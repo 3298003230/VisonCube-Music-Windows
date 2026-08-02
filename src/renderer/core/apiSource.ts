@@ -5,8 +5,8 @@ import musicSdk from '@renderer/utils/musicSdk'
 import apiSourceInfo from '@renderer/utils/musicSdk/api-source-info'
 
 let prevId = ''
-export const setUserApi = async(apiId: string) => {
-  if (prevId == apiId) return
+export const setUserApi = async(apiId: string, force = false) => {
+  if (!force && prevId == apiId) return
   prevId = apiId
   if (window.lx.apiInitPromise[1]) {
     window.lx.apiInitPromise[0] = new Promise<boolean>(resolve => {

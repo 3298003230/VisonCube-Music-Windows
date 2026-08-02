@@ -1,6 +1,7 @@
 {
   "name": "visoncube-music-desktop",
-  "version": "2.12.2",
+  "version": "2.13.0",
+  "displayVersion": "2.13.0",
   "description": "一个免费的音乐查找助手",
   "main": "./dist/main.js",
   "scripts": {
@@ -90,22 +91,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lyswhut/lx-music-desktop.git"
+    "url": "git+https://github.com/3298003230/VisonCube-Music-Windows.git"
   },
   "keywords": [
     "music-player",
     "electron-app",
     "vuejs3"
   ],
-  "author": {
-    "name": "lyswhut",
-    "email": "lyswhut@qq.com"
-  },
-  "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/lyswhut/lx-music-desktop/issues"
+    "url": "https://github.com/3298003230/VisonCube-Music-Windows/issues"
   },
-  "homepage": "https://github.com/lyswhut/lx-music-desktop#readme",
+  "homepage": "https://github.com/3298003230/VisonCube-Music-Windows#readme",
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.13",
     "@types/better-sqlite3": "^7.6.13",

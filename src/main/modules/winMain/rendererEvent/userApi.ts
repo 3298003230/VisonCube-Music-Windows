@@ -10,6 +10,7 @@ import {
   cancelRequest,
   setAllowShowUpdateAlert,
 } from '@main/modules/userApi'
+import { hydrateManagedSource, installManagedSource } from '@main/modules/userApi/managedSource'
 import { sendEvent } from '@main/modules/winMain/main'
 
 export default () => {
@@ -42,6 +43,13 @@ export default () => {
   })
   mainHandle<LX.UserApi.UserApiRequestCancelParams>(WIN_MAIN_RENDERER_EVENT_NAME.request_user_api_cancel, async({ params: requestKey }) => {
     cancelRequest(requestKey)
+  })
+
+  mainHandle<Parameters<typeof installManagedSource>[0], Awaited<ReturnType<typeof installManagedSource>>>(WIN_MAIN_RENDERER_EVENT_NAME.install_managed_source, async({ params }) => {
+    return installManagedSource(params)
+  })
+  mainHandle<number, Awaited<ReturnType<typeof hydrateManagedSource>>>(WIN_MAIN_RENDERER_EVENT_NAME.hydrate_managed_source, async({ params: userId }) => {
+    return hydrateManagedSource(userId)
   })
 }
 

@@ -2,6 +2,7 @@ import { userApis as defaultUserApis } from './config'
 import { STORE_NAMES } from '@common/constants'
 import getStore from '@main/utils/store'
 import zlib from 'node:zlib'
+import { MANAGED_USER_API_ID } from '@common/musicSource'
 
 let userApis: LX.UserApi.UserApiInfo[] | null
 let scripts = new Map<string, string>()
@@ -80,7 +81,7 @@ const matchInfo = (scriptInfo: string) => {
 }
 const parseScriptInfo = (script: string) => {
   const result = /^\/\*[\S|\s]+?\*\//.exec(script)
-  if (!result) throw new Error('无效的自定义源文件')
+  if (!result) throw new Error('无效的音源文件')
 
   let scriptInfo = matchInfo(result[0])
 
@@ -149,4 +150,31 @@ export const setAllowShowUpdateAlert = (id: string, enable: boolean) => {
 
 export const getScript = async(id: string) => {
   return inflateScript(scripts.get(id) ?? '')
+}
+
+export const upsertManagedApi = async(script: string, manifest: { name: string, version: string }) => {
+  const scriptInfo = parseScriptInfo(script)
+  const compressedScript = await deflateScript(script)
+  userApis ??= getUserApis()
+  const apiInfo: LX.UserApi.UserApiInfo = {
+    id: MANAGED_USER_API_ID,
+    ...scriptInfo,
+    name: manifest.name || scriptInfo.name,
+    version: manifest.version || scriptInfo.version,
+    allowShowUpdateAlert: false,
+  }
+  const index = userApis.findIndex(api => api.id == MANAGED_USER_API_ID)
+  if (index >= 0) userApis.splice(index, 1, apiInfo)
+  else userApis.push(apiInfo)
+  scripts.set(MANAGED_USER_API_ID, compressedScript)
+  saveData()
+  return apiInfo
+}
+
+export const removeManagedApi = () => {
+  if (!userApis) return
+  const index = userApis.findIndex(api => api.id == MANAGED_USER_API_ID)
+  if (index >= 0) userApis.splice(index, 1)
+  scripts.delete(MANAGED_USER_API_ID)
+  saveData()
 }

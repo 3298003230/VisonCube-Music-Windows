@@ -53,7 +53,6 @@ export default (setting: any): Partial<LX.AppSetting> => {
     setting['common.font'] = setting.font
     setting['common.isShowAnimation'] = setting.isShowAnimation
     setting['common.randomAnimate'] = setting.randomAnimate
-    setting['common.isAgreePact'] = setting.isAgreePact
     setting['common.controlBtnPosition'] = setting.controlBtnPosition
 
     setting['player.togglePlayMethod'] = setting.player?.togglePlayMethod

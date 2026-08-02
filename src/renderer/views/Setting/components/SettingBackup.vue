@@ -120,11 +120,9 @@ export default {
     const importOldSettingData = (setting) => {
       console.log(setting)
       setting = migrateSetting(setting)
-      setting['common.isAgreePact'] = false
       updateSetting(setting)
     }
     const importNewSettingData = (setting) => {
-      setting['common.isAgreePact'] = false
       updateSetting(setting)
     }
 

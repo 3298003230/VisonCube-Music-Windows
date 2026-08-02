@@ -15,17 +15,11 @@ dd.gap-top
       div
         base-input.gap-left(:class="$style.portInput" :model-value="appSetting['openAPI.port']" type="number" :placeholder="$t('setting__open_api_port_tip')" @update:model-value="setPort")
 
-dd.gap-top
-  div
-    .p
-      | {{ $t('setting__open_api_tip') }}
-      strong.hover.underline(aria-label="https://lyswhut.github.io/lx-music-doc/desktop/faq/open-api" @click="openUrl('https://lyswhut.github.io/lx-music-doc/desktop/open-api')") {{ $t('setting__open_api_tip_link') }}
 </template>
 
 <script>
 // import { computed } from '@common/utils/vueTools'
 import { openAPI } from '@renderer/store'
-import { openUrl } from '@common/utils/electron'
 import { appSetting, updateSetting } from '@renderer/store/setting'
 import { debounce } from '@common/utils'
 
@@ -40,7 +34,6 @@ export default {
       appSetting,
       updateSetting,
       openAPI,
-      openUrl,
       setPort,
     }
   },

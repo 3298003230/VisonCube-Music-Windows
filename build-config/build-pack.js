@@ -3,6 +3,7 @@
 const builder = require('electron-builder')
 const beforePack = require('./build-before-pack')
 const afterPack = require('./build-after-pack')
+const { displayVersion } = require('../package.json')
 
 /**
 * @type {import('electron-builder').Configuration}
@@ -47,7 +48,10 @@ const options = {
   extraResources: [
     './licenses',
   ],
-  publish: null,
+  publish: {
+    provider: 'generic',
+    url: 'https://updates.invalid/visoncube/music/windows',
+  },
 }
 /**
  * @type {import('electron-builder').Configuration}
@@ -56,7 +60,7 @@ const options = {
 const winOptions = {
   win: {
     icon: './resources/icons/icon.ico',
-    legalTrademarks: 'lyswhut',
+    legalTrademarks: 'VisonCube',
     // artifactName: '${productName}-v${version}-${env.ARCH}-${env.TARGET}.${ext}',
   },
   nsis: {
@@ -66,6 +70,7 @@ const winOptions = {
     // differentialPackage: true,
     license: './licenses/license.rtf',
     shortcutName: 'VisonCube Music',
+    uninstallDisplayName: `VisonCube Music ${displayVersion}`,
   },
 }
 /**
@@ -171,31 +176,31 @@ const createTarget = {
   win(arch, packageType) {
     switch (packageType) {
       case 'setup':
-        winOptions.artifactName = `VisonCube-Music-v\${version}-${arch}-Setup.\${ext}`
+        winOptions.artifactName = `VisonCube-Music-v${displayVersion}-${arch}-Setup.\${ext}`
         return {
           buildOptions: { win: ['nsis'] },
           options: winOptions,
         }
       case 'green':
-        winOptions.artifactName = `VisonCube-Music-v\${version}-win_${arch}-green.\${ext}`
+        winOptions.artifactName = `VisonCube-Music-v${displayVersion}-win_${arch}-green.\${ext}`
         return {
           buildOptions: { win: ['7z'] },
           options: winOptions,
         }
       case 'win7_setup':
-        winOptions.artifactName = `VisonCube-Music-v\${version}-win7_${arch}-Setup.\${ext}`
+        winOptions.artifactName = `VisonCube-Music-v${displayVersion}-win7_${arch}-Setup.\${ext}`
         return {
           buildOptions: { win: ['nsis'] },
           options: winOptions,
         }
       case 'win7_green':
-        winOptions.artifactName = `VisonCube-Music-v\${version}-win7_${arch}-green.\${ext}`
+        winOptions.artifactName = `VisonCube-Music-v${displayVersion}-win7_${arch}-green.\${ext}`
         return {
           buildOptions: { win: ['7z'] },
           options: winOptions,
         }
       case 'portable':
-        winOptions.artifactName = `VisonCube-Music-v\${version}-${arch}-portable.\${ext}`
+        winOptions.artifactName = `VisonCube-Music-v${displayVersion}-${arch}-portable.\${ext}`
         return {
           buildOptions: { win: ['portable'] },
           options: winOptions,

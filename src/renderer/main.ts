@@ -22,6 +22,7 @@ import { langList } from '@root/lang'
 import type { I18n } from '@root/lang/i18n'
 
 import { initSetting } from './store/setting'
+import { restoreSession } from './features/auth/state'
 // import { bubbleCursor } from './utils/cursor-effects/bubbleCursor'
 
 import './worker'
@@ -68,6 +69,8 @@ void getSetting().then(setting => {
 
   // store.commit('setSetting', setting)
   initSetting(setting)
+
+  void restoreSession()
 
   const app = createApp(App)
   app

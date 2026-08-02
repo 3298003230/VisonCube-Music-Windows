@@ -6,6 +6,7 @@ import { qualityList, userApi } from '@renderer/store'
 import { appSetting } from '@renderer/store/setting'
 import { dialog } from '@renderer/plugins/Dialog'
 import { setUserApi } from '@renderer/core/apiSource'
+import { hydrateManagedSource } from '@renderer/features/musicSource/managedSource'
 
 const sendUserApiRequest: typeof sendUserApiRequestRemote = async(data) => {
   let stop: () => void
@@ -171,6 +172,7 @@ export default () => {
   })
 
   return async() => {
+    await hydrateManagedSource()
     await setUserApi(appSetting['common.apiSource'])
     void getUserApiList().then(list => {
       // console.log(list)

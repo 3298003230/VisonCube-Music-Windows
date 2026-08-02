@@ -1,7 +1,7 @@
 <template>
   <div :class="[$style.aside, { [$style.fullscreen]: isFullscreen }]">
     <ControlBtns v-if="appSetting['common.controlBtnPosition'] == 'left'" />
-    <div v-else :class="$style.logo">L X</div>
+    <div v-else :class="$style.logo">VC</div>
     <NavBar />
   </div>
 </template>
@@ -41,7 +41,8 @@ import NavBar from './NavBar.vue'
 
 .logo {
   box-sizing: border-box;
-  padding: 0 13%;
+  padding: 0;
+  width: 56px;
   height: 50px;
   color: var(--color-nav-font);
   opacity: .8;
@@ -49,6 +50,10 @@ import NavBar from './NavBar.vue'
   text-align: center;
   line-height: 50px;
   font-weight: bold;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   // -webkit-app-region: no-drag;
 }
 

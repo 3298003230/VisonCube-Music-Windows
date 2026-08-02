@@ -1,28 +1,15 @@
 <template>
-  <div id="container" class="view-container">
-    <layout-aside id="left" />
-    <div id="right">
-      <layout-toolbar id="toolbar" />
-      <layout-view id="view" />
-      <layout-play-bar id="player" />
-    </div>
-    <layout-icons />
-    <layout-change-log-modal />
-    <layout-update-modal />
-    <layout-pact-modal />
-    <layout-sync-mode-modal />
-    <layout-sync-auth-code-modal />
-    <layout-play-detail />
-  </div>
+  <Account v-if="!authReady || !authUser" />
+  <AuthenticatedShell v-else />
 </template>
 
 <script setup>
 import { onMounted } from '@common/utils/vueTools'
 // import BubbleCursor from '@common/utils/effects/cursor-effects/bubbleCursor'
 // import '@common/utils/effects/snow.min'
-import useApp from '@renderer/core/useApp'
-
-useApp()
+import { authReady, authUser } from '@renderer/features/auth/state'
+import Account from './views/Account/index.vue'
+import AuthenticatedShell from './components/layout/AuthenticatedShell.vue'
 
 onMounted(() => {
   document.getElementById('root').style.display = 'block'

@@ -26,14 +26,6 @@ export const updateSetting = window.lxData.updateSetting = (setting: Partial<LX.
 }
 
 /**
- * 保存是否同意协议
- * @param isAgreePact 是否同意协议
- */
-export const saveAgreePact = (isAgreePact: boolean) => {
-  updateSetting({ 'common.isAgreePact': isAgreePact })
-}
-
-/**
  * 保存音频输出id
  * @param id 媒体驱动id
  */

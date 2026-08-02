@@ -116,6 +116,8 @@ const modules = {
     user_api_status: 'user_api_status',
     user_api_show_update_alert: 'user_api_show_update_alert',
     user_api_set_allow_update_alert: 'user_api_set_allow_update_alert',
+    install_managed_source: 'install_managed_source',
+    hydrate_managed_source: 'hydrate_managed_source',
 
     get_palyer_lyric: 'get_lyric',
     // save_lyric: 'save_lyric',

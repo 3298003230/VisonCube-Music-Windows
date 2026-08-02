@@ -10,6 +10,8 @@ import { onBeforeUnmount } from '@common/utils/vueTools'
 import { appSetting } from '@renderer/store/setting'
 import { playMusicInfo } from '@renderer/store/player/state'
 import { initDislikeInfo, registerRemoteDislikeAction } from '@renderer/core/dislikeList'
+import { authSession } from '@renderer/features/auth/state'
+import { startMusicCloudSync } from '@renderer/features/musicSync'
 
 const initPrevPlayInfo = async() => {
   const info = await getPlayInfo()
@@ -52,6 +54,7 @@ export default () => {
     })
     window.lxData.userLists = await getUserLists() // 获取用户列表
     unregisterDislikeEvent = registerRemoteDislikeAction()
+    if (authSession.value) void startMusicCloudSync(authSession.value)
     await initDislikeInfo() // 获取不喜欢列表
     await initPrevPlayInfo().catch(err => {
       log.error(err)

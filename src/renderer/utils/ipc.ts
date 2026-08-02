@@ -158,6 +158,14 @@ export const userApiRequestCancel = (requestKey: LX.UserApi.UserApiRequestCancel
   rendererSend(WIN_MAIN_RENDERER_EVENT_NAME.request_user_api_cancel, requestKey)
 }
 
+export const installManagedSource = async(params: unknown): Promise<LX.UserApi.UserApiInfo[]> => {
+  return rendererInvoke<unknown, LX.UserApi.UserApiInfo[]>(WIN_MAIN_RENDERER_EVENT_NAME.install_managed_source, params)
+}
+
+export const hydrateManagedSource = async(userId: number) => {
+  return rendererInvoke<number, boolean>(WIN_MAIN_RENDERER_EVENT_NAME.hydrate_managed_source, userId)
+}
+
 // export const setDesktopLyricInfo = (type, data, info) => {
 //   rendererSend(WIN_MAIN_RENDERER_EVENT_NAME.set_lyric_info, {
 //     type,
@@ -293,6 +301,14 @@ export const saveViewPrevState = (state: typeof DEFAULT_SETTING['viewPrevState']
 }
 export const getViewPrevState = async() => {
   return (await rendererInvoke<string, typeof DEFAULT_SETTING['viewPrevState']>(WIN_MAIN_RENDERER_EVENT_NAME.get_data, DATA_KEYS.viewPrevState)) ?? { ...DEFAULT_SETTING.viewPrevState }
+}
+
+export const getData = async<T>(path: string) => {
+  return rendererInvoke<string, T | null>(WIN_MAIN_RENDERER_EVENT_NAME.get_data, path)
+}
+
+export const saveData = (path: string, data: unknown) => {
+  rendererSend(WIN_MAIN_RENDERER_EVENT_NAME.save_data, { path, data })
 }
 
 

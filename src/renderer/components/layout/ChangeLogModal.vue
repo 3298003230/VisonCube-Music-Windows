@@ -4,7 +4,7 @@ material-modal(:show="isShowChangeLog" max-width="60%" @close="isShowChangeLog =
     h2 当前版本更新日志
     div.scroll.select(:class="$style.info")
       div(:class="$style.current")
-        h3 当前版本：{{ versionInfo.version }}
+        h3 当前版本：{{ APP_DISPLAY_VERSION }}
         template(v-if="info.desc")
           h3 版本变化：
           pre(:class="$style.desc" v-text="info.desc")
@@ -17,18 +17,15 @@ material-modal(:show="isShowChangeLog" max-width="60%" @close="isShowChangeLog =
     div(:class="$style.footer")
       div(:class="$style.desc")
         p 📢&nbsp;为了减少疑问，我们墙裂建议阅读版本更新日志来了解当前所用版本的变化！
-        p 📢&nbsp;若遇到问题可以阅读
-          strong.hover.underline(aria-label="点击打开" @click="openUrl('https://lyswhut.github.io/lx-music-doc/desktop/faq')") 桌面版常见问题
-          | 。
-        p(v-if="!info.isLatest") 🚀&nbsp;发现新版本 (v{{ versionInfo.newVersion.version }})！建议去「设置 → 软件更新」更新新版本。
+        p(v-if="!info.isLatest") 🚀&nbsp;发现新版本 (v{{ versionInfo.newVersion.displayVersion || versionInfo.newVersion.version }})！建议去「设置 → 软件更新」更新新版本。
 </template>
 
 <script>
 import { compareVer } from '@common/utils'
-import { openUrl, clipboardWriteText } from '@common/utils/electron'
 import { versionInfo, isShowChangeLog } from '@renderer/store'
 import { getLastStartInfo } from '@renderer/utils/ipc'
 import { computed, ref } from '@common/utils/vueTools'
+import { APP_DISPLAY_VERSION } from '@common/version'
 
 export default {
   setup() {
@@ -76,11 +73,10 @@ export default {
       return info
     })
     return {
-      openUrl,
-      clipboardWriteText,
       versionInfo,
       info,
       isShowChangeLog,
+      APP_DISPLAY_VERSION,
     }
   },
 }

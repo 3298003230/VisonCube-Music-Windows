@@ -62,6 +62,22 @@ const router = createRouter({
         name: 'Setting',
       },
     },
+    {
+      path: '/account',
+      name: 'Account',
+      component: require('./views/Account/index.vue').default,
+      meta: {
+        name: 'Account',
+      },
+    },
+    {
+      path: '/account/password',
+      name: 'AccountPassword',
+      component: require('./views/Account/Password.vue').default,
+      meta: {
+        name: 'Account',
+      },
+    },
     { path: '/:pathMatch(.*)*', redirect: '/search' },
   ],
   linkActiveClass: 'active-link',

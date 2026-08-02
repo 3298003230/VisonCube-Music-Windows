@@ -32,6 +32,7 @@ export const LIST_IDS = {
 } as const
 
 export const DATA_KEYS = {
+  authSession: 'authSession',
   viewPrevState: 'viewPrevState',
   playInfo: 'playInfo',
   searchHistoryList: 'searchHistoryList',
