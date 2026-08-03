@@ -111,8 +111,18 @@ export default () => {
   })
 
   mainOn(WIN_MAIN_RENDERER_EVENT_NAME.update_download_update, () => {
-    if (!autoUpdater.isUpdaterActive()) return
-    void autoUpdater.downloadUpdate()
+    if (!autoUpdater.isUpdaterActive()) {
+      handleSendEvent({
+        type: WIN_MAIN_RENDERER_EVENT_NAME.update_error,
+        info: 'Automatic updates are unavailable for this installation.',
+      })
+      return
+    }
+
+    sendStatusToWindow('Starting update download...')
+    // electron-updater emits its own error event. Consume the rejection here to
+    // avoid leaving the IPC callback with an unhandled promise rejection.
+    void autoUpdater.downloadUpdate().catch(() => {})
   })
 
   mainOn(WIN_MAIN_RENDERER_EVENT_NAME.quit_update, () => {

@@ -121,6 +121,7 @@ export default {
     handleDownloadClick() {
       if (this.isIgnored) saveIgnoreVersion(this.ignoreVersion = null)
       versionInfo.status = 'downloading'
+      versionInfo.downloadProgress = null
       downloadUpdate()
     },
     handleCheckUpdate() {
