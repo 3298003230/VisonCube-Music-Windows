@@ -4,7 +4,7 @@
 
 - Windows 已接入 `/api/music/playlists`，仅同步带来源标识的歌单，支持旧 ID 迁移、本地歌曲保留、删除墓碑、CAS 冲突和账号页冲突选择。
 - 4 项同步模型测试、定向/全量 lint、主进程和渲染进程生产构建、x64 NSIS 打包通过；本轮修复了两处可选 `sourceListId` 的 TypeScript 收窄错误。
-- 后端和 SQLite 表已部署，Windows `2.13.2` 安装包、`.blockmap`、`latest.yml` 与生产发布清单已发布；安装包 SHA-256 为 `4561D5C16EEC4C935AFD4EAD1AE615D7CB3F883BD75D283421E8F4457B4435B6`，公网完整下载哈希与 Range 响应已核验。本轮未提交或推送 GitHub。
+- 后端和 SQLite 表已部署，Windows `2.13.2` 安装包、`.blockmap`、`latest.yml` 与生产发布清单已发布；安装包 SHA-256 为 `4561D5C16EEC4C935AFD4EAD1AE615D7CB3F883BD75D283421E8F4457B4435B6`，公网完整下载哈希与 Range 响应已核验。源码已于 2026-08-05 发布到 GitHub `main` 提交 `dcb854d8`。
 - 同账号 Android/Windows 来源歌单完整运行联调仍待完成。
 
 ## 2026-08-03 Windows 更新状态修复与 2.13.1 线上发布
