@@ -71,6 +71,26 @@
         </div>
       </dl>
 
+      <div :class="$style.syncSection">
+        <h2>{{ $t('account__sync_title') }}</h2>
+        <p :class="$style.syncStatus">{{ syncStatusText }}</p>
+        <p v-if="lastSyncText" :class="$style.syncMeta">{{ lastSyncText }}</p>
+        <p v-if="musicCloudSyncStatus.error" :class="$style.syncMeta">{{ musicCloudSyncStatus.error }}</p>
+        <div v-if="musicCloudSyncStatus.phase === 'conflict'" :class="$style.syncActions">
+          <button type="button" :class="$style.secondaryButton" :disabled="syncBusy" @click="resolveSyncConflict('local')">
+            {{ $t('account__sync_keep_local') }}
+          </button>
+          <button type="button" :class="$style.primaryButton" :disabled="syncBusy" @click="resolveSyncConflict('remote')">
+            {{ $t('account__sync_use_cloud') }}
+          </button>
+        </div>
+        <div v-else-if="musicCloudSyncStatus.phase !== 'success'" :class="$style.syncActions">
+          <button type="button" :class="$style.secondaryButton" :disabled="syncBusy" @click="retrySync">
+            {{ $t('account__sync_retry') }}
+          </button>
+        </div>
+      </div>
+
       <p v-if="errorMessage" :class="$style.error" role="alert">{{ errorMessage }}</p>
       <div :class="$style.actions">
         <button type="button" :class="$style.primaryButton" @click="goToPassword">{{ $t('account__change_password') }}</button>
@@ -87,6 +107,11 @@ import { useI18n } from '@renderer/plugins/i18n'
 import { AuthApiError } from '@renderer/features/auth/api'
 import { authReady, authUser, login, register, signOut } from '@renderer/features/auth/state'
 import type { AuthUser } from '@renderer/features/auth/models'
+import {
+  musicCloudSyncStatus,
+  resolveMusicPlaylistConflicts,
+  syncMusicCloudNow,
+} from '@renderer/features/musicSync'
 import logoImage from '@renderer/assets/images/visoncube-music-logo.png'
 
 const router = useRouter()
@@ -98,6 +123,20 @@ const form = reactive({ username: '', email: '', password: '', confirmPassword: 
 
 const user = computed<AuthUser>(() => authUser.value!)
 const avatarText = computed(() => authUser.value?.username.slice(0, 1).toUpperCase() ?? '?')
+const syncBusy = computed(() => musicCloudSyncStatus.value.phase === 'syncing')
+const syncStatusText = computed(() => {
+  switch (musicCloudSyncStatus.value.phase) {
+    case 'syncing': return t('account__sync_syncing')
+    case 'success': return t('account__sync_success')
+    case 'partial': return t('account__sync_partial')
+    case 'error': return t('account__sync_error')
+    case 'conflict': return t('account__sync_conflict', { num: musicCloudSyncStatus.value.conflictCount })
+    default: return t('account__sync_idle')
+  }
+})
+const lastSyncText = computed(() => musicCloudSyncStatus.value.lastSuccessAt
+  ? t('account__sync_last', { time: new Date(musicCloudSyncStatus.value.lastSuccessAt).toLocaleString() })
+  : '')
 
 const getErrorMessage = (error: unknown) => error instanceof AuthApiError ? error.message : t('account__unknown_error')
 
@@ -126,6 +165,14 @@ const handleSubmit = async() => {
 
 const goToPassword = () => {
   void router.push('/account/password')
+}
+
+const retrySync = () => {
+  void syncMusicCloudNow()
+}
+
+const resolveSyncConflict = (strategy: 'local' | 'remote') => {
+  void resolveMusicPlaylistConflicts(strategy)
 }
 
 const handleSignOut = async() => {
@@ -344,6 +391,39 @@ h1 {
 .details dd { margin: 0; text-align: right; word-break: break-all; }
 .success { color: var(--color-primary); }
 .warning { color: var(--color-error, #d05c5c); }
+
+.syncSection {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-primary-alpha-300);
+}
+
+.syncSection h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.syncStatus {
+  margin: 7px 0 0;
+  color: var(--color-font);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.syncMeta {
+  margin: 4px 0 0;
+  color: var(--color-font-label);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.syncActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
 
 .actions {
   display: flex;

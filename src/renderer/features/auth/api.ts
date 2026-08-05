@@ -26,6 +26,26 @@ export interface MusicCollectRecord {
   deleted: boolean
 }
 
+export interface MusicPlaylistRecord {
+  source: string
+  source_list_id: string
+  name: string
+  songs: LX.Music.MusicInfo[]
+  deleted: boolean
+  revision: number
+  updated_at: number
+}
+
+export interface MusicPlaylistWrite {
+  source: string
+  source_list_id: string
+  name: string
+  songs: LX.Music.MusicInfo[]
+  deleted: boolean
+  base_revision: number
+  operation_id: string
+}
+
 export class AuthApiError extends Error {
   readonly status: number
 
@@ -140,6 +160,16 @@ export const deleteMusicCollect = async(token: string, sourceKey: string, musicI
   request<{ message: string }>(`/api/collect/${encodeURIComponent(sourceKey)}/${encodeURIComponent(musicId)}`, {
     method: 'DELETE',
     token,
+  })
+
+export const getMusicPlaylists = async(token: string) =>
+  request<MusicPlaylistRecord[]>('/api/music/playlists', { token })
+
+export const putMusicPlaylist = async(token: string, playlist: MusicPlaylistWrite) =>
+  request<MusicPlaylistRecord>('/api/music/playlists', {
+    method: 'PUT',
+    token,
+    body: playlist,
   })
 
 export const changePassword = async(token: string, oldPassword: string, newPassword: string) =>

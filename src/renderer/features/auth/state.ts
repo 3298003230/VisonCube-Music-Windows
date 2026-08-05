@@ -2,7 +2,7 @@ import { computed, ref } from '@common/utils/vueTools'
 import * as authApi from './api'
 import type { AuthSession, AuthUser, PasswordCredentials, RegisterCredentials } from './models'
 import { clearSession, loadSession, saveSession } from './storage'
-import { stopMusicCloudSync } from '@renderer/features/musicSync'
+import { stopMusicCloudSync, updateMusicCloudSyncSession } from '@renderer/features/musicSync'
 
 export const authSession = ref<AuthSession | null>(null)
 export const authReady = ref(false)
@@ -17,6 +17,7 @@ const isSessionUsable = (session: AuthSession | null) => {
 const persistSession = (session: AuthSession) => {
   authSession.value = session
   saveSession(session)
+  updateMusicCloudSyncSession(session)
   return session
 }
 

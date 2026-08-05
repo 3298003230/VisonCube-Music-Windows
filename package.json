@@ -1,7 +1,7 @@
 {
   "name": "visoncube-music-desktop",
-  "version": "2.13.1",
-  "displayVersion": "2.13.1",
+  "version": "2.13.2",
+  "displayVersion": "2.13.2",
   "description": "一个免费的音乐查找助手",
   "main": "./dist/main.js",
   "scripts": {
@@ -62,6 +62,7 @@
     "build:renderer": "cross-env NODE_ENV=production webpack --config build-config/renderer/webpack.config.prod.js --progress",
     "build:renderer-lyric": "cross-env NODE_ENV=production webpack --config build-config/renderer-lyric/webpack.config.prod.js --progress",
     "build:renderer-scripts": "cross-env NODE_ENV=production webpack --config build-config/renderer-scripts/webpack.config.prod.js --progress",
+    "test:music-sync": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/music-sync-model.test.ts",
     "lint": "eslint --ext .ts,.js,.vue -f node_modules/eslint-formatter-friendly src",
     "lint:fix": "eslint --ext .ts,.js,.vue -f node_modules/eslint-formatter-friendly --fix src",
     "postinstall": "electron-builder install-app-deps",
