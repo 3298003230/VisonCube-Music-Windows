@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="VisonCube Music icon">
+  <rect width="1024" height="1024" fill="#F7FAFC"/>
+  <path d="M733 345C680 285 603 248 512 248C349 248 218 366 218 512C218 658 349 776 512 776C603 776 680 739 733 679" fill="none" stroke="#142B4A" stroke-width="76" stroke-linecap="round"/>
+  <path d="M669 389C628 351 573 328 512 328C393 328 298 410 298 512C298 614 393 696 512 696C573 696 628 673 669 635" fill="none" stroke="#335775" stroke-width="16" stroke-linecap="round"/>
+  <path d="M389 415L510 653L643 415" fill="none" stroke="#18A99A" stroke-width="70" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
