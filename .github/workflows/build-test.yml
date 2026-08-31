@@ -39,7 +39,8 @@ jobs:
         # The upstream renderer contains legacy event handlers that intentionally
         # fire-and-forget settings IPC calls. Keep reporting this rule without
         # blocking the reproducible build; new errors remain visible in the log.
-        run: npm run lint -- --rule "@typescript-eslint/no-floating-promises: warn"
+        run: |
+          npm run lint -- --rule "@typescript-eslint/no-floating-promises: warn"
 
       - name: Build all source bundles
         run: npm run build
