@@ -31,3 +31,4 @@
 - Windows GitHub Actions `CI` run `33370107565` 已通过 npm ci、来源歌单测试、全量 ESLint 和完整 `npm run build`；后续提交使用仅检查改动源码文件的定向 lint，run `33370642949` 已再次全绿。
 - Android GitHub Actions `CI` run `33369508808` 已通过 npm ci、来源歌单测试、Lint、JS bundle、Gradle Debug APK，并上传 7 天保留的 Debug Artifact。
 - CI 使用固定 SHA 的 actions、Node 22、Java 17、npm/Gradle runner cache；正式 Release 工作流仅手动触发。
+- Windows Beta workflow 可手动触发生成测试安装包；COS 发布工具只接受 `latest.yml`、`version.json`、安装包和 `.blockmap`，凭据从 `VISONCUBE_COS_*` 环境变量读取，绝不删除远端历史对象。

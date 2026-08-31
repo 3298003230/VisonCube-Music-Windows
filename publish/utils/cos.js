@@ -12,55 +12,25 @@ const cos = new COS({
   KeepAlive: false,
 })
 
-const getCosFileList = () => new Promise((resolve, reject) => {
-  cos.getBucket({
-    Bucket: config.bucket,
-    Region: config.region,
-    Prefix: config.prefix,
-  }, function(err, data) {
-    if (err) {
-      console.log(err)
-      reject(err)
-      console.log(chalk.red('COS文件列表获取失败'))
-    }
-    resolve(data.Contents.filter(o => o.Key !== config.prefix).map(o => o.Key.replace(config.prefix, '')))
-  })
-})
-
 const getLocalFileList = () => fs.readdirSync(jp('../assets'), 'utf8')
 
-const diffFileList = (localFiles, cosFiles) => {
-  const removeFiles = []
-  cosFiles.forEach(file => {
-    let index = localFiles.indexOf(file)
-    if (index < 0) return removeFiles.push(file)
-    localFiles.splice(index, 1)
-  })
-  if (cosFiles.includes('latest.yml')) {
-    removeFiles.push('latest.yml')
-    localFiles.push('latest.yml')
+const isReleaseAsset = fileName => fileName === 'latest.yml' || fileName === 'version.json' ||
+  /\.(?:exe|blockmap)$/i.test(fileName)
+
+const validateConfig = () => {
+  const missing = ['secretId', 'secretKey', 'bucket', 'region', 'prefix']
+    .filter(key => !config[key])
+  if (missing.length) {
+    throw new Error(`COS configuration is incomplete: ${missing.join(', ')} (set VISONCUBE_COS_* environment variables)`)
   }
-  if (cosFiles.includes('version.json')) {
-    removeFiles.push('version.json')
-    localFiles.push('version.json')
-  }
-  return removeFiles
 }
 
-const deleteCosFiles = files => new Promise((resolve, reject) => {
-  files = files.map(f => ({ Key: config.prefix + f }))
-  cos.deleteMultipleObject({
-    Bucket: config.bucket,
-    Region: config.region,
-    Objects: files,
-  }, function(err, data) {
-    if (err) {
-      console.log(err)
-      reject(err)
-    }
-    resolve()
-  })
-})
+const validateLocalFiles = files => {
+  if (!files.includes('latest.yml')) throw new Error('Release assets must include latest.yml')
+  if (!files.some(file => /\.exe$/i.test(file))) throw new Error('Release assets must include at least one .exe installer')
+  const invalid = files.filter(file => !isReleaseAsset(file))
+  if (invalid.length) throw new Error(`Refusing to upload non-release assets: ${invalid.join(', ')}`)
+}
 
 const createProgressBar = (name, spacekLen, total) => multi.newBar(
   `${`  ${name}`.padEnd(spacekLen, ' ')} :status [:bar] :current/:total  :percent  :speed`, {
@@ -126,19 +96,10 @@ const uploadFile = (fileName, len) => new Promise((resolve, reject) => {
 
 
 module.exports = async() => {
-  console.log(chalk.blue('正在获取COS文件列表...'))
-  const cosFiles = await getCosFileList()
-  console.log(chalk.green('COS文件列表获取成功'))
+  validateConfig()
   const uploadFiles = getLocalFileList()
-  const removeFiles = diffFileList(uploadFiles, cosFiles)
-  if (removeFiles.length) {
-    console.log(chalk.blue('共需删除') + chalk.yellow(removeFiles.length) + chalk.blue('个文件'))
-    console.log(chalk.blue('正在从COS删除多余的文件...'))
-    await deleteCosFiles(removeFiles)
-    console.log(chalk.green('多余文件删除成功'))
-  } else {
-    console.log(chalk.blue('没有在COS发现多余的文件'))
-  }
+  validateLocalFiles(uploadFiles)
+  console.log(chalk.blue('仅上传当前版本白名单产物，不删除COS历史文件'))
   if (uploadFiles.length) {
     console.log(chalk.blue('共需上传') + chalk.green(uploadFiles.length) + chalk.blue('个文件'))
     console.log(chalk.blue('正在上传新文件到COS...'))

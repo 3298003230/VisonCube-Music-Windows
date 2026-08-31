@@ -26,6 +26,9 @@
 - Windows CI run `33370107565` 全量验证通过；随后将 lint 改为按提交定向检查，run `33370642949` 验证 npm ci、测试、定向 lint、完整 `npm run build` 全部通过。
 - Android CI run `33369508808` 全部通过，Debug APK 已作为短期 Artifact 上传；`.nvmrc` 固定 Node 22，修复 Node 20 无法直接运行 TypeScript 测试的问题。
 - 依赖仓库新增 `direct-packages.json`，发布工作流改为清单驱动并拒绝覆盖已有 `deps-*` Release；以后新增依赖集使用新标签，不改写旧标签。
+- 已手动触发 Windows Beta 候选构建 `33373780718`：Windows x64/arm64 安装包与绿色包、Win7、Linux、Mac 产物全部成功并上传 Artifact（保留至 2026-11-29）。Android Debug Artifact `9749688825` 有效至 2026-09-07。
+- 公网服务器只读审查：`/api/releases/music-windows` 与 `/api/releases/music-android` 均返回 2.13.3；Windows `latest.yml`、安装包和 Android APK 均 HTTP 200，安装包支持 Range 206。尚未切换生产版本。
+- 修正 Windows COS 工具：凭据改由 `VISONCUBE_COS_*` 环境变量提供，上传前校验白名单产物，移除删除远端多余文件逻辑；Android Release workflow 增加签名 Secret 缺失的明确预检。两项修改尚未发布正式包。
 - 本机未安装 `node_modules`、未下载 1.14 GB 依赖 bundle，也未生成安装包/APK；云端构建已验证源码和依赖直链可用。
 
 ## 2026-08-04 来源歌单云同步与 2.13.2 发布
