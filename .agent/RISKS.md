@@ -12,3 +12,4 @@
 - GitHub 双端 `main` 已同步最新普通提交（Windows `5fefbf8f`，Android `9d1837af`）；本地解压目录不是 Git 工作树，后续修改需先读取远端 `main` 头并使用非强制更新。
 - 2026-08-31 CI 复验已通过（Windows run `33375209886`、Android run `33375405837`）；但当前 GitHub API 显示两个仓库均无 repository secrets，Android 签名、Windows `BT_TOKEN` 和 COS 凭据仍需维护者配置后才能准备正式发布。
 - 服务器端备份 `releases.json`、原子替换和上传后 HTTP/Range/SHA-256 验证要求已保留为发布规程；因缺少 SSH/服务器代码，本轮只能核验公网结果，尚不能从远端脚本确认其自动化实现。
+- Windows 默认候选 Release run `33377401806` 已确认不会新建标签或 Release；仍需将 Artifact 安装到真实桌面完成关闭/托盘验收，Android 仍需实体设备安装 Debug APK。

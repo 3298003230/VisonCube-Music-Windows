@@ -28,7 +28,7 @@
 
 ## 设备验收与候选产物
 
-- Windows Beta run `33373780718`（Artifact 保留至 2026-11-29）和 Android Debug run `33375405837` / Artifact `9751779113`（保留至 2026-09-07）用于真实设备验收；正式 Release workflow 仍仅手动触发。
+- Windows Beta run `33373780718`（多平台 Artifact）以及默认候选 Release run `33377401806` / Artifact `9752534440`（x64 安装包，均保留至 2026-11-29），和 Android Debug run `33375405837` / Artifact `9751779113`（保留至 2026-09-07）用于真实设备验收；正式 Release workflow 仍仅手动触发且需显式选择发布。
 
 ## 云端构建
 
