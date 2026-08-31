@@ -43,3 +43,9 @@
 
 - `src/renderer/core/useApp/index.ts` 等待 `router.isReady()` 后才读取上次页面；仅当当前仍是默认首屏 `/` 或 `/search`，且异步读取期间路由未被用户改变时才执行 `router.replace()`。
 - 这样可避免首次打开时用户快速点击侧边栏，历史页面恢复结果覆盖用户刚选择的页面；恢复失败只记录警告，不阻塞应用初始化。
+
+## 2026-08-31 2.13.4 候选构建
+
+- Android Release 候选 run `33406193588` 基于 `main` 提交 `4274e0cd` 成功；5 个 APK Artifact 均已上传并可下载，实际文件名为 `visoncube-music-mobile-v2.13.4-*.apk`。
+- Android Runner 的 `apksigner verify --print-certs` 已通过，5 个 ABI 的证书 SHA-256 均为 `9C951C4BBA399D21751F4B194E839DA3A49EFD60534CF9B3B9D35859A6D6BC95`。
+- Actions 使用固定依赖 Release；签名 JKS 只在 Runner 临时生成并由退出 trap 清理。Android 五项签名 Secret 已配置，Windows 独立 Authenticode PFX 仍是候选与正式构建硬门槛。

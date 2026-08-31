@@ -77,3 +77,10 @@
 - 本地源码与临时 Git 克隆的修复内容一致；Windows 修复提交 `e43c7ab` 已以普通方式推送到 `main`，CI run `33387721505` 全绿。
 - 候选 Release run `33388893148` 已成功，Artifact `9756799587`（x64 安装包，压缩包 SHA-256 `06951BD0ECD2A1B9722A12152C5063AFE365ECA8B7CF193C78139F9BB1588E7E`，安装包 SHA-256 `E2C9382E18941640DFEA83B3DF0D0E4E1F6FC718E1B4B45A62E86C89C52A9445`）已用于隔离桌面回归；安装包和主程序均为 `Authenticode NotSigned`，未进入正式发布。
 - 隔离 Windows 桌面通过 CDP 依次验证搜索、歌单、排行榜、我的列表、设置页面，URL、活动导航和页面内容均同步；全新空配置会进入登录页，未进行未登录业务页验收。
+
+## 2026-08-31 2.13.4 签名与 Android 候选验收
+
+- Android 加密签名备份已在本机恢复；JKS/配置哈希与备份元数据一致，证书指纹为 `9C951C4BBA399D21751F4B194E839DA3A49EFD60534CF9B3B9D35859A6D6BC95`，恢复目录权限仅当前用户和 `SYSTEM`。
+- GitHub Actions Android Release run `33404747499` 首轮构建和签名校验成功，但上传路径沿用旧文件名前缀导致无 Artifact；已修正 `.github/actions/upload-artifact/action.yml` 并普通推送提交 `4274e0cd`。
+- 修正后的候选 run `33406193588` 成功，5 个 ABI Artifact 已生成并下载核对，版本均为 `2.13.4`；未创建标签/正式 Release、未上传 COS 或修改服务器清单。
+- Android 五项 Actions Secret 已加密配置并核对名称；Windows 仓库仍无 PFX/密码 Secret，因此 Windows 候选和双端正式发布保持门禁，真实设备验收待执行。

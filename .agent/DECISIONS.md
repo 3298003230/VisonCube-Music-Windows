@@ -33,6 +33,8 @@
 - Android 加密签名备份继续使用本机交互式恢复口令；Windows 正式/候选构建均要求独立 Authenticode PFX，并在 Runner 上执行签名校验。
 - Android Release workflow 延后创建标签，先完成 APK 构建和 `apksigner verify`；失败时不留下半成品标签。
 
+- Android Gradle 实际输出文件前缀为 `visoncube-music-mobile-v<version>`；上传 composite action 已同步该大小写和前缀，避免候选构建成功但 Artifact 为空。后续发布资产命名以 Runner 实际产物为准。
+
 ## 来源歌单同步
 
 - 仅同步同时具有 `source` 与 `sourceListId` 的来源歌单；普通手建、试听/临时/稍后播放列表和本地歌曲不进入云端。

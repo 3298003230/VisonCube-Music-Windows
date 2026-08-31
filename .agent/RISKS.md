@@ -19,3 +19,6 @@
 - `2.13.4` 候选构建要求 Android 五个签名 Secret 和 Windows Authenticode PFX Secret；任一缺失或验签失败都必须停止正式发布。
 - 当前本机未恢复 Android JKS，恢复口令只能在 `Restore-SigningBackup.ps1` 的交互终端输入；Windows 本地也未发现 PFX 文件。
 - GitHub 仓库为公开仓库，加密 `.vcb` 可被下载，恢复口令不能写入聊天或仓库；若口令泄露必须重新生成备份并轮换。
+
+- Android 候选 run `33406193588` 的 5 个 APK Artifact 和签名校验已通过；首轮上传路径问题已修复。Android 仍需实体设备安装验收，Artifact 不等同于正式 Release。
+- Windows 仓库 Actions Secrets 仍为 0，缺少独立 Authenticode PFX、PFX 密码、`BT_TOKEN` 与 COS 凭据；不得触发 Windows 候选或 `publish_release=true`，也不得把 Android JKS 当作 Windows 证书。
