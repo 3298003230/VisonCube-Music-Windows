@@ -22,7 +22,7 @@
 
 ## 2026-08-31 云端构建链路完成
 
-- Windows、Android 源码已分别以普通非强制提交同步到 GitHub：Windows 最终提交 `54bf533e`，Android 最终提交 `5e453035`；依赖仓库清单与发布工作流提交 `3f407c05`。
+- Windows、Android 源码已分别以普通非强制提交同步到 GitHub：Windows 功能提交 `54bf533e`，随后以文档验证提交 `586f5646` 收尾；Android 最终提交 `5e453035`；依赖仓库清单与发布工作流提交 `3f407c05`。
 - Windows CI run `33370107565` 全量验证通过；随后将 lint 改为按提交定向检查，run `33370642949` 验证 npm ci、测试、定向 lint、完整 `npm run build` 全部通过。
 - Android CI run `33369508808` 全部通过，Debug APK 已作为短期 Artifact 上传；`.nvmrc` 固定 Node 22，修复 Node 20 无法直接运行 TypeScript 测试的问题。
 - 依赖仓库新增 `direct-packages.json`，发布工作流改为清单驱动并拒绝覆盖已有 `deps-*` Release；以后新增依赖集使用新标签，不改写旧标签。
