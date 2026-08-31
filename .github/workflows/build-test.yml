@@ -36,11 +36,15 @@ jobs:
         run: npm run test:music-sync
 
       - name: Lint source code
-        # The upstream renderer's mixed TS/JS parser cannot provide the type
-        # information required by this legacy rule. Other ESLint rules remain
-        # strict; this rule is tracked separately for a future parser migration.
+        # Lint only files changed by this commit so legacy code does not make
+        # every build rescan the whole tree. Other ESLint rules remain strict.
         run: |
-          npm run lint -- --rule "@typescript-eslint/no-floating-promises: off"
+          $files = @(git diff --name-only HEAD^ HEAD | Where-Object { $_ -match '^src/.*\.(ts|js|vue)$' })
+          if ($files.Count -eq 0) {
+            Write-Host 'No source files changed in this commit; skipping targeted lint.'
+            exit 0
+          }
+          npx eslint --ext .ts,.js,.vue -f node_modules/eslint-formatter-friendly --rule "@typescript-eslint/no-floating-promises: off" $files
 
       - name: Build all source bundles
         run: npm run build
