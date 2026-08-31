@@ -27,6 +27,12 @@
 - 两端 `release.yml` 仅允许手动触发，默认 `publish_release=false`：只生成候选 Artifact，绝不创建标签、GitHub Release、COS 对象或服务器清单；只有维护者手动明确设为 `true` 才进入正式发布路径。
 - 正式发布前先以候选 Artifact 完成真实设备验收，再配置并预检 Android 五个签名 Secret、Windows `BT_TOKEN` 和 COS 环境凭据。`COS` 上传工具仅接受白名单产物，服务器 `releases.json` 的备份与原子替换仍须由具备服务器权限的发布流程执行。
 
+## 2026-08 2.13.4 签名与候选发布
+
+- 新版本固定为 Windows/Android `2.13.4`，Android `versionCode=85`；候选 workflow 使用 `publish_release=false`，正式阶段才允许创建 `v2.13.4` 标签和 Release。
+- Android 加密签名备份继续使用本机交互式恢复口令；Windows 正式/候选构建均要求独立 Authenticode PFX，并在 Runner 上执行签名校验。
+- Android Release workflow 延后创建标签，先完成 APK 构建和 `apksigner verify`；失败时不留下半成品标签。
+
 ## 来源歌单同步
 
 - 仅同步同时具有 `source` 与 `sourceListId` 的来源歌单；普通手建、试听/临时/稍后播放列表和本地歌曲不进入云端。

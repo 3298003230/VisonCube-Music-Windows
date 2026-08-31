@@ -15,3 +15,7 @@
 - 2026-08-31 CI 复验已通过（Windows run `33375209886`、Android run `33375405837`）；但当前 GitHub API 显示两个仓库均无 repository secrets，Android 签名、Windows `BT_TOKEN` 和 COS 凭据仍需维护者配置后才能准备正式发布。
 - 服务器端备份 `releases.json`、原子替换和上传后 HTTP/Range/SHA-256 验证要求已保留为发布规程；因缺少 SSH/服务器代码，本轮只能核验公网结果，尚不能从远端脚本确认其自动化实现。
 - Windows 默认候选 Release run `33377401806` 已确认不会新建标签或 Release；仍需将 Artifact 安装到真实桌面完成关闭/托盘验收，Android 仍需实体设备安装 Debug APK。
+
+- `2.13.4` 候选构建要求 Android 五个签名 Secret 和 Windows Authenticode PFX Secret；任一缺失或验签失败都必须停止正式发布。
+- 当前本机未恢复 Android JKS，恢复口令只能在 `Restore-SigningBackup.ps1` 的交互终端输入；Windows 本地也未发现 PFX 文件。
+- GitHub 仓库为公开仓库，加密 `.vcb` 可被下载，恢复口令不能写入聊天或仓库；若口令泄露必须重新生成备份并轮换。

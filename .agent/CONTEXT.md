@@ -4,7 +4,7 @@
 
 - 路径：`D:\Code\VisonCube\Music\Windows`（ZIP 已扁平解压，源码目录直接包含 `package.json`、`src`、`.agent`）。
 - Electron 40.9.2、Vue 3、TypeScript、Webpack，使用 `electron-updater` 6.8.4。
-- 当前源码发布版本为 `2.13.3`；本轮只优化源码，不生成安装包或发布产物。
+- 当前源码候选发布版本为 `2.13.4`；Android `versionCode=85`。正式标签和生产产物仍须候选验收后创建。
 - Windows 关闭策略由 `common.closeAction` 控制：`ask` 首次询问、`tray` 隐藏到系统托盘、`quit` 退出程序。
 
 ## 更新链路
@@ -12,6 +12,7 @@
 - 主进程 `src/main/modules/winMain/autoUpdate.ts` 从服务器 Music Windows 发布接口读取 `feed_url`，再以 generic provider 读取 `latest.yml`。
 - 渲染进程 `src/renderer/core/useApp/useUpdate.ts` 接收更新事件并维护下载、错误和完成状态；更新弹窗位于 `src/renderer/components/layout/UpdateModal.vue`。
 - Windows 安装包、`.blockmap` 和 `latest.yml` 必须保持在同一个 COS 目录。
+- Android 发布签名从受保护目录 `D:\Compilationenvironment\VisonCube-Music-Signing` 恢复；Windows 使用独立 Authenticode PFX（`CSC_LINK`/`CSC_KEY_PASSWORD`），Android JKS 不可用于 Windows。
 
 ## 云同步
 

@@ -64,6 +64,13 @@
 - 发布工作流已改为显式双阶段：默认候选构建只上传 Artifact，`publish_release=true` 才会运行原有正式发布（Android 标签/GitHub Release、Windows `publish:*`）路径；避免误触发手动工作流造成生产发布。
 - Windows 默认候选 Release run `33377401806` 已成功，Artifact `9752534440`（`visoncube-music-windows-x64-release-candidate`，107,199,029 字节）有效至 2026-11-29；Windows 正式 Release 数量仍为 2、最新标签仍为 `v2.13.3`，未创建标签、Release、COS 对象或服务器更新。
 
+## 2026-08-31 2.13.4 候选准备
+
+- 双端版本已提升为 Windows/Android `2.13.4`，Android `versionCode=85`；双端变更日志已补齐关闭策略、首屏路由和上游修复说明。
+- Android Release workflow 增加临时签名文件清理、文件名安全校验和 `apksigner` 验证；移除构建前创建 Git 标签的步骤。
+- Windows Release workflow 增加 PFX Secret 映射、候选/正式 Authenticode 验证，并将候选 Artifact 扩展为安装包、`.blockmap` 和 `latest.yml`。
+- 本机尚未恢复 JKS：恢复脚本需要维护者在终端私下输入口令；候选构建、设备验收、GitHub 正式发布和服务器切换均待签名与权限门禁通过。
+
 ## 2026-08-31 首次启动页面切换修复
 
 - 修复 `src/renderer/core/useApp/index.ts` 中异步恢复上次页面覆盖用户首屏点击的问题：等待路由 ready，限制恢复范围为默认首屏，并在读取状态前后做路由一致性检查。

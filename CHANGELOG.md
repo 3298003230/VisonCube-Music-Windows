@@ -6,6 +6,22 @@ Project versioning adheres to [Semantic Versioning](http://semver.org/).
 Commit convention is based on [Conventional Commits](http://conventionalcommits.org).
 Change log format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [2.13.4](https://github.com/3298003230/VisonCube-Music-Windows/compare/v2.13.3...v2.13.4) - 2026-08-31
+
+### 优化
+
+- 优化首次启动页面恢复逻辑，快速切换页面时不再被历史路由覆盖。
+- 优化歌曲换源匹配、容量单位、歌词时间解析和歌单歌曲顺序。
+
+### 修复
+
+- 修复关闭按钮、Alt+F4 和关闭快捷键行为不一致的问题。
+- 修复首次关闭确认弹窗在登录页初始化较慢时可能不显示的问题。
+
+### 其他
+
+- 关闭行为支持每次询问、隐藏到系统托盘和退出程序，并可记住选择。
+
 ## [2.12.2](https://github.com/lyswhut/lx-music-desktop/compare/v2.12.1...v2.12.2) - 2026-05-01
 
 我们很高兴地宣布新项目 Any Listen 的桌面版已发布，目前已支持列表跟随本地文件自动更新、加载并播放WebDAV上的歌曲等功能，更多功能仍在积极开发中，桌面版与Web版将同步更新。
