@@ -49,3 +49,5 @@
 - Android Release 候选 run `33406193588` 基于 `main` 提交 `4274e0cd` 成功；5 个 APK Artifact 均已上传并可下载，实际文件名为 `visoncube-music-mobile-v2.13.4-*.apk`。
 - Android Runner 的 `apksigner verify --print-certs` 已通过，5 个 ABI 的证书 SHA-256 均为 `9C951C4BBA399D21751F4B194E839DA3A49EFD60534CF9B3B9D35859A6D6BC95`。
 - Actions 使用固定依赖 Release；签名 JKS 只在 Runner 临时生成并由退出 trap 清理。Android 五项签名 Secret 已配置，Windows 独立 Authenticode PFX 仍是候选与正式构建硬门槛。
+
+- 按维护者确认，Windows 恢复旧版未签名发布路径；`v2.13.4` Windows Release 明确标注为 unsigned，Android Release 使用现有 JKS 签名。

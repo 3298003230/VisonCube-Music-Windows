@@ -84,3 +84,11 @@
 - GitHub Actions Android Release run `33404747499` 首轮构建和签名校验成功，但上传路径沿用旧文件名前缀导致无 Artifact；已修正 `.github/actions/upload-artifact/action.yml` 并普通推送提交 `4274e0cd`。
 - 修正后的候选 run `33406193588` 成功，5 个 ABI Artifact 已生成并下载核对，版本均为 `2.13.4`；未创建标签/正式 Release、未上传 COS 或修改服务器清单。
 - Android 五项 Actions Secret 已加密配置并核对名称；Windows 仓库仍无 PFX/密码 Secret，因此 Windows 候选和双端正式发布保持门禁，真实设备验收待执行。
+
+## 2026-08-31 2.13.4 正式 Release
+
+- 按维护者确认恢复旧版未签名 Windows 流程；Windows Release workflow 移除 PFX、`BT_TOKEN` 和 Authenticode 阻断检查，候选构建生成未签名安装包。
+- Windows 正式 Release `v2.13.4` 已创建并上传 `latest.yml`、x64 安装包和 `.blockmap`；安装包 SHA-256 为 `DBD5A784EB07ABED2D517564B8BECD1FFE82EE41287AAE7657FAE8AAF30397C8`，签名状态 `NotSigned`。
+- Android 正式 Release `v2.13.4` 已创建并上传 5 个 ABI APK；均通过 `apksigner verify`，证书指纹为 `9C951C4BBA399D21751F4B194E839DA3A49EFD60534CF9B3B9D35859A6D6BC95`。
+- GitHub Release：Windows `https://github.com/3298003230/VisonCube-Music-Windows/releases/tag/v2.13.4`；Android `https://github.com/3298003230/VisonCube-Music-Android/releases/tag/v2.13.4`。
+- 本轮未上传 COS、未修改服务器 `releases.json`；Windows 自动更新仍需服务器端同步后才会向旧客户端推送。

@@ -22,3 +22,6 @@
 
 - Android 候选 run `33406193588` 的 5 个 APK Artifact 和签名校验已通过；首轮上传路径问题已修复。Android 仍需实体设备安装验收，Artifact 不等同于正式 Release。
 - Windows 仓库 Actions Secrets 仍为 0，缺少独立 Authenticode PFX、PFX 密码、`BT_TOKEN` 与 COS 凭据；不得触发 Windows 候选或 `publish_release=true`，也不得把 Android JKS 当作 Windows 证书。
+
+- 维护者已明确接受 Windows 未签名发布；GitHub Windows `v2.13.4` 安装包为 `NotSigned`，系统可能显示未知发布者，后续应申请 Authenticode PFX 并重新发布修订版本。
+- GitHub 双端 `v2.13.4` Release 已公开创建，但 COS/服务器清单未更新；自动更新和服务器下载地址不会因 GitHub Release 创建而改变。

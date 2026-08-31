@@ -35,6 +35,8 @@
 
 - Android Gradle 实际输出文件前缀为 `visoncube-music-mobile-v<version>`；上传 composite action 已同步该大小写和前缀，避免候选构建成功但 Artifact 为空。后续发布资产命名以 Runner 实际产物为准。
 
+- 维护者确认继续沿用旧版 Windows 未签名发布方式；本轮移除 PFX/Authenticode 硬门禁并在 Release 说明中公开标注 unsigned，不生成或伪造 Windows 证书。
+
 ## 来源歌单同步
 
 - 仅同步同时具有 `source` 与 `sourceListId` 的来源歌单；普通手建、试听/临时/稍后播放列表和本地歌曲不进入云端。
