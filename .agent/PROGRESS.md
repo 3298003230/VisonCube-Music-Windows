@@ -61,3 +61,4 @@
 - Windows Beta 候选 run `33373780718` 的 x64/arm64 安装包和绿色包等 Artifact 仍有效至 2026-11-29；CI 本身不上传生产对象。
 - GitHub Actions API 只读检查显示 Windows、Android 仓库当前均无 repository secrets；Android Release 所需 5 个签名 Secret、Windows `BT_TOKEN`/COS 凭据均未配置，正式发布条件未满足。
 - 本轮没有真实 Windows 桌面或 Android 实体设备可供操作，设备验收项目保持“待执行”；未创建正式 Release、未切换线上更新清单、未写入 COS/服务器。
+- 发布工作流已改为显式双阶段：默认候选构建只上传 Artifact，`publish_release=true` 才会运行原有正式发布（Android 标签/GitHub Release、Windows `publish:*`）路径；避免误触发手动工作流造成生产发布。

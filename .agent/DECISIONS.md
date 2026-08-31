@@ -24,6 +24,8 @@
 
 - Windows 发布版本必须在 `package.json`、服务端 `releases.json` 和 COS `latest.yml` 中保持一致。
 - COS 发布时仅上传新版本的安装包、对应 `.blockmap` 与 `latest.yml`，不得清理已有历史安装包。
+- 两端 `release.yml` 仅允许手动触发，默认 `publish_release=false`：只生成候选 Artifact，绝不创建标签、GitHub Release、COS 对象或服务器清单；只有维护者手动明确设为 `true` 才进入正式发布路径。
+- 正式发布前先以候选 Artifact 完成真实设备验收，再配置并预检 Android 五个签名 Secret、Windows `BT_TOKEN` 和 COS 环境凭据。`COS` 上传工具仅接受白名单产物，服务器 `releases.json` 的备份与原子替换仍须由具备服务器权限的发布流程执行。
 
 ## 来源歌单同步
 

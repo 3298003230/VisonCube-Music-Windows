@@ -2,6 +2,12 @@ name: Build
 
 on:
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: 'Create official release assets (requires BT_TOKEN)'
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -57,7 +63,18 @@ jobs:
           git status --porcelain
           npm run build
 
-      - name: Release package
+      - name: Verify official publication token
+        if: ${{ inputs.publish_release }}
+        env:
+          BT_TOKEN: ${{ secrets.BT_TOKEN }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:BT_TOKEN)) {
+            Write-Error 'BT_TOKEN is required when publish_release is enabled.'
+            exit 1
+          }
+
+      - name: Publish official packages
+        if: ${{ inputs.publish_release }}
         run: |
           npm run publish:win:7z:x64
           npm run publish:win:7z:arm64
@@ -67,14 +84,34 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BT_TOKEN: ${{ secrets.BT_TOKEN }}
 
-      - name: Generate file MD5
+      - name: Build candidate package
+        if: ${{ !inputs.publish_release }}
+        run: npm run pack:win:setup:x64
+
+      - name: Upload candidate installer
+        if: ${{ !inputs.publish_release }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: visoncube-music-windows-x64-release-candidate
+          path: build/*-x64-Setup.exe
+          if-no-files-found: error
+
+      - name: Generate official file MD5
+        if: ${{ inputs.publish_release }}
         run: |
           cd build
           Get-FileHash *.exe,*.7z -Algorithm MD5 | Format-List
 
+      - name: Generate candidate SHA-256
+        if: ${{ !inputs.publish_release }}
+        run: |
+          cd build
+          Get-FileHash *.exe -Algorithm SHA256 | Format-List
+
 
   Windows_7:
     name: Windows_7
+    if: ${{ inputs.publish_release }}
     runs-on: windows-latest
     # needs: CheckCode
     steps:
@@ -117,6 +154,7 @@ jobs:
 
   Mac:
     name: Mac
+    if: ${{ inputs.publish_release }}
     runs-on: macos-latest
     # needs: CheckCode
     steps:
@@ -149,6 +187,7 @@ jobs:
 
   Linux:
     name: Linux
+    if: ${{ inputs.publish_release }}
     runs-on: ubuntu-latest
     # needs: CheckCode
     steps:
