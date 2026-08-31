@@ -36,3 +36,8 @@
 - Android GitHub Actions `CI` run `33369508808` 已通过 npm ci、来源歌单测试、Lint、JS bundle、Gradle Debug APK，并上传 7 天保留的 Debug Artifact。
 - CI 使用固定 SHA 的 actions、Node 22、Java 17、npm/Gradle runner cache；正式 Release 工作流仅手动触发。
 - Windows Beta workflow 可手动触发生成测试安装包；COS 发布工具只接受 `latest.yml`、`version.json`、安装包和 `.blockmap`，凭据从 `VISONCUBE_COS_*` 环境变量读取，绝不删除远端历史对象。
+
+## 首次启动路由恢复
+
+- `src/renderer/core/useApp/index.ts` 等待 `router.isReady()` 后才读取上次页面；仅当当前仍是默认首屏 `/` 或 `/search`，且异步读取期间路由未被用户改变时才执行 `router.replace()`。
+- 这样可避免首次打开时用户快速点击侧边栏，历史页面恢复结果覆盖用户刚选择的页面；恢复失败只记录警告，不阻塞应用初始化。

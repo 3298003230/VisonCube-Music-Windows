@@ -56,8 +56,18 @@ export default () => {
       }
     }
 
-    void getViewPrevState().then(state => {
-      void router.push({ path: state.url, query: state.query })
+    // 等待路由完成首屏导航后再恢复上次页面。恢复过程是异步的，用户可能
+    // 已经点击了侧边栏；只有路由仍停留在启动默认页时才允许覆盖它。
+    void router.isReady().then(async() => {
+      const routeBeforeRestore = router.currentRoute.value
+      if (routeBeforeRestore.path != '/' && routeBeforeRestore.path != '/search') return
+
+      const state = await getViewPrevState()
+      if (router.currentRoute.value.fullPath != routeBeforeRestore.fullPath) return
+
+      await router.replace({ path: state.url, query: state.query })
+    }).catch(error => {
+      console.warn('Restore previous view failed:', error)
     })
 
     // 初始化我的列表、下载列表等数据

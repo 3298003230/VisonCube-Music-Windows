@@ -8,6 +8,7 @@
 - Windows `2.13.2` 安装包未配置 Authenticode 数字签名，干净系统可能显示未知发布者提示。
 - GitHub Actions 当前未配置 Android Release 所需的 5 个签名 Secret；Release workflow 现会在构建前明确失败，正式发布前必须由维护者在仓库设置中补齐，值不会写入源码。
 - Windows Beta 候选包只存在于 GitHub Artifact，尚未安装到真实桌面验收；候选包不等同于生产更新包。
+- 首次启动页面切换修复尚未经过新候选包的桌面回归；需在应用启动后立即点击设置、歌单、排行榜，确认异步历史恢复不会覆盖用户选择。
 - 服务器公网接口和 COS 对象已只读核对，但本地没有服务器 SSH 凭据，无法直接审查远端部署脚本；本轮未执行任何生产上传或清单修改。
 - GitHub 双端 `main` 已同步最新普通提交（Windows `5fefbf8f`，Android `9d1837af`）；本地解压目录不是 Git 工作树，后续修改需先读取远端 `main` 头并使用非强制更新。
 - 2026-08-31 CI 复验已通过（Windows run `33375209886`、Android run `33375405837`）；但当前 GitHub API 显示两个仓库均无 repository secrets，Android 签名、Windows `BT_TOKEN` 和 COS 凭据仍需维护者配置后才能准备正式发布。

@@ -63,3 +63,8 @@
 - 本轮没有真实 Windows 桌面或 Android 实体设备可供操作，设备验收项目保持“待执行”；未创建正式 Release、未切换线上更新清单、未写入 COS/服务器。
 - 发布工作流已改为显式双阶段：默认候选构建只上传 Artifact，`publish_release=true` 才会运行原有正式发布（Android 标签/GitHub Release、Windows `publish:*`）路径；避免误触发手动工作流造成生产发布。
 - Windows 默认候选 Release run `33377401806` 已成功，Artifact `9752534440`（`visoncube-music-windows-x64-release-candidate`，107,199,029 字节）有效至 2026-11-29；Windows 正式 Release 数量仍为 2、最新标签仍为 `v2.13.3`，未创建标签、Release、COS 对象或服务器更新。
+
+## 2026-08-31 首次启动页面切换修复
+
+- 修复 `src/renderer/core/useApp/index.ts` 中异步恢复上次页面覆盖用户首屏点击的问题：等待路由 ready，限制恢复范围为默认首屏，并在读取状态前后做路由一致性检查。
+- 本地源码与临时 Git 克隆的修复内容一致；待提交并触发 Windows CI 后，用候选包复验启动后立即切换页面及正常恢复上次页面两条路径。
