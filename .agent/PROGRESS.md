@@ -20,6 +20,14 @@
 - 验证：双端 `music-sync-model.test.ts` 使用 Codex 内置 Node 24.19.0 各 4/4 通过；14 个修改后的 JavaScript 文件通过 `node --check`；双端三语言 JSON 均可解析且键集合一致；ZIP 路径、SHA-256 与扁平目录结构复核通过。
 - 项目脚本、ESLint、Webpack/React Native 构建及 GUI/真机验收仍未运行：当时项目依赖目录和 `node_modules` 缺失；本地 `.tgz` 阻塞已由后续固定 GitHub Release 直链解决。
 
+## 2026-08-31 云端构建链路完成
+
+- Windows、Android 源码已分别以普通非强制提交同步到 GitHub：Windows 最终提交 `54bf533e`，Android 最终提交 `5e453035`；依赖仓库清单与发布工作流提交 `3f407c05`。
+- Windows CI run `33370107565` 全量验证通过；随后将 lint 改为按提交定向检查，run `33370642949` 验证 npm ci、测试、定向 lint、完整 `npm run build` 全部通过。
+- Android CI run `33369508808` 全部通过，Debug APK 已作为短期 Artifact 上传；`.nvmrc` 固定 Node 22，修复 Node 20 无法直接运行 TypeScript 测试的问题。
+- 依赖仓库新增 `direct-packages.json`，发布工作流改为清单驱动并拒绝覆盖已有 `deps-*` Release；以后新增依赖集使用新标签，不改写旧标签。
+- 本机未安装 `node_modules`、未下载 1.14 GB 依赖 bundle，也未生成安装包/APK；云端构建已验证源码和依赖直链可用。
+
 ## 2026-08-04 来源歌单云同步与 2.13.2 发布
 
 - Windows 已接入 `/api/music/playlists`，仅同步带来源标识的歌单，支持旧 ID 迁移、本地歌曲保留、删除墓碑、CAS 冲突和账号页冲突选择。

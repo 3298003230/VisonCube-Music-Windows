@@ -25,3 +25,9 @@
 - 主进程：`npm.cmd run build:main`。
 - 渲染进程：`npm.cmd run build:renderer`。
 - 来源歌单模型测试：`npm.cmd run test:music-sync`。
+
+## 云端构建
+
+- Windows GitHub Actions `CI` run `33370107565` 已通过 npm ci、来源歌单测试、全量 ESLint 和完整 `npm run build`；后续提交使用仅检查改动源码文件的定向 lint，run `33370642949` 已再次全绿。
+- Android GitHub Actions `CI` run `33369508808` 已通过 npm ci、来源歌单测试、Lint、JS bundle、Gradle Debug APK，并上传 7 天保留的 Debug Artifact。
+- CI 使用固定 SHA 的 actions、Node 22、Java 17、npm/Gradle runner cache；正式 Release 工作流仅手动触发。
