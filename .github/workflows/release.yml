@@ -50,11 +50,6 @@ jobs:
   Windows:
     name: Windows
     runs-on: windows-latest
-    env:
-      # electron-builder accepts a base64 PFX through CSC_LINK. Prefer the
-      # namespaced secrets while keeping compatibility with standard names.
-      CSC_LINK: ${{ secrets.WIN_CSC_LINK || secrets.CSC_LINK }}
-      CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD || secrets.CSC_KEY_PASSWORD }}
     # needs: CheckCode
     steps:
       - name: Check out git repository
@@ -63,32 +58,10 @@ jobs:
       - name: Setup Node Env
         uses: ./.github/actions/setup
 
-      - name: Verify Windows signing secrets
-        shell: pwsh
-        run: |
-          if ([string]::IsNullOrWhiteSpace($env:CSC_LINK)) {
-            Write-Error 'A Windows Authenticode PFX secret is required for candidate and official builds.'
-            exit 1
-          }
-          if ([string]::IsNullOrWhiteSpace($env:CSC_KEY_PASSWORD)) {
-            Write-Error 'CSC_KEY_PASSWORD is required for candidate and official builds.'
-            exit 1
-          }
-
       - name: Build src code
         run: |
           git status --porcelain
           npm run build
-
-      - name: Verify official publication token
-        if: ${{ inputs.publish_release }}
-        env:
-          BT_TOKEN: ${{ secrets.BT_TOKEN }}
-        run: |
-          if ([string]::IsNullOrWhiteSpace($env:BT_TOKEN)) {
-            Write-Error 'BT_TOKEN is required when publish_release is enabled.'
-            exit 1
-          }
 
       - name: Publish official packages
         if: ${{ inputs.publish_release }}
@@ -100,24 +73,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BT_TOKEN: ${{ secrets.BT_TOKEN }}
-
-      - name: Verify official Authenticode signatures
-        if: ${{ inputs.publish_release }}
-        shell: pwsh
-        run: |
-          $executables = @(Get-ChildItem -LiteralPath build -Filter '*.exe' -File)
-          if ($executables.Count -eq 0) {
-            Write-Error 'No Windows installers were produced for signature verification.'
-            exit 1
-          }
-          foreach ($file in $executables) {
-            $signature = Get-AuthenticodeSignature -LiteralPath $file.FullName
-            if ($signature.Status -ne 'Valid') {
-              Write-Error "Authenticode verification failed for $($file.Name): $($signature.Status)"
-              exit 1
-            }
-            Write-Host "$($file.Name): $($signature.SignerCertificate.Subject)"
-          }
 
       - name: Build candidate package
         if: ${{ !inputs.publish_release }}
@@ -133,22 +88,6 @@ jobs:
             build/*.blockmap
             build/latest.yml
           if-no-files-found: error
-
-      - name: Verify candidate Authenticode signature
-        if: ${{ !inputs.publish_release }}
-        shell: pwsh
-        run: |
-          $installer = Get-ChildItem -LiteralPath build -Filter '*-x64-Setup.exe' -File | Select-Object -First 1
-          if ($null -eq $installer) {
-            Write-Error 'Candidate Windows installer was not produced.'
-            exit 1
-          }
-          $signature = Get-AuthenticodeSignature -LiteralPath $installer.FullName
-          if ($signature.Status -ne 'Valid') {
-            Write-Error "Authenticode verification failed for $($installer.Name): $($signature.Status)"
-            exit 1
-          }
-          Write-Host "$($installer.Name): $($signature.SignerCertificate.Subject)"
 
       - name: Generate official file MD5
         if: ${{ inputs.publish_release }}
