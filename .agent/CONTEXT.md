@@ -2,9 +2,10 @@
 
 ## 项目概况
 
-- 路径：`D:\Code\VisonCube\VisonCube-Music\Windows`。
+- 路径：`D:\Code\VisonCube\Music\Windows`（ZIP 已扁平解压，源码目录直接包含 `package.json`、`src`、`.agent`）。
 - Electron 40.9.2、Vue 3、TypeScript、Webpack，使用 `electron-updater` 6.8.4。
-- 当前源码发布版本为 `2.13.2`，Windows 安装包通过 `https://download.sjmf.xyz/VisonCube/Music/Windows` 分发。
+- 当前源码发布版本为 `2.13.3`；本轮只优化源码，不生成安装包或发布产物。
+- Windows 关闭策略由 `common.closeAction` 控制：`ask` 首次询问、`tray` 隐藏到系统托盘、`quit` 退出程序。
 
 ## 更新链路
 
@@ -19,6 +20,7 @@
 
 ## 构建入口
 
+- Windows 5 个、Android 4 个定制 npm 包固定使用 `VisonCube-Music-Dependent` 的 `deps-2026-07-30-aeadf24` Release 直链，不再要求 `D:\Code\VisonCube\依赖`；Android Gradle Wrapper 使用 Gradle 官方 8.8 分发地址和固定 SHA-256。
 - 定向 lint：`.\node_modules\.bin\eslint.cmd <changed files>`。
 - 主进程：`npm.cmd run build:main`。
 - 渲染进程：`npm.cmd run build:renderer`。

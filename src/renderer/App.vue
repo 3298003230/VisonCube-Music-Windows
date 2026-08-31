@@ -1,6 +1,7 @@
 <template>
   <Account v-if="!authReady || !authUser" />
   <AuthenticatedShell v-else />
+  <CloseConfirmModal />
 </template>
 
 <script setup>
@@ -10,6 +11,7 @@ import { onMounted } from '@common/utils/vueTools'
 import { authReady, authUser } from '@renderer/features/auth/state'
 import Account from './views/Account/index.vue'
 import AuthenticatedShell from './components/layout/AuthenticatedShell.vue'
+import CloseConfirmModal from './components/layout/CloseConfirmModal.vue'
 
 onMounted(() => {
   document.getElementById('root').style.display = 'block'

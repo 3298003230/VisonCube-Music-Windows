@@ -79,6 +79,11 @@ declare global {
       'common.showChangeLog': boolean
 
       /**
+       * 关闭主窗口时的处理方式
+       */
+      'common.closeAction': 'ask' | 'tray' | 'quit'
+
+      /**
        * 启动时自动播放歌曲
        */
       'player.startupAutoPlay': boolean

@@ -5,7 +5,7 @@ import {
   onSettingChanged,
   onThemeChange,
   openDevTools,
-  quitApp,
+  closeWindow,
   setFullScreen,
   showHideWindowToggle,
 } from '@renderer/utils/ipc'
@@ -124,7 +124,7 @@ export default () => {
 
   window.key_event.on(HOTKEY_COMMON.min.action, minWindow)
   window.key_event.on(HOTKEY_COMMON.hide_toggle.action, showHideWindowToggle)
-  window.key_event.on(HOTKEY_COMMON.close.action, quitApp)
+  window.key_event.on(HOTKEY_COMMON.close.action, closeWindow)
 
   window.app_event.on('keyDown', handle_key_down)
   window.key_event.on('key_mod+f12_down', handle_open_devtools)
@@ -135,7 +135,7 @@ export default () => {
   onBeforeUnmount(() => {
     window.key_event.off(HOTKEY_COMMON.min.action, minWindow)
     window.key_event.off(HOTKEY_COMMON.hide_toggle.action, showHideWindowToggle)
-    window.key_event.off(HOTKEY_COMMON.close.action, quitApp)
+    window.key_event.off(HOTKEY_COMMON.close.action, closeWindow)
 
     window.app_event.off('keyDown', handle_key_down)
     window.key_event.off('key_mod+f12_down', handle_open_devtools)

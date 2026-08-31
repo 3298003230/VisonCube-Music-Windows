@@ -21,6 +21,7 @@ const defaultSetting: LX.AppSetting = {
   'common.transparentWindow': !isMac,
   'common.tryAutoUpdate': false,
   'common.showChangeLog': true,
+  'common.closeAction': 'ask',
 
   'player.startupAutoPlay': false,
   'player.togglePlayMethod': 'listLoop',

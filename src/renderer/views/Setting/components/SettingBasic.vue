@@ -10,6 +10,12 @@ dd
       base-checkbox(id="setting_start_in_fullscreen" :model-value="appSetting['common.startInFullscreen']" :label="$t('setting__basic_start_in_fullscreen')" @update:model-value="updateSetting({'common.startInFullscreen': $event})")
     .gap-top
       base-checkbox(id="setting_to_tray" :model-value="appSetting['tray.enable']" :label="$t('setting__basic_to_tray')" @update:model-value="updateSetting({'tray.enable': $event})")
+    .gap-top
+      p(:class="$style.settingLabel") {{ $t('setting__basic_close_action_title') }}
+      base-checkbox.gap-left(
+        v-for="item in closeActionList" :id="`setting_close_action_${item.id}`" :key="item.id"
+        name="setting_close_action" need :model-value="appSetting['common.closeAction']" :value="item.id" :label="item.label"
+        @update:model-value="handleCloseActionChange($event)")
     .p.gap-top
       base-btn.btn(min @click="isShowPlayTimeoutModal = true") {{ $t('setting__play_timeout')}} {{ timeLabel ? ` (${timeLabel})` : '' }}
 
@@ -294,6 +300,21 @@ export default {
       ]
     })
 
+    const closeActionList = computed(() => {
+      return [
+        { id: 'ask', label: t('setting__basic_close_action_ask') },
+        { id: 'tray', label: t('setting__basic_close_action_tray') },
+        { id: 'quit', label: t('setting__basic_close_action_quit') },
+      ]
+    })
+
+    const handleCloseActionChange = (action) => {
+      if (!action || action == appSetting['common.closeAction']) return
+      const setting = { 'common.closeAction': action }
+      if (action == 'tray') setting['tray.enable'] = true
+      updateSetting(setting)
+    }
+
     const systemFontList = ref([])
     const fontList = computed(() => {
       return [{ id: '', label: t('setting__desktop_lyric_font_default') }, ...systemFontList.value]
@@ -348,6 +369,8 @@ export default {
       langList,
       sourceNameTypes,
       controlBtnPositionList,
+      closeActionList,
+      handleCloseActionChange,
       fontList,
       isFullscreen,
       toggleTheme,
@@ -550,6 +573,12 @@ export default {
   .status {
     margin-left: 5px;
   }
+}
+
+.settingLabel {
+  margin-bottom: 8px;
+  color: var(--color-font-label);
+  font-size: 14px;
 }
 
 </style>

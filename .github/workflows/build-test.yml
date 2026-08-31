@@ -1,28 +1,42 @@
-name: Run build test
+name: CI
 
 on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
-      - dev
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IS_CI: 'true'
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: Test and build Windows sources
+    runs-on: windows-latest
+    timeout-minutes: 45
 
     steps:
       - name: Check out git repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
-      - name: Install Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
+      - name: Setup build environment
+        uses: ./.github/actions/setup
 
-      - name: Install Dependencies
-        run: npm ci
+      - name: Test music sync model
+        run: npm run test:music-sync
 
-      - name: Eslint check
+      - name: Lint source code
         run: npm run lint
 
-      - name: Test Build
+      - name: Build all source bundles
         run: npm run build

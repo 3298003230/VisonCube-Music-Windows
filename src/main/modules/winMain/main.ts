@@ -4,29 +4,87 @@ import { createTaskBarButtons, getWindowSizeInfo } from './utils'
 import { getPlatform, isLinux, isWin } from '@common/utils'
 import { getProxy, openDevTools as handleOpenDevTools } from '@main/utils'
 import { mainSend } from '@common/mainIpc'
+import { WIN_MAIN_RENDERER_EVENT_NAME } from '@common/ipcNames'
 import { sendFocus, sendTaskbarButtonClick } from './rendererEvent'
 import { encodePath } from '@common/utils/electron'
 
 let browserWindow: Electron.BrowserWindow | null = null
+let isCloseRendererReady = false
+let isClosePromptPending = false
+
+type CloseAction = 'tray' | 'quit' | 'cancel'
+
+const handleCloseAction = (action: CloseAction) => {
+  isClosePromptPending = false
+  if (!browserWindow || browserWindow.isDestroyed()) return
+
+  if (action == 'cancel') return
+  if (action == 'quit') {
+    global.lx.isSkipTrayQuit = true
+    browserWindow.close()
+    return
+  }
+
+  // 托盘关闭策略必须保证存在恢复窗口和退出菜单的入口。
+  if (!global.lx.appSetting['tray.enable']) {
+    global.lx.event_app.update_config({ 'tray.enable': true })
+  }
+  browserWindow.hide()
+}
+
+const requestCloseAction = () => {
+  if (!browserWindow || browserWindow.isDestroyed()) return
+  if (!isCloseRendererReady || browserWindow.webContents.isDestroyed() || browserWindow.webContents.isCrashed()) {
+    global.lx.isSkipTrayQuit = true
+    browserWindow.close()
+    return
+  }
+  if (isClosePromptPending) return
+  isClosePromptPending = true
+  try {
+    mainSend(browserWindow, WIN_MAIN_RENDERER_EVENT_NAME.close_request)
+  } catch {
+    isClosePromptPending = false
+    global.lx.isSkipTrayQuit = true
+    browserWindow.close()
+  }
+}
 
 const winEvent = () => {
   if (!browserWindow) return
 
   browserWindow.on('close', event => {
-    if (global.lx.isSkipTrayQuit || !global.lx.appSetting['tray.enable']) {
+    if (global.lx.isSkipTrayQuit) {
       browserWindow!.setProgressBar(-1)
-      // global.lx.mainWindowClosed = true
       global.lx.event_app.main_window_close()
       return
     }
 
+    // 关闭策略是 Windows 端行为；其他桌面平台保持 Electron 默认关闭语义。
+    if (!isWin) return
+
+    const closeAction = global.lx.appSetting['common.closeAction']
+    if (closeAction == 'quit') {
+      global.lx.isSkipTrayQuit = true
+      browserWindow!.setProgressBar(-1)
+      global.lx.event_app.main_window_close()
+      return
+    }
+    if (closeAction == 'tray') {
+      event.preventDefault()
+      if (!global.lx.appSetting['tray.enable']) global.lx.event_app.update_config({ 'tray.enable': true })
+      browserWindow!.hide()
+      return
+    }
+
     event.preventDefault()
-    browserWindow!.hide()
+    requestCloseAction()
   })
 
   browserWindow.on('closed', () => {
-    // global.lx.mainWindowClosed = true
     browserWindow = null
+    isCloseRendererReady = false
+    isClosePromptPending = false
   })
 
   // browserWindow.on('restore', () => {
@@ -47,6 +105,14 @@ const winEvent = () => {
       setThumbarButtons()
     }
     global.lx.event_app.main_window_ready_to_show()
+  })
+
+  global.lx.event_app.once('main_window_inited', () => {
+    isCloseRendererReady = true
+  })
+  browserWindow.webContents.on('render-process-gone', () => {
+    isCloseRendererReady = false
+    isClosePromptPending = false
   })
 
   browserWindow.on('show', () => {
@@ -127,6 +193,14 @@ export const isShowWindow = (): boolean => {
 export const closeWindow = () => {
   if (!browserWindow) return
   browserWindow.close()
+}
+
+export const resolveCloseAction = (action: CloseAction) => {
+  handleCloseAction(action)
+}
+
+export const setCloseRendererReady = () => {
+  isCloseRendererReady = true
 }
 
 const setSesProxy = (ses: Electron.Session, host?: string, port?: string | number) => {

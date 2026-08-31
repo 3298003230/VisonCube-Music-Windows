@@ -18,6 +18,8 @@ import {
   // setThumbnailClip,
   toggleMinimize,
   toggleHide,
+  resolveCloseAction,
+  setCloseRendererReady,
   showSelectDialog,
   showDialog,
   showSaveDialog,
@@ -37,6 +39,12 @@ export default () => {
   // })
   mainOn(WIN_MAIN_RENDERER_EVENT_NAME.quit, () => {
     quitApp()
+  })
+  mainOn<'tray' | 'quit' | 'cancel'>(WIN_MAIN_RENDERER_EVENT_NAME.close_action, ({ params: action }) => {
+    if (action == 'tray' || action == 'quit' || action == 'cancel') resolveCloseAction(action)
+  })
+  mainOn(WIN_MAIN_RENDERER_EVENT_NAME.close_ready, () => {
+    setCloseRendererReady()
   })
   mainOn(WIN_MAIN_RENDERER_EVENT_NAME.min_toggle, () => {
     toggleMinimize()

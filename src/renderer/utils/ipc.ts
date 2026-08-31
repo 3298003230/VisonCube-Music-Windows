@@ -748,6 +748,27 @@ export const onFocus = (listener: LX.IpcRendererEventListener): RemoveListener =
 }
 
 /**
+ * 主进程请求渲染层确认关闭行为。
+ */
+export const onCloseRequest = (listener: LX.IpcRendererEventListener): RemoveListener => {
+  rendererOn(WIN_MAIN_RENDERER_EVENT_NAME.close_request, listener)
+  return () => {
+    rendererOff(WIN_MAIN_RENDERER_EVENT_NAME.close_request, listener)
+  }
+}
+
+export const sendCloseReady = () => {
+  rendererSend(WIN_MAIN_RENDERER_EVENT_NAME.close_ready)
+}
+
+/**
+ * 将关闭确认结果发送回主进程。
+ */
+export const sendCloseAction = (action: 'tray' | 'quit' | 'cancel') => {
+  rendererSend(WIN_MAIN_RENDERER_EVENT_NAME.close_action, action)
+}
+
+/**
  * 快捷键触发事件
  * @param listener
  * @returns

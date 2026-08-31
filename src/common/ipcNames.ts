@@ -58,6 +58,9 @@ const modules = {
     open_dir_in_explorer: 'open_dir_in_explorer',
     open_dev_tools: 'open_dev_tools',
     set_power_save_blocker: 'set_power_save_blocker',
+    close_ready: 'close_ready',
+    close_request: 'close_request',
+    close_action: 'close_action',
 
     player_status: 'player_status',
     change_tray: 'change_tray',

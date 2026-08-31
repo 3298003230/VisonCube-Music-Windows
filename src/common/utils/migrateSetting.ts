@@ -20,6 +20,13 @@ const oldThemeMap = {
 export default (setting: any): Partial<LX.AppSetting> => {
   setting = { ...setting }
 
+  // 关闭策略在 2.13.3 中新增。旧版本启用托盘时沿用原有关闭行为，
+  // 其他旧配置改为首次询问，避免继续无提示地退出应用。
+  if (!['ask', 'tray', 'quit'].includes(setting['common.closeAction'])) {
+    const trayEnabled = setting['tray.enable'] ?? setting.tray?.enable ?? setting.tray?.isShow
+    setting['common.closeAction'] = trayEnabled ? 'tray' : 'ask'
+  }
+
   // 迁移 v2.0.0 之前的配置
   if (compareVer(setting.version, '2.0.0') < 0) {
     // 迁移列表滚动位置设置 ~0.18.3
@@ -116,7 +123,8 @@ export default (setting: any): Partial<LX.AppSetting> => {
     setting['network.proxy.host'] = setting.network?.proxy?.host
     setting['network.proxy.port'] = setting.network?.proxy?.port
 
-    setting['tray.enable'] = setting.tray?.enable
+    // 兼容早期已经扁平化的配置；没有嵌套值时保留原有 tray.enable。
+    setting['tray.enable'] = setting.tray?.enable ?? setting['tray.enable']
     setting['tray.themeId'] = setting.tray?.themeId
 
 

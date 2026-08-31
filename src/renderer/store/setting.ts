@@ -22,7 +22,7 @@ export const mergeSetting = (newSetting: Partial<LX.AppSetting>) => {
 
 export const updateSetting = window.lxData.updateSetting = (setting: Partial<LX.AppSetting>) => {
   // console.warn(setting)
-  void saveSetting(setting)
+  return saveSetting(setting)
 }
 
 /**
