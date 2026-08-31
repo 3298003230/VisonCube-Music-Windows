@@ -26,6 +26,10 @@
 - 渲染进程：`npm.cmd run build:renderer`。
 - 来源歌单模型测试：`npm.cmd run test:music-sync`。
 
+## 设备验收与候选产物
+
+- Windows Beta run `33373780718`（Artifact 保留至 2026-11-29）和 Android Debug run `33375405837` / Artifact `9751779113`（保留至 2026-09-07）用于真实设备验收；正式 Release workflow 仍仅手动触发。
+
 ## 云端构建
 
 - Windows GitHub Actions `CI` run `33370107565` 已通过 npm ci、来源歌单测试、全量 ESLint 和完整 `npm run build`；后续提交使用仅检查改动源码文件的定向 lint，run `33370642949` 已再次全绿。

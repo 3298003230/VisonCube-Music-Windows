@@ -53,3 +53,11 @@
 
 - 在真实 Windows 与 Android 设备验证首次合并、删除、本地歌曲保留、重试和并发冲突选择。
 - 在真实旧版本客户端上完成发现、下载、重启安装，并确认升级到 `2.13.2` 后不再重复提示更新。
+
+## 2026-08-31 下一步验收与发布准备
+
+- Windows `main` 提交 `5fefbf8f` 的 CI run `33375209886` 成功：来源歌单测试、改动文件定向 ESLint、完整源码构建均通过。
+- Android `main` 提交 `9d1837af` 的 CI run `33375405837` 成功：来源歌单测试、Lint、JS bundle、Gradle Debug APK 均通过；Artifact `9751779113`（`visoncube-music-android-debug-9d1837af012cca328f10fbe2824854f0b6f8b342`）有效至 2026-09-07。
+- Windows Beta 候选 run `33373780718` 的 x64/arm64 安装包和绿色包等 Artifact 仍有效至 2026-11-29；CI 本身不上传生产对象。
+- GitHub Actions API 只读检查显示 Windows、Android 仓库当前均无 repository secrets；Android Release 所需 5 个签名 Secret、Windows `BT_TOKEN`/COS 凭据均未配置，正式发布条件未满足。
+- 本轮没有真实 Windows 桌面或 Android 实体设备可供操作，设备验收项目保持“待执行”；未创建正式 Release、未切换线上更新清单、未写入 COS/服务器。
