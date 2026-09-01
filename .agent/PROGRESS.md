@@ -13,8 +13,9 @@
 - 双端 Release workflow 已收敛为候选优先：Windows 只构建 x64 并验证未签名状态；Android 构建五个签名 APK并校验包名、版本码映射和证书指纹。
 - Android 签名文档已明确公开仓库边界、规范 LF 文件哈希和以证书指纹作为跨平台身份依据。
 - 本地验证已通过：双端来源歌单模型测试各 4/4、18 个本轮 Vue 脚本块与 Windows `local.ts` 语法检查、JSON/版本一致性、双端元数据重复运行、Windows 错误版本拒绝，以及双端临时 Git 工作区差异检查。
+- Windows 候选 Build #4 在元数据校验阶段暴露 CRLF 兼容问题；发布元数据解析现统一换行，CRLF 模拟验证通过。
 
 ## 待完成
 
 - 本机没有项目 `node_modules`，完整 ESLint 和构建仍需在提交、推送后由双端候选 Actions 验证。
-- 候选 Artifact、真实 Windows/Android 设备验收、正式 GitHub Release、Music COS 和服务器清单更新均未执行。
+- 候选 Artifact、真实 Windows/Android 设备验收、正式 GitHub Release、Music COS 和服务器清单更新均未执行；Build #4 失败后将用修复提交重跑候选。

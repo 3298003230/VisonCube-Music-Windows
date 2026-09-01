@@ -6,6 +6,7 @@ const versionPath = path.join(__dirname, '../version.json')
 const changeLogPath = path.join(__dirname, '../changeLog.md')
 
 const parseVersionSections = (text) => {
+  text = text.replace(/\r\n?/g, '\n')
   const matches = [...text.matchAll(/^##\s+(\d+\.\d+\.\d+)\s*$/gm)]
   return matches.map((match, index) => {
     const start = match.index
