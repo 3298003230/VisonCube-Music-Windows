@@ -71,6 +71,13 @@
 - Windows Release workflow 增加 PFX Secret 映射、候选/正式 Authenticode 验证，并将候选 Artifact 扩展为安装包、`.blockmap` 和 `latest.yml`。
 - 本机尚未恢复 JKS：恢复脚本需要维护者在终端私下输入口令；候选构建、设备验收、GitHub 正式发布和服务器切换均待签名与权限门禁通过。
 
+## 2026-09-01 2.13.5 上游增量
+
+- 复核原作者桌面端 `dev` 分支至 2026-08-25、移动端至 2026-08-04；现有自定义实现已包含版本关键词、IEC 容量、歌词毫秒、QQ/MG 修复和错误 URL 缓存清理。
+- 仅在 Windows 补入原作者提交 `75ba99d` 的歌词标签严格解析细节（毫秒固定三位、逐字时间整数化及网易云两位毫秒兼容）；未改动账号、云歌单、托管音源和关闭策略。
+- 双端版本提升为 `2.13.5`，Android `versionCode=86`，更新双端 CHANGELOG 与发布变更记录。
+- 静态验证：5 个 Windows 歌词 JavaScript 文件 `node --check` 通过，双端 package/package-lock JSON 解析通过；尚未运行完整 CI、安装包构建或设备验收。
+
 ## 2026-08-31 首次启动页面切换修复
 
 - 修复 `src/renderer/core/useApp/index.ts` 中异步恢复上次页面覆盖用户首屏点击的问题：等待路由 ready，限制恢复范围为默认首屏，并在读取状态前后做路由一致性检查。
@@ -92,3 +99,11 @@
 - Android 正式 Release `v2.13.4` 已创建并上传 5 个 ABI APK；均通过 `apksigner verify`，证书指纹为 `9C951C4BBA399D21751F4B194E839DA3A49EFD60534CF9B3B9D35859A6D6BC95`。
 - GitHub Release：Windows `https://github.com/3298003230/VisonCube-Music-Windows/releases/tag/v2.13.4`；Android `https://github.com/3298003230/VisonCube-Music-Android/releases/tag/v2.13.4`。
 - 本轮未上传 COS、未修改服务器 `releases.json`；Windows 自动更新仍需服务器端同步后才会向旧客户端推送。
+
+## 2026-09-01 警告与架构基线审查
+
+- 本机无 npm/node_modules，双端完整 ESLint、TypeScript 检查和构建未运行；不能将未执行项目伪装为通过。
+- 检查生产入口引用后，Windows/Android 的 `api-test.js`、`musicSdk/*/temp/*-new.js`、`leaderboard-old.js` 与 `.bak` 文件均未被生产源码导入，暂保留以避免误删原作者调试资产。
+- 清理 Windows `api-source.js` 中已失效的注释导入，保留空内置 API 映射（运行时 API 仍由 `user_api` 提供）；已通过 Node 语法检查。
+- 后续重构按模块小批次进行，先以 CI lint/build 输出为门禁，再处理可确认的重复实现。
+- 第一批 lint 清理已完成：为双端同步、网络解析、音源回退、歌词滚动和数据库备份中的空 `catch` 添加意图注释，保留原有静默回退行为；源码语法检查通过，未改变业务流程。

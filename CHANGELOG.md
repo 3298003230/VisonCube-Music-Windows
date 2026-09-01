@@ -6,6 +6,16 @@ Project versioning adheres to [Semantic Versioning](http://semver.org/).
 Commit convention is based on [Conventional Commits](http://conventionalcommits.org).
 Change log format is based on [Keep a Changelog](http://keepachangelog.com/).
 
+## [2.13.5](https://github.com/3298003230/VisonCube-Music-Windows/compare/v2.13.4...v2.13.5) - 2026-09-01
+
+### 修复
+
+- 同步原作者歌词标签解析修复：统一毫秒补零并将逐字时间截断为整数，兼容标准 LRC/MRC 格式。
+
+### 其他
+
+- 保留 VisonCube Music 现有自定义功能，仅合并上游稳定修复。
+
 ## [2.13.4](https://github.com/3298003230/VisonCube-Music-Windows/compare/v2.13.3...v2.13.4) - 2026-08-31
 
 ### 优化

@@ -1,7 +1,7 @@
 {
   "name": "visoncube-music-desktop",
-  "version": "2.13.4",
-  "displayVersion": "2.13.4",
+  "version": "2.13.5",
+  "displayVersion": "2.13.5",
   "description": "一个免费的音乐查找助手",
   "main": "./dist/main.js",
   "scripts": {

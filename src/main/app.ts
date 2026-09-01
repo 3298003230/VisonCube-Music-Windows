@@ -293,13 +293,19 @@ const backupDB = (backupPath: string) => {
   const dbPath = path.join(global.lxDataPath, 'lx.data.db')
   try {
     renameSync(dbPath, backupPath)
-  } catch {}
+  } catch {
+    // The database sidecar may not exist; continue backing up other files.
+  }
   try {
     renameSync(`${dbPath}-wal`, `${backupPath}-wal`)
-  } catch {}
+  } catch {
+    // The database sidecar may not exist; continue backing up other files.
+  }
   try {
     renameSync(`${dbPath}-shm`, `${backupPath}-shm`)
-  } catch {}
+  } catch {
+    // The database sidecar may not exist; continue backing up other files.
+  }
   openDirInExplorer(backupPath)
 }
 
