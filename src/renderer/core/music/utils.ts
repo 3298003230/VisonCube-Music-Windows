@@ -18,11 +18,11 @@ const getOtherSourcePromises = new Map()
 const otherSourceCache = new Map<LX.Music.MusicInfo | LX.Download.ListItem, LX.Music.MusicInfoOnline[]>()
 export const existTimeExp = /\[\d{1,2}:.*\d{1,4}\]/
 
-type MusicSdkLyricRequest = {
+interface MusicSdkLyricRequest {
   promise: Promise<LX.Music.LyricInfo>
 }
 
-const getMusicSdkLyricPromise = (musicInfo: LX.Music.MusicInfoOnline): Promise<LX.Music.LyricInfo> => {
+const getMusicSdkLyricPromise = async (musicInfo: LX.Music.MusicInfoOnline): Promise<LX.Music.LyricInfo> => {
   try {
     return (musicSdk[musicInfo.source].getLyric(toOldMusicInfo(musicInfo)) as unknown as MusicSdkLyricRequest).promise
   } catch (err) {
