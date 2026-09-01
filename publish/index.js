@@ -5,7 +5,7 @@ const run = async() => {
   console.log(result.changed ? 'Release metadata updated.' : 'Release metadata is already up to date.')
 }
 
-void run().catch((error) => {
+run().catch((error) => {
   console.error(error)
   process.exitCode = 1
 })

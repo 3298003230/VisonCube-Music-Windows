@@ -1,6 +1,7 @@
 # 当前风险
 
 - Windows CI #20 的 43 个 lint 问题已按完整日志修复；首个 2.13.5 候选因 CRLF 元数据解析失败，修复提交尚未通过新一轮 Actions 复验。
+- Android 首个修复后候选因 3 个 lint 错误停止在 lint 阶段，已完成最小修复，需由下一轮 Actions 复验。
 - 双端源码目录没有 `node_modules`，本机只能运行不依赖项目包的语法、JSON、模型和元数据检查；完整 ESLint、Webpack、React Native 与 Gradle 验证依赖 Actions。
 - Android 本机签名恢复目录当前不存在；Actions Secret 的有效性只能由候选构建、`apksigner` 指纹和 APK 元数据校验确认。
 - Windows 安装包按维护者决定保持未签名，干净系统可能显示“未知发布者”。
