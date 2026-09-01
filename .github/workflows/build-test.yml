@@ -36,15 +36,7 @@ jobs:
         run: npm run test:music-sync
 
       - name: Lint source code
-        # Lint only files changed by this commit so legacy code does not make
-        # every build rescan the whole tree. Other ESLint rules remain strict.
-        run: |
-          $files = @(git diff --name-only HEAD^ HEAD | Where-Object { $_ -match '^src/.*\.(ts|js|vue)$' })
-          if ($files.Count -eq 0) {
-            Write-Host 'No source files changed in this commit; skipping targeted lint.'
-            exit 0
-          }
-          npx eslint --ext .ts,.js,.vue -f node_modules/eslint-formatter-friendly --rule "@typescript-eslint/no-floating-promises: off" $files
+        run: npm run lint
 
       - name: Build all source bundles
         run: npm run build
