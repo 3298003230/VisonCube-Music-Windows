@@ -19,8 +19,10 @@ import {
 const getOtherSourceByLocal = async<T>(musicInfo: LX.Music.MusicInfoLocal, handler: (infos: LX.Music.MusicInfoOnline[]) => Promise<T>) => {
   let result: LX.Music.MusicInfoOnline[] = []
   result = await getOtherSource(musicInfo)
-  if (result.length) try { return await handler(result) } catch {
-    // Try the next matching source.
+  if (result.length) {
+    try { return await handler(result) } catch {
+      // Try the next matching source.
+    }
   }
   if (musicInfo.name.includes('-')) {
     const [name, singer] = musicInfo.name.split('-').map(val => val.trim())
@@ -29,16 +31,20 @@ const getOtherSourceByLocal = async<T>(musicInfo: LX.Music.MusicInfoLocal, handl
       name,
       singer,
     }, true)
-    if (result.length) try { return await handler(result) } catch {
-      // Try the next matching source.
+    if (result.length) {
+      try { return await handler(result) } catch {
+        // Try the next matching source.
+      }
     }
     result = await getOtherSource({
       ...musicInfo,
       name: singer,
       singer: name,
     }, true)
-    if (result.length) try { return await handler(result) } catch {
-      // Try the next matching source.
+    if (result.length) {
+      try { return await handler(result) } catch {
+        // Try the next matching source.
+      }
     }
   }
   let fileName = musicInfo.meta.filePath.split(/\/|\\/).at(-1)
@@ -52,8 +58,10 @@ const getOtherSourceByLocal = async<T>(musicInfo: LX.Music.MusicInfoLocal, handl
           name,
           singer,
         }, true)
-        if (result.length) try { return await handler(result) } catch {
-          // Try the next matching source.
+        if (result.length) {
+          try { return await handler(result) } catch {
+            // Try the next matching source.
+          }
         }
         result = await getOtherSource({
           ...musicInfo,
@@ -67,8 +75,10 @@ const getOtherSourceByLocal = async<T>(musicInfo: LX.Music.MusicInfoLocal, handl
           singer: '',
         }, true)
       }
-      if (result.length) try { return await handler(result) } catch {
-        // Try the next matching source.
+      if (result.length) {
+        try { return await handler(result) } catch {
+          // Try the next matching source.
+        }
       }
     }
   }

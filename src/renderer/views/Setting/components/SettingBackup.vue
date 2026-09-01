@@ -120,10 +120,10 @@ export default {
     const importOldSettingData = (setting) => {
       console.log(setting)
       setting = migrateSetting(setting)
-      updateSetting(setting)
+      void updateSetting(setting)
     }
     const importNewSettingData = (setting) => {
-      updateSetting(setting)
+      void updateSetting(setting)
     }
 
 

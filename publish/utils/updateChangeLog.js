@@ -1,60 +1,64 @@
 const fs = require('fs')
-const { jp, formatTime } = require('./index')
-const pkgDir = '../../package.json'
-const pkg = require(pkgDir)
-const version = require('../version.json')
-const chalk = require('chalk')
-const pkg_bak = JSON.stringify(pkg, null, 2)
-const version_bak = JSON.stringify(version, null, 2)
-const changelogPath = jp('../../CHANGELOG.md')
-const { parseChangelog } = require('./parseChangelog')
+const path = require('path')
 
-// const md_renderer = markdownStr => new (require('markdown-it'))({
-//   html: true,
-//   linkify: true,
-//   typographer: true,
-//   breaks: true,
-// }).render(markdownStr)
+const packagePath = path.join(__dirname, '../../package.json')
+const versionPath = path.join(__dirname, '../version.json')
+const changeLogPath = path.join(__dirname, '../changeLog.md')
 
-const getPrevVer = () => parseChangelog(fs.readFileSync(changelogPath, 'utf-8').toString()).then(versions => {
-  if (!versions.length) throw new Error('CHANGELOG 无法解析到版本号')
-  return versions[0].version
-})
-
-const updateChangeLog = async(newVerNum, newChangeLog) => {
-  let changeLog = fs.readFileSync(changelogPath, 'utf-8')
-  const prevVer = await getPrevVer()
-  const log = `## [${newVerNum}](${pkg.repository.url.replace(/^git\+(http.+)\.git$/, '$1')}/compare/v${prevVer}...v${newVerNum}) - ${formatTime()}\n\n${newChangeLog}`
-  fs.writeFileSync(changelogPath, changeLog.replace(/(## \[(?:\d+\.))/, log + '\n$1'), 'utf-8')
-}
-
-// const renderChangeLog = md => md_renderer(md)
-
-
-module.exports = async newVerNum => {
-  if (!newVerNum) newVerNum = pkg.version
-  const newMDChangeLog = fs.readFileSync(jp('../changeLog.md'), 'utf-8')
-  // const newChangeLog = renderChangeLog(newMDChangeLog)
-  version.history.unshift({
-    version: version.version,
-    desc: version.desc,
+const parseVersionSections = (text) => {
+  const matches = [...text.matchAll(/^##\s+(\d+\.\d+\.\d+)\s*$/gm)]
+  return matches.map((match, index) => {
+    const start = match.index
+    const end = matches[index + 1]?.index ?? text.length
+    return {
+      version: match[1],
+      markdown: text.slice(start, end).trim(),
+      desc: text.slice(start + match[0].length, end)
+        .replace(/(?:^|\n)#{1,6}\s+(.+)(?=\n|$)/g, '$1')
+        .trim(),
+    }
   })
-  version.version = newVerNum
-  version.desc = newMDChangeLog.replace(/(?:^|(\n))#{1,6} (.+)\n/g, '$1$2').trim()
-  pkg.version = newVerNum
-
-  console.log(chalk.blue('new version: ') + chalk.green(newVerNum))
-
-  fs.writeFileSync(jp('../version.json'), JSON.stringify(version) + '\n', 'utf-8')
-
-  fs.writeFileSync(jp(pkgDir), JSON.stringify(pkg, null, 2) + '\n', 'utf-8')
-
-  await updateChangeLog(newVerNum, newMDChangeLog)
-
-  return {
-    pkg_bak,
-    version_bak,
-    // changeLog: newChangeLog,
-  }
 }
 
+const uniqueHistory = (items, currentVersion) => {
+  const versions = new Set([currentVersion])
+  return items.filter((item) => {
+    if (!item?.version || versions.has(item.version)) return false
+    versions.add(item.version)
+    return true
+  })
+}
+
+const syncVersionFile = async(expectedVersion) => {
+  const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'))
+  if (expectedVersion && expectedVersion !== pkg.version) {
+    throw new Error(`Requested version ${expectedVersion} does not match package.json ${pkg.version}.`)
+  }
+
+  const versionInfo = JSON.parse(fs.readFileSync(versionPath, 'utf8'))
+  const sections = parseVersionSections(fs.readFileSync(changeLogPath, 'utf8'))
+  const current = sections.find(section => section.version === pkg.version)
+  if (!current) throw new Error(`publish/changeLog.md does not contain version ${pkg.version}.`)
+
+  const sectionHistory = sections
+    .filter(section => section.version !== pkg.version)
+    .map(({ version, desc }) => ({ version, desc }))
+  const existingHistory = [
+    { version: versionInfo.version, desc: versionInfo.desc },
+    ...(Array.isArray(versionInfo.history) ? versionInfo.history : []),
+  ]
+  const nextVersionInfo = {
+    ...versionInfo,
+    version: pkg.version,
+    desc: current.desc,
+    history: uniqueHistory([...sectionHistory, ...existingHistory], pkg.version),
+  }
+  const nextContent = JSON.stringify(nextVersionInfo) + '\n'
+  const changed = fs.readFileSync(versionPath, 'utf8') !== nextContent
+  if (changed) fs.writeFileSync(versionPath, nextContent, 'utf8')
+
+  return { changed, version: pkg.version }
+}
+
+module.exports = syncVersionFile
+module.exports.parseVersionSections = parseVersionSections

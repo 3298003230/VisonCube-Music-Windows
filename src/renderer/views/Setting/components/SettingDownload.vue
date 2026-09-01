@@ -90,7 +90,7 @@ export default {
         properties: ['openDirectory'],
       }).then(result => {
         if (result.canceled) return
-        updateSetting({ 'download.savePath': result.filePaths[0] })
+        void updateSetting({ 'download.savePath': result.filePaths[0] })
       })
     }
 
@@ -99,7 +99,7 @@ export default {
       if (id > 3) {
         if (!await dialog.confirm(window.i18n.t('setting__download_max_num_tip'))) return
       }
-      updateSetting({ 'download.maxDownloadNum': id })
+      await updateSetting({ 'download.maxDownloadNum': id })
     }
 
     const musicNames = computed(() => {

@@ -63,7 +63,7 @@ export default {
     const handleConfirm = () => {
       let time = verify()
       if (time == '') return
-      if (appSetting['player.waitPlayEndStopTime'] != time) updateSetting({ 'player.waitPlayEndStopTime': time })
+      if (appSetting['player.waitPlayEndStopTime'] != time) void updateSetting({ 'player.waitPlayEndStopTime': time })
       startTimeoutStop(time * 60)
       handleCloseModal()
     }

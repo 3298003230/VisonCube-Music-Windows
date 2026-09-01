@@ -475,7 +475,7 @@ export default {
           isRequireUpdateSetting = true
         }
       }
-      if (isRequireUpdateSetting) updateSetting(newSetting)
+      if (isRequireUpdateSetting) await updateSetting(newSetting)
       if (originBgName) void removeFile(joinPath(themeInfo.dataPath, originBgName))
       await removeTheme(props.themeId)
       const index = themeInfo.userThemes.findIndex(t => t.id == theme.id)

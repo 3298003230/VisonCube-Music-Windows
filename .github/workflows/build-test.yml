@@ -32,6 +32,11 @@ jobs:
       - name: Setup build environment
         uses: ./.github/actions/setup
 
+      - name: Verify release metadata
+        run: |
+          npm run publish
+          git diff --exit-code -- package.json package-lock.json CHANGELOG.md publish/version.json
+
       - name: Test music sync model
         run: npm run test:music-sync
 

@@ -18,6 +18,18 @@ const getOtherSourcePromises = new Map()
 const otherSourceCache = new Map<LX.Music.MusicInfo | LX.Download.ListItem, LX.Music.MusicInfoOnline[]>()
 export const existTimeExp = /\[\d{1,2}:.*\d{1,4}\]/
 
+type MusicSdkLyricRequest = {
+  promise: Promise<LX.Music.LyricInfo>
+}
+
+const getMusicSdkLyricPromise = (musicInfo: LX.Music.MusicInfoOnline): Promise<LX.Music.LyricInfo> => {
+  try {
+    return (musicSdk[musicInfo.source].getLyric(toOldMusicInfo(musicInfo)) as unknown as MusicSdkLyricRequest).promise
+  } catch (err) {
+    return Promise.reject(err)
+  }
+}
+
 export const getOtherSource = async(musicInfo: LX.Music.MusicInfo | LX.Download.ListItem, isRefresh = false): Promise<LX.Music.MusicInfoOnline[]> => {
   // if (!isRefresh && musicInfo.id) {
   //   const cachedInfo = await getOtherSourceFromStore(musicInfo.id)
@@ -447,13 +459,7 @@ export const getOnlineOtherSourceLyricInfo = async({ musicInfos, onToggleSource,
     if (lyricInfo) return { musicInfo, lyricInfo, isFromCache: true }
   }
 
-  let reqPromise
-  try {
-    // TODO: remove any type
-    reqPromise = (musicSdk[musicInfo.source].getLyric(toOldMusicInfo(musicInfo)) as any).promise
-  } catch (err: any) {
-    reqPromise = Promise.reject(err)
-  }
+  const reqPromise = getMusicSdkLyricPromise(musicInfo)
   // retryedSource.includes(musicInfo.source)
   // eslint-disable-next-line @typescript-eslint/promise-function-async
   return reqPromise.then((lyricInfo: LX.Music.LyricInfo) => {
@@ -483,13 +489,7 @@ export const handleGetOnlineLyricInfo = async({ musicInfo, onToggleSource, isRef
   isFromCache: boolean
 }> => {
   // console.log(musicInfo.source)
-  let reqPromise
-  try {
-    // TODO: remove any type
-    reqPromise = (musicSdk[musicInfo.source].getLyric(toOldMusicInfo(musicInfo)) as any).promise
-  } catch (err) {
-    reqPromise = Promise.reject(err)
-  }
+  const reqPromise = getMusicSdkLyricPromise(musicInfo)
   // eslint-disable-next-line @typescript-eslint/promise-function-async
   return reqPromise.then((lyricInfo: LX.Music.LyricInfo) => {
     return existTimeExp.test(lyricInfo.lyric) ? {

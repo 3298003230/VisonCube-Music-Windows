@@ -1,27 +1,9 @@
 # 当前风险
 
-- `D:\Code\VisonCube\依赖` 已不再需要，9 个定制 npm 包改由固定 GitHub Release 获取；GitHub Actions 已验证 npm ci、ESLint、Windows bundle、Android JS bundle 和 Debug APK。两个项目本机仍无 `node_modules`，未执行本地构建；首次安装依赖 GitHub 与 Gradle 官方分发网络，离线环境需预热标准 npm/Gradle 缓存。
-- 关闭弹窗和托盘行为尚未在真实 Windows 桌面环境手工验收；应验证取消、记忆选择、托盘恢复/退出和无残留进程。
-
-- 来源歌单同步和 Windows `2.13.2` 已部署并通过构建、清单、完整下载哈希与 Range 验证，但 Android/Windows 同账号首次合并、删除、本地歌曲保留、重试和冲突选择仍需完整运行验收。
-- 从旧版本自动更新到 `2.13.2`、重启安装以及安装后不再重复提示更新，仍需在干净 Windows 测试环境完成。
-- Windows `2.13.2` 安装包未配置 Authenticode 数字签名，干净系统可能显示未知发布者提示。
-- GitHub Actions 当前未配置 Android Release 所需的 5 个签名 Secret；Release workflow 现会在构建前明确失败，正式发布前必须由维护者在仓库设置中补齐，值不会写入源码。
-- Windows Beta 候选包只存在于 GitHub Artifact，尚未安装到真实用户环境验收；候选包不等同于生产更新包。
-- 候选 Release `33388893148` 已在隔离 Windows 桌面完成多页面切换冒烟，但全新空配置进入登录页，且未能稳定复现带历史页面恢复的最早点击竞态；仍需用户环境复验。
-- 候选安装包和主程序 Authenticode 均为 `NotSigned`；正式发布前必须配置代码签名证书并提升版本号，不能直接把该 `2.13.3` 候选当作新版本。
-- 服务器公网接口和 COS 对象已只读核对，但本地没有服务器 SSH 凭据，无法直接审查远端部署脚本；本轮未执行任何生产上传或清单修改。
-- GitHub 双端 `main` 已同步最新普通提交（Windows `5fefbf8f`，Android `9d1837af`）；本地解压目录不是 Git 工作树，后续修改需先读取远端 `main` 头并使用非强制更新。
-- 2026-08-31 CI 复验已通过（Windows run `33375209886`、Android run `33375405837`）；但当前 GitHub API 显示两个仓库均无 repository secrets，Android 签名、Windows `BT_TOKEN` 和 COS 凭据仍需维护者配置后才能准备正式发布。
-- 服务器端备份 `releases.json`、原子替换和上传后 HTTP/Range/SHA-256 验证要求已保留为发布规程；因缺少 SSH/服务器代码，本轮只能核验公网结果，尚不能从远端脚本确认其自动化实现。
-- Windows 默认候选 Release run `33377401806` 已确认不会新建标签或 Release；仍需将 Artifact 安装到真实桌面完成关闭/托盘验收，Android 仍需实体设备安装 Debug APK。
-
-- `2.13.4` 候选构建要求 Android 五个签名 Secret 和 Windows Authenticode PFX Secret；任一缺失或验签失败都必须停止正式发布。
-- 当前本机未恢复 Android JKS，恢复口令只能在 `Restore-SigningBackup.ps1` 的交互终端输入；Windows 本地也未发现 PFX 文件。
-- GitHub 仓库为公开仓库，加密 `.vcb` 可被下载，恢复口令不能写入聊天或仓库；若口令泄露必须重新生成备份并轮换。
-
-- Android 候选 run `33406193588` 的 5 个 APK Artifact 和签名校验已通过；首轮上传路径问题已修复。Android 仍需实体设备安装验收，Artifact 不等同于正式 Release。
-- Windows 仓库 Actions Secrets 仍为 0，缺少独立 Authenticode PFX、PFX 密码、`BT_TOKEN` 与 COS 凭据；不得触发 Windows 候选或 `publish_release=true`，也不得把 Android JKS 当作 Windows 证书。
-
-- 维护者已明确接受 Windows 未签名发布；GitHub Windows `v2.13.4` 安装包为 `NotSigned`，系统可能显示未知发布者，后续应申请 Authenticode PFX 并重新发布修订版本。
-- GitHub 双端 `v2.13.4` Release 已公开创建，但 COS/服务器清单未更新；自动更新和服务器下载地址不会因 GitHub Release 创建而改变。
+- Windows CI #20 的 43 个 lint 问题已按完整日志修复，但尚未通过新一轮 Actions 复验。
+- 双端源码目录没有 `node_modules`，本机只能运行不依赖项目包的语法、JSON、模型和元数据检查；完整 ESLint、Webpack、React Native 与 Gradle 验证依赖 Actions。
+- Android 本机签名恢复目录当前不存在；Actions Secret 的有效性只能由候选构建、`apksigner` 指纹和 APK 元数据校验确认。
+- Windows 安装包按维护者决定保持未签名，干净系统可能显示“未知发布者”。
+- Windows 关闭/托盘、旧版自动更新、Android 覆盖安装与跨端来源歌单同步尚未完成真实设备验收。
+- Music COS、服务器部署凭据和电视安装包对象的精确删除范围尚未核对；任何生产写入或删除仍需单独确认。
+- 加密签名备份位于公开仓库，安全性依赖恢复口令；恢复口令、JKS 和 Secret 不得写入源码、日志或 Artifact。

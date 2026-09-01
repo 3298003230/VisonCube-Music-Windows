@@ -232,7 +232,7 @@ export default {
       if (themeId.value == theme.id) return
       themeId.value = theme.id
       applyTheme(theme.id, appSetting['theme.lightId'], appSetting['theme.darkId'], dataPath)
-      updateSetting({ 'theme.id': theme.id })
+      void updateSetting({ 'theme.id': theme.id })
     }
 
     watch(() => [appSetting['theme.lightId'], appSetting['theme.darkId']], () => {
@@ -312,7 +312,7 @@ export default {
       if (!action || action == appSetting['common.closeAction']) return
       const setting = { 'common.closeAction': action }
       if (action == 'tray') setting['tray.enable'] = true
-      updateSetting(setting)
+      void updateSetting(setting)
     }
 
     const systemFontList = ref([])
@@ -332,7 +332,7 @@ export default {
       let font = []
       if (font1) font.push(font1)
       if (font2) font.push(font2)
-      updateSetting({ 'common.font': font.join(', ') })
+      void updateSetting({ 'common.font': font.join(', ') })
     }
     const fontSizeList = computed(() => {
       return [

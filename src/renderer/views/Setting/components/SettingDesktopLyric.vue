@@ -210,13 +210,13 @@ const useLyricColor = () => {
 
   const initColors = () => {
     initLyricUnplayColor(appSetting['desktopLyric.style.lyricUnplayColor'], (color) => {
-      updateSetting({ 'desktopLyric.style.lyricUnplayColor': color })
+      void updateSetting({ 'desktopLyric.style.lyricUnplayColor': color })
     })
     initLyricPlayedColor(appSetting['desktopLyric.style.lyricPlayedColor'], (color) => {
-      updateSetting({ 'desktopLyric.style.lyricPlayedColor': color })
+      void updateSetting({ 'desktopLyric.style.lyricPlayedColor': color })
     })
     initLyricShadowColor(appSetting['desktopLyric.style.lyricShadowColor'], (color) => {
-      updateSetting({ 'desktopLyric.style.lyricShadowColor': color })
+      void updateSetting({ 'desktopLyric.style.lyricShadowColor': color })
     })
   }
 
@@ -232,7 +232,7 @@ const useLyricColor = () => {
       'desktopLyric.style.lyricPlayedColor': 'rgba(7, 197, 86, 1)',
       'desktopLyric.style.lyricShadowColor': 'rgba(0, 0, 0, 0.18)',
     }
-    updateSetting(defaultSetting)
+    void updateSetting(defaultSetting)
     setLyricUnplayColor(defaultSetting['desktopLyric.style.lyricUnplayColor'])
     setLyricPlayedColor(defaultSetting['desktopLyric.style.lyricPlayedColor'])
     setLyricShadowColor(defaultSetting['desktopLyric.style.lyricShadowColor'])
@@ -260,7 +260,7 @@ export default {
 
     const changeLineGap = (step) => {
       let gap = appSetting['desktopLyric.style.lineGap'] + step
-      updateSetting({ 'desktopLyric.style.lineGap': Math.min(Math.max(gap, 0), 25) })
+      void updateSetting({ 'desktopLyric.style.lineGap': Math.min(Math.max(gap, 0), 25) })
     }
 
     const {
@@ -279,7 +279,7 @@ export default {
     })
 
     const resetWindowSetting = () => {
-      updateSetting({
+      void updateSetting({
         'desktopLyric.width': 450,
         'desktopLyric.height': 300,
         'desktopLyric.x': null,

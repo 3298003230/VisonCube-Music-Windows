@@ -1,53 +1,28 @@
-# VisonCube Music Windows
+# VisonCube Music 双端上下文
 
-## 项目概况
+## 项目
 
-- 路径：`D:\Code\VisonCube\Music\Windows`（ZIP 已扁平解压，源码目录直接包含 `package.json`、`src`、`.agent`）。
-- Electron 40.9.2、Vue 3、TypeScript、Webpack，使用 `electron-updater` 6.8.4。
-- 当前源码候选发布版本为 `2.13.4`；Android `versionCode=85`。正式标签和生产产物仍须候选验收后创建。
-- Windows 关闭策略由 `common.closeAction` 控制：`ask` 首次询问、`tray` 隐藏到系统托盘、`quit` 退出程序。
+- Windows 源码：`D:\Code\VisonCube\Music\Windows`，Electron 40.9.2、Vue 3、TypeScript、Webpack。
+- Android 源码：`D:\Code\VisonCube\Music\Android`，React Native 与 React Native Navigation。
+- 两个目录均为扁平源码目录且不包含 `.git`；提交和推送使用临时 Git 工作区。
+- 当前发布版本为 Windows/Android `2.13.5`，Android 基础 `versionCode=86`。
 
-## 更新链路
+## 定制功能
 
-- 主进程 `src/main/modules/winMain/autoUpdate.ts` 从服务器 Music Windows 发布接口读取 `feed_url`，再以 generic provider 读取 `latest.yml`。
-- 渲染进程 `src/renderer/core/useApp/useUpdate.ts` 接收更新事件并维护下载、错误和完成状态；更新弹窗位于 `src/renderer/components/layout/UpdateModal.vue`。
-- Windows 安装包、`.blockmap` 和 `latest.yml` 必须保持在同一个 COS 目录。
-- Android 发布签名从受保护目录 `D:\Compilationenvironment\VisonCube-Music-Signing` 恢复；Windows 使用独立 Authenticode PFX（`CSC_LINK`/`CSC_KEY_PASSWORD`），Android JKS 不可用于 Windows。
+- Windows `common.closeAction` 支持 `ask`、`tray`、`quit`；标题栏关闭、Alt+F4 和关闭快捷键共用关闭策略。
+- 来源歌单通过鉴权接口同步，使用 revision/CAS、删除墓碑和幂等操作编号；应用云端顺序时保留本地歌曲。
+- 原作者稳定修复在双端按适用范围同步，定制账号、云歌单、托管音源和关闭策略不得被上游更新覆盖。
 
-## 云同步
+## 构建与依赖
 
-- `src/renderer/features/musicSync/` 负责播放历史、收藏和来源歌单同步；来源歌单通过鉴权接口 `/api/music/playlists` 使用 revision/CAS、删除墓碑和幂等操作编号。
-- 仅同步具有 `source` 与 `sourceListId` 的来源歌单；普通手建、试听/临时/稍后播放列表和本地歌曲保持本机。应用云端歌单时保留本地歌曲，并在账号页提供重试、保留本机和采用云端操作。
+- 双端定制 npm 包固定使用 `VisonCube-Music-Dependent` 的不可变 Release `deps-2026-07-30-aeadf24`。
+- 本机源码目录不安装 `node_modules`；完整 lint、构建和安装包验证通过 GitHub Actions 执行。
+- Windows CI 运行来源歌单模型测试、零警告 ESLint 和完整源码构建；Android CI 额外生成 JS bundle 与 Debug APK。
 
-## 构建入口
+## 发布
 
-- Windows 5 个、Android 4 个定制 npm 包固定使用 `VisonCube-Music-Dependent` 的 `deps-2026-07-30-aeadf24` Release 直链，不再要求 `D:\Code\VisonCube\依赖`；Android Gradle Wrapper 使用 Gradle 官方 8.8 分发地址和固定 SHA-256。
-- 定向 lint：`.\node_modules\.bin\eslint.cmd <changed files>`。
-- 主进程：`npm.cmd run build:main`。
-- 渲染进程：`npm.cmd run build:renderer`。
-- 来源歌单模型测试：`npm.cmd run test:music-sync`。
-
-## 设备验收与候选产物
-
-- Windows Beta run `33373780718`（多平台 Artifact）以及默认候选 Release run `33377401806` / Artifact `9752534440`（x64 安装包，均保留至 2026-11-29），和 Android Debug run `33375405837` / Artifact `9751779113`（保留至 2026-09-07）用于真实设备验收；正式 Release workflow 仍仅手动触发且需显式选择发布。
-
-## 云端构建
-
-- Windows GitHub Actions `CI` run `33370107565` 已通过 npm ci、来源歌单测试、全量 ESLint 和完整 `npm run build`；后续提交使用仅检查改动源码文件的定向 lint，run `33370642949` 已再次全绿。
-- 路由恢复修复提交 `e43c7ab` 的 Windows CI run `33387721505` 已通过来源歌单测试、Lint 和完整源码构建。
-- Android GitHub Actions `CI` run `33369508808` 已通过 npm ci、来源歌单测试、Lint、JS bundle、Gradle Debug APK，并上传 7 天保留的 Debug Artifact。
-- CI 使用固定 SHA 的 actions、Node 22、Java 17、npm/Gradle runner cache；正式 Release 工作流仅手动触发。
-- Windows Beta workflow 可手动触发生成测试安装包；最近候选 Release run `33388893148` 基于 `e43c7ab` 成功，Artifact `9756799587`（x64 安装包，保留至 2026-11-29）。COS 发布工具只接受 `latest.yml`、`version.json`、安装包和 `.blockmap`，凭据从 `VISONCUBE_COS_*` 环境变量读取，绝不删除远端历史对象。
-
-## 首次启动路由恢复
-
-- `src/renderer/core/useApp/index.ts` 等待 `router.isReady()` 后才读取上次页面；仅当当前仍是默认首屏 `/` 或 `/search`，且异步读取期间路由未被用户改变时才执行 `router.replace()`。
-- 这样可避免首次打开时用户快速点击侧边栏，历史页面恢复结果覆盖用户刚选择的页面；恢复失败只记录警告，不阻塞应用初始化。
-
-## 2026-08-31 2.13.4 候选构建
-
-- Android Release 候选 run `33406193588` 基于 `main` 提交 `4274e0cd` 成功；5 个 APK Artifact 均已上传并可下载，实际文件名为 `visoncube-music-mobile-v2.13.4-*.apk`。
-- Android Runner 的 `apksigner verify --print-certs` 已通过，5 个 ABI 的证书 SHA-256 均为 `9C951C4BBA399D21751F4B194E839DA3A49EFD60534CF9B3B9D35859A6D6BC95`。
-- Actions 使用固定依赖 Release；签名 JKS 只在 Runner 临时生成并由退出 trap 清理。Android 五项签名 Secret 已配置，Windows 独立 Authenticode PFX 仍是候选与正式构建硬门槛。
-
-- 按维护者确认，Windows 恢复旧版未签名发布路径；`v2.13.4` Windows Release 明确标注为 unsigned，Android Release 使用现有 JKS 签名。
+- 双端 Release workflow 仅手动触发；`publish_release=false` 只生成候选 Artifact，`true` 才允许创建 GitHub Release。
+- Windows 只发布 x64 安装包、`.blockmap`、`latest.yml` 和 SHA-256 清单，沿用明确标注的未签名发布方式。
+- Android 发布四个 ABI APK 与 universal APK；基础版本号为 86，ABI 包沿用 Gradle 的 86001–86004 映射。
+- Android 正式包必须通过证书 SHA-256 指纹 `9C951C4BBA399D21751F4B194E839DA3A49EFD60534CF9B3B9D35859A6D6BC95` 校验。
+- Music COS 和服务器清单只在候选与真机验收通过并再次确认后更新；本地 TV 项目不属于清理范围。

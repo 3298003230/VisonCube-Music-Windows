@@ -4,213 +4,138 @@ on:
   workflow_dispatch:
     inputs:
       publish_release:
-        description: 'Create official release assets (requires BT_TOKEN)'
+        description: 'Create the official GitHub Release after candidate validation'
         required: true
         default: false
         type: boolean
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   IS_CI: 'true'
 
 jobs:
-  # CheckCode:
-  #   name: Lint Code
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check out git repository
-  #       uses: actions/checkout@v6
-
-  #     - name: Install Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 20
-
-  #     - name: Cache file
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: |
-  #           node_modules
-  #           $HOME/.cache/electron
-  #           $HOME/.cache/electron-builder
-  #           $HOME/.npm/_prebuilds
-  #         key: ${{ runner.os }}-build-caches-${{ hashFiles('**/package-lock.json') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-build-
-
-  #     - name: Install Dependencies
-  #       run: |
-  #         npm ci
-
-  #     - name: Lint src code
-  #       run: npm run lint
-
   Windows:
-    name: Windows
+    name: Windows x64 candidate
     runs-on: windows-latest
-    # needs: CheckCode
+    timeout-minutes: 60
     steps:
       - name: Check out git repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
-      - name: Setup Node Env
+      - name: Setup Node environment
         uses: ./.github/actions/setup
 
-      - name: Build src code
+      - name: Verify release metadata
         run: |
-          git status --porcelain
-          npm run build
+          npm run publish
+          git diff --exit-code -- package.json package-lock.json CHANGELOG.md publish/version.json
 
-      - name: Publish official packages
-        if: ${{ inputs.publish_release }}
-        run: |
-          npm run publish:win:7z:x64
-          npm run publish:win:7z:arm64
-          npm run publish:win:setup:arm64
-          npm run publish:win:setup:x64
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BT_TOKEN: ${{ secrets.BT_TOKEN }}
+      - name: Test music sync model
+        run: npm run test:music-sync
 
-      - name: Build candidate package
-        if: ${{ !inputs.publish_release }}
+      - name: Lint source code
+        run: npm run lint
+
+      - name: Build all source bundles
+        run: npm run build
+
+      - name: Build x64 installer
         run: npm run pack:win:setup:x64
 
-      - name: Upload candidate installer
-        if: ${{ !inputs.publish_release }}
+      - name: Verify candidate assets
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = node -p "require('./package.json').version"
+          $installerName = "VisonCube-Music-v$version-x64-Setup.exe"
+          $installer = Get-Item -LiteralPath (Join-Path 'build' $installerName)
+          $blockmap = Get-Item -LiteralPath "$($installer.FullName).blockmap"
+          $latest = Get-Item -LiteralPath 'build/latest.yml'
+          $latestContent = Get-Content -Raw -LiteralPath $latest.FullName
+          if ($latestContent -notmatch "(?m)^version:\s+$([regex]::Escape($version))\s*$") {
+            throw "latest.yml version does not match package.json: $version"
+          }
+          if ($latestContent -notmatch [regex]::Escape("path: $installerName")) {
+            throw "latest.yml does not reference $installerName"
+          }
+          $signature = Get-AuthenticodeSignature -LiteralPath $installer.FullName
+          if ($signature.Status -ne 'NotSigned') {
+            throw "Expected the approved unsigned Windows package, got: $($signature.Status)"
+          }
+          $assets = @($installer, $blockmap, $latest)
+          $checksumLines = foreach ($asset in $assets) {
+            $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $asset.FullName
+            "$($hash.Hash.ToLowerInvariant()) *$($asset.Name)"
+          }
+          Set-Content -LiteralPath 'build/SHA256SUMS.txt' -Value $checksumLines -Encoding utf8NoBOM
+          $assets | Select-Object Name, Length
+          $checksumLines
+          Write-Output 'Authenticode status: NotSigned'
+
+      - name: Upload candidate assets
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: visoncube-music-windows-x64-release-candidate
           path: |
             build/*-x64-Setup.exe
-            build/*.blockmap
+            build/*-x64-Setup.exe.blockmap
             build/latest.yml
+            build/SHA256SUMS.txt
           if-no-files-found: error
+          retention-days: 30
 
-      - name: Generate official file MD5
-        if: ${{ inputs.publish_release }}
-        run: |
-          cd build
-          Get-FileHash *.exe,*.7z -Algorithm MD5 | Format-List
-
-      - name: Generate candidate SHA-256
-        if: ${{ !inputs.publish_release }}
-        run: |
-          cd build
-          Get-FileHash *.exe -Algorithm SHA256 | Format-List
-
-
-  Windows_7:
-    name: Windows_7
+  Release:
+    name: Publish GitHub Release
     if: ${{ inputs.publish_release }}
-    runs-on: windows-latest
-    # needs: CheckCode
-    steps:
-      - name: Check out git repository
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-
-      - name: Setup Node Env
-        uses: ./.github/actions/setup
-
-      - name: Prepare win7 undici env
-        run: |
-          npm install undici@5
-          Set-Content -Path .\src\common\utils\request.ts -Value "export * from './request_node16'"
-
-      - name: Build src code
-        env:
-          BUILD_WIN7: true
-        run: |
-          git status --porcelain
-          npm run build
-
-      - name: Prepare win7 electron env
-        run: |
-          npm install electron@22
-          pip.exe install setuptools
-
-      - name: Release win7 package
-        run: |
-          npm run publish:win7:setup:x64
-          npm run publish:win7:7z:x64
-          npm run publish:win7:7z:x86
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BT_TOKEN: ${{ secrets.BT_TOKEN }}
-
-      - name: Generate file MD5
-        run: |
-          cd build
-          Get-FileHash *.exe,*.7z -Algorithm MD5 | Format-List
-
-  Mac:
-    name: Mac
-    if: ${{ inputs.publish_release }}
-    runs-on: macos-latest
-    # needs: CheckCode
-    steps:
-      - name: Check out git repository
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-
-      - name: Install python3 setuptools
-        run: brew install python-setuptools
-
-      - name: Setup Node Env
-        uses: ./.github/actions/setup
-
-      - name: Build src code
-        run: |
-          git status --porcelain
-          npm run build
-
-      - name: Release package
-        run: |
-          npm run publish:mac:dmg
-          npm run publish:mac:dmg:arm64
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BT_TOKEN: ${{ secrets.BT_TOKEN }}
-
-      - name: Generate file MD5
-        run: |
-          cd build
-          md5 *.dmg
-
-  Linux:
-    name: Linux
-    if: ${{ inputs.publish_release }}
+    needs: Windows
     runs-on: ubuntu-latest
-    # needs: CheckCode
+    permissions:
+      contents: write
     steps:
-      - name: Install package
-        run: sudo apt-get update && sudo apt-get install -y rpm libarchive-tools
-
       - name: Check out git repository
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30af803 # v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
-      - name: Setup Node Env
-        uses: ./.github/actions/setup
+      - name: Download candidate assets
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: visoncube-music-windows-x64-release-candidate
+          path: artifacts
 
-      - name: Build src code
+      - name: Prepare release metadata
+        shell: bash
         run: |
-          git status --porcelain
-          npm run build
+          set -euo pipefail
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          if git ls-remote --exit-code --tags origin "refs/tags/v${PACKAGE_VERSION}" >/dev/null 2>&1; then
+            echo "Release tag v${PACKAGE_VERSION} already exists." >&2
+            exit 1
+          fi
+          echo "PACKAGE_VERSION=${PACKAGE_VERSION}" >> "$GITHUB_ENV"
+          node <<'NODE'
+          const fs = require('fs')
+          const pkg = require('./package.json')
+          const { parseVersionSections } = require('./publish/utils/updateChangeLog')
+          const sections = parseVersionSections(fs.readFileSync('./publish/changeLog.md', 'utf8'))
+          const current = sections.find(section => section.version === pkg.version)
+          if (!current) throw new Error(`Missing release notes for ${pkg.version}.`)
+          fs.writeFileSync('./release-notes.md', `${current.markdown}\n\n> Windows 安装包沿用旧版未签名发布方式，系统可能显示“未知发布者”。\n`)
+          NODE
 
-      - name: Release package
-        run: |
-          npm run publish:linux:deb:amd64
-          npm run publish:linux:deb:arm64
-          npm run publish:linux:deb:armv7l
-          npm run publish:linux:appImage
-          npm run publish:linux:rpm
-          npm run publish:linux:pacman
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          name: VisonCube Music Windows v${{ env.PACKAGE_VERSION }}
+          tag_name: v${{ env.PACKAGE_VERSION }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          files: |
+            artifacts/VisonCube-Music-v${{ env.PACKAGE_VERSION }}-x64-Setup.exe
+            artifacts/VisonCube-Music-v${{ env.PACKAGE_VERSION }}-x64-Setup.exe.blockmap
+            artifacts/latest.yml
+            artifacts/SHA256SUMS.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BT_TOKEN: ${{ secrets.BT_TOKEN }}
-
-      - name: Generate file MD5
-        run: |
-          cd build
-          md5sum *.deb *.rpm *.pacman *.AppImage
