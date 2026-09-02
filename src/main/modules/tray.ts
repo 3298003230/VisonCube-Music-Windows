@@ -137,7 +137,26 @@ const getIconPath = (id: number) => {
     ? global.lx.theme.shouldUseDarkColors
       ? themeList[0] : themeList[2]
     : themeList.find(item => item.id === id) ?? themeList[0]
+
+  // Template images are monochrome black and are only automatically inverted
+  // by macOS. On a dark Windows taskbar they are effectively invisible, so
+  // use the coloured icon while keeping the selected theme setting unchanged.
+  if (isWin && theme.isNative && global.lx.theme.shouldUseDarkColors) theme = themeList[1]
   return path.join(global.staticPath, 'images/tray', theme.fileName + (isWin ? '.ico' : '.png'))
+}
+
+const getTrayImage = (themeId: number) => {
+  const iconPath = getIconPath(themeId)
+  const image = nativeImage.createFromPath(iconPath)
+  if (!image.isEmpty()) return image
+
+  // Some packaged Electron builds cannot decode an ICO through an asar path.
+  // The corresponding PNG is copied beside it and is a safe fallback.
+  if (isWin) {
+    const pngImage = nativeImage.createFromPath(iconPath.replace(/\.ico$/i, '.png'))
+    if (!pngImage.isEmpty()) return pngImage
+  }
+  return image
 }
 
 export const createTray = () => {
@@ -145,7 +164,9 @@ export const createTray = () => {
   if ((tray && !tray.isDestroyed()) || !global.lx.appSetting['tray.enable']) return
 
   // 托盘
-  tray = new Tray(nativeImage.createFromPath(getIconPath(global.lx.appSetting['tray.themeId'])))
+  const image = getTrayImage(global.lx.appSetting['tray.themeId'])
+  if (image.isEmpty()) return
+  tray = new Tray(image)
 
   // tray.setToolTip('VisonCube Music')
   // createMenu()
@@ -297,7 +318,8 @@ export const createMenu = () => {
 
 export const setTrayImage = (themeId: number) => {
   if (!tray) return
-  tray.setImage(nativeImage.createFromPath(getIconPath(themeId)))
+  const image = getTrayImage(themeId)
+  if (!image.isEmpty()) tray.setImage(image)
 }
 
 const setLyric = (lyricLineText?: string) => {
@@ -327,9 +349,13 @@ const init = () => {
     themeId = global.lx.appSetting['tray.themeId']
     setTrayImage(themeId)
   }
-  if (isEnableTray !== global.lx.appSetting['tray.enable']) {
-    isEnableTray = global.lx.appSetting['tray.enable']
-    global.lx.appSetting['tray.enable'] ? createTray() : destroyTray()
+  if (isEnableTray !== global.lx.appSetting['tray.enable'] || (global.lx.appSetting['tray.enable'] && !tray)) {
+    if (global.lx.appSetting['tray.enable']) {
+      createTray()
+      isEnableTray = !!tray && !tray.isDestroyed()
+    } else {
+      destroyTray()
+    }
   }
   if (isShowStatusBarLyric !== global.lx.appSetting['player.isShowStatusBarLyric']) {
     isShowStatusBarLyric = global.lx.appSetting['player.isShowStatusBarLyric']
