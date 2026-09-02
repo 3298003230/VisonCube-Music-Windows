@@ -138,11 +138,10 @@ const getIconPath = (id: number) => {
       ? themeList[0] : themeList[2]
     : themeList.find(item => item.id === id) ?? themeList[0]
 
-  // Template images are monochrome black and are only automatically inverted
-  // by macOS. On a dark Windows taskbar they are effectively invisible, so
-  // use the coloured icon while keeping the selected theme setting unchanged.
-  if (isWin && theme.isNative && global.lx.theme.shouldUseDarkColors) theme = themeList[1]
-  return path.join(global.staticPath, 'images/tray', theme.fileName + (isWin ? '.ico' : '.png'))
+  // Template images are monochrome and are only automatically inverted by
+  // macOS. Windows uses a dedicated high-contrast Music icon instead.
+  const fileName = isWin && (id === 0 || id === TRAY_AUTO_ID) ? 'tray_music' : theme.fileName
+  return path.join(global.staticPath, 'images/tray', fileName + (isWin ? '.ico' : '.png'))
 }
 
 const getTrayImage = (themeId: number) => {
