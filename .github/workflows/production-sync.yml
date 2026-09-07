@@ -34,6 +34,11 @@ env:
   RELEASE_API_BASE_URL: https://linux.sjmf.xyz/api/releases
   WINDOWS_COS_PREFIX: VisonCube/Music/Windows
   ANDROID_COS_PREFIX: VisonCube/Music/Android
+  DEFAULT_COS_BUCKET: visoncube-releases-1442257950
+  DEFAULT_COS_REGION: ap-shanghai
+  DEFAULT_SERVER_HOST: linux.sjmf.xyz
+  DEFAULT_SERVER_PORT: '22'
+  DEFAULT_SERVER_USER: ubuntu
   DEFAULT_SERVER_RELEASES_PATH: /home/ubuntu/ServerCode/VisonCube/update/releases.json
 
 jobs:
@@ -213,10 +218,6 @@ jobs:
           required=(
             VISONCUBE_COS_SECRET_ID
             VISONCUBE_COS_SECRET_KEY
-            VISONCUBE_COS_BUCKET
-            VISONCUBE_COS_REGION
-            VISONCUBE_SERVER_HOST
-            VISONCUBE_SERVER_USER
             VISONCUBE_SERVER_SSH_KEY
           )
           missing=()
@@ -230,6 +231,9 @@ jobs:
             exit 1
           fi
           echo 'Required production secrets are present.'
+          echo "COS bucket defaults to ${DEFAULT_COS_BUCKET}; override with VISONCUBE_COS_BUCKET if needed."
+          echo "COS region defaults to ${DEFAULT_COS_REGION}; override with VISONCUBE_COS_REGION if needed."
+          echo "Server defaults to ${DEFAULT_SERVER_USER}@${DEFAULT_SERVER_HOST}:${DEFAULT_SERVER_PORT}; override with VISONCUBE_SERVER_* secrets if needed."
 
       - name: Download production sync payload
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
@@ -261,6 +265,8 @@ jobs:
           set -euo pipefail
           python3 -m pip install --user --disable-pip-version-check coscmd
           export PATH="$HOME/.local/bin:$PATH"
+          cos_bucket="${VISONCUBE_COS_BUCKET:-$DEFAULT_COS_BUCKET}"
+          cos_region="${VISONCUBE_COS_REGION:-$DEFAULT_COS_REGION}"
           cleanup() {
             rm -f "$HOME/.cos.conf"
           }
@@ -269,8 +275,8 @@ jobs:
           coscmd config \
             -a "$VISONCUBE_COS_SECRET_ID" \
             -s "$VISONCUBE_COS_SECRET_KEY" \
-            -b "$VISONCUBE_COS_BUCKET" \
-            -r "$VISONCUBE_COS_REGION"
+            -b "$cos_bucket" \
+            -r "$cos_region"
 
           manifest='payload/production-manifest.json'
           windows_file=$(python3 -c "import json; print(json.load(open('$manifest', encoding='utf-8'))['windows']['file_name'])")
@@ -344,7 +350,9 @@ jobs:
         run: |
           set -euo pipefail
           version="${{ inputs.version }}"
-          server_port="${VISONCUBE_SERVER_PORT:-22}"
+          server_host="${VISONCUBE_SERVER_HOST:-$DEFAULT_SERVER_HOST}"
+          server_port="${VISONCUBE_SERVER_PORT:-$DEFAULT_SERVER_PORT}"
+          server_user="${VISONCUBE_SERVER_USER:-$DEFAULT_SERVER_USER}"
           releases_path="${VISONCUBE_SERVER_RELEASES_PATH:-$DEFAULT_SERVER_RELEASES_PATH}"
           mkdir -p "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
@@ -365,12 +373,12 @@ jobs:
           if [[ -n "${VISONCUBE_SERVER_KNOWN_HOSTS:-}" ]]; then
             printf '%s\n' "$VISONCUBE_SERVER_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
           else
-            ssh-keyscan -p "$server_port" -H "$VISONCUBE_SERVER_HOST" >> "$HOME/.ssh/known_hosts"
+            ssh-keyscan -p "$server_port" -H "$server_host" >> "$HOME/.ssh/known_hosts"
           fi
 
           ssh_opts=(-i "$HOME/.ssh/visoncube_music_server_key" -p "$server_port" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes)
           scp_opts=(-i "$HOME/.ssh/visoncube_music_server_key" -P "$server_port" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes)
-          target="${VISONCUBE_SERVER_USER}@${VISONCUBE_SERVER_HOST}"
+          target="${server_user}@${server_host}"
           remote_tmp="/tmp/visoncube-music-releases-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
           stamp="$(date -u +%Y%m%dT%H%M%SZ)"
 
