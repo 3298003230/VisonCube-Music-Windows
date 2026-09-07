@@ -156,6 +156,8 @@ jobs:
               checksums_name = 'SHA256SUMS.txt'
               download_url = "${{ env.DOWNLOAD_BASE_URL }}/${{ env.WINDOWS_COS_PREFIX }}/$installerName"
               feed_url = "${{ env.DOWNLOAD_BASE_URL }}/${{ env.WINDOWS_COS_PREFIX }}"
+              asset_path = "${{ env.WINDOWS_COS_PREFIX }}/$installerName"
+              feed_path = "${{ env.WINDOWS_COS_PREFIX }}"
               size = $installer.Length
               sha256 = $windowsSha
               blockmap_size = $blockmap.Length
@@ -172,6 +174,8 @@ jobs:
               checksums_name = 'SHA256SUMS.txt'
               download_url = "${{ env.DOWNLOAD_BASE_URL }}/${{ env.ANDROID_COS_PREFIX }}/$androidName"
               feed_url = ''
+              asset_path = "${{ env.ANDROID_COS_PREFIX }}/$androidName"
+              feed_path = ''
               size = $androidApk.Length
               sha256 = $androidSha
               checksums_size = $androidSums.Length
@@ -424,6 +428,9 @@ jobs:
           entries['music-windows'].update({
               'version': version,
               'display_version': version,
+              'asset_path': manifest['windows']['asset_path'],
+              'feed_path': manifest['windows']['feed_path'],
+              'download_base': '',
               'file_name': manifest['windows']['file_name'],
               'download_url': manifest['windows']['download_url'],
               'feed_url': manifest['windows']['feed_url'],
@@ -434,6 +441,9 @@ jobs:
           entries['music-android'].update({
               'version': version,
               'display_version': version,
+              'asset_path': manifest['android']['asset_path'],
+              'feed_path': manifest['android']['feed_path'],
+              'download_base': '',
               'file_name': manifest['android']['file_name'],
               'download_url': manifest['android']['download_url'],
               'feed_url': manifest['android']['feed_url'],
