@@ -7,6 +7,7 @@
 - 已从服务器 `ubuntu` 用户 `authorized_keys` 删除本轮专用 GitHub Actions SSH 公钥，并在服务器保留带时间戳备份。
 - 已删除本机本轮专用 SSH 私钥/公钥文件 `C:\Users\L\.ssh\visoncube_music_actions_ed25519*`。
 - 已从本地 Windows 源码和远端 Windows `main` 删除 `.github/workflows/production-sync.yml`；推送提交为 `56dd0d6543d40c45b15c70f0bb01ce4166d7f1c1`。
+- 已推送 `.agent` 状态同步提交 `e20e19a0feb01d4ea4522d1f3b6d6d1dc7fd1736`，对应 Windows CI `34192474898` 通过。
 - 已确认远端版本号仍为 Windows/Android `2.13.5`、Android `versionCode=86`；Android 仓库本轮没有实际内容变更，不新增提交。
 
 ## 2026-09-01 2.13.5 收敛
@@ -27,5 +28,5 @@
 
 ## 待完成
 
-- 本机没有项目 `node_modules`，完整 ESLint 和构建仍需在提交、推送后由双端候选 Actions 验证。
+- 本机没有项目 `node_modules`；需要重新出包时，完整候选包构建仍需由双端候选 Actions 验证。本轮 Windows `main` CI 已通过，Android 本轮未改代码。
 - 真实 Windows/Android 设备验收、Music COS 和服务器清单更新仍需后续单独门禁；GitHub 直连生产同步已取消。
