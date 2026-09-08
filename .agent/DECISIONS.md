@@ -24,4 +24,5 @@
 - `npm run publish` 只幂等同步 `publish/version.json`，不得修改 package 版本、增加 Android versionCode 或重复写 CHANGELOG。
 - Windows 继续未签名 x64 发布并在说明中公开标注；Android 只接受既有证书指纹签名的 APK。
 - 候选和正式发布分离；创建标签、GitHub Release、写入 COS、修改服务器清单均需在动作前单独确认。
+- 取消 GitHub Actions 直连 Music COS/服务器的生产同步 workflow；不得继续为该 workflow 申请或保存 COS Secret。
 - COS 电视安装包只在列出精确对象并再次确认后删除；不触碰 Music 历史对象、本地 TV 项目或源码目录。

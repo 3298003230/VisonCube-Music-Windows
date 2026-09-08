@@ -1,5 +1,14 @@
 # 当前进度
 
+## 2026-09-08 生产同步方案回退
+
+- 按用户要求停止 COS 密钥创建流程，不再获取或配置 COS Secret。
+- 已通过 GitHub API 删除 Windows 仓库的 `VISONCUBE_SERVER_SSH_KEY` Secret；当前 Windows 仓库 Actions Secrets 列表为空。
+- 已从服务器 `ubuntu` 用户 `authorized_keys` 删除本轮专用 GitHub Actions SSH 公钥，并在服务器保留带时间戳备份。
+- 已删除本机本轮专用 SSH 私钥/公钥文件 `C:\Users\L\.ssh\visoncube_music_actions_ed25519*`。
+- 已从本地 Windows 源码和远端 Windows `main` 删除 `.github/workflows/production-sync.yml`；推送提交为 `56dd0d6543d40c45b15c70f0bb01ce4166d7f1c1`。
+- 已确认远端版本号仍为 Windows/Android `2.13.5`、Android `versionCode=86`；Android 仓库本轮没有实际内容变更，不新增提交。
+
 ## 2026-09-01 2.13.5 收敛
 
 - 已确认远端基线：Windows `a21cd7cad9a2c372e34f06098d7d168d75d4614b`，Android `6a1baa43d1378fc543ca3c66213874e0f51e02c7`；两个本地源码目录仍不包含 `.git`。
@@ -19,4 +28,4 @@
 ## 待完成
 
 - 本机没有项目 `node_modules`，完整 ESLint 和构建仍需在提交、推送后由双端候选 Actions 验证。
-- 候选 Artifact、真实 Windows/Android 设备验收、正式 GitHub Release、Music COS 和服务器清单更新均未执行；Build #4 失败后将用修复提交重跑候选。
+- 真实 Windows/Android 设备验收、Music COS 和服务器清单更新仍需后续单独门禁；GitHub 直连生产同步已取消。

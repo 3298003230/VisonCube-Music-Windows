@@ -25,4 +25,5 @@
 - Windows 只发布 x64 安装包、`.blockmap`、`latest.yml` 和 SHA-256 清单，沿用明确标注的未签名发布方式。
 - Android 发布四个 ABI APK 与 universal APK；基础版本号为 86，ABI 包沿用 Gradle 的 86001–86004 映射。
 - Android 正式包必须通过证书 SHA-256 指纹 `9C951C4BBA399D21751F4B194E839DA3A49EFD60534CF9B3B9D35859A6D6BC95` 校验。
-- Music COS 和服务器清单只在候选与真机验收通过并再次确认后更新；本地 TV 项目不属于清理范围。
+- 2026-09-08 已取消 GitHub Actions 直连 COS/服务器的生产同步方案；Music COS 和服务器清单后续保持人工门禁，不在 GitHub 保存发布专用 SSH 或 COS Secret。
+- 本地 TV 项目不属于 Music 清理范围。
