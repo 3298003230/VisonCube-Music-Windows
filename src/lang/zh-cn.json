@@ -805,7 +805,7 @@
   "account__sign_out": "退出登录",
   "account__back": "返回",
   "account__cancel": "取消",
-  "setting__basic_source_update_btn": "更新源",
+  "setting__basic_source_update_btn": "更新音源",
   "setting__basic_source_update_idle": "尚未更新服务器音源",
   "setting__basic_source_update_loading": "正在更新音源...",
   "setting__basic_source_update_failed": "音源更新失败，继续使用本地缓存",

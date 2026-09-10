@@ -805,7 +805,7 @@
   "account__sign_out": "Sign out",
   "account__back": "Back",
   "account__cancel": "Cancel",
-  "setting__basic_source_update_btn": "Update Source",
+  "setting__basic_source_update_btn": "Update Music Source",
   "setting__basic_source_update_idle": "The server source has not been updated",
   "setting__basic_source_update_loading": "Updating source...",
   "setting__basic_source_update_failed": "Update failed; using the local cache",
