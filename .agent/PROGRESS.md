@@ -5,7 +5,7 @@
 - Windows 与 Android 正式 `src` 已从经验证的原作者快照重建，并只合并白名单的 VisonCube 功能；用户可见的加载、导入、更新与请求异常文案已按既有要求去除无意义表情和原作者导向。
 - Windows 保留关闭选择、托盘图标、账号、云同步和托管音源；Android 保留账号、云同步、托管音源、自有更新、包名和原生图标配置。
 - Windows 构建发现并恢复三项必要定制契约：账号会话数据键、请求代理函数导出和 PNG 资源类型声明；未改变业务流程或公共数据格式。
-- 当前远端 `main`：Windows `7822954999d94fc1bba0cdd0f70f5e51a900dc78`，Android `443c4cef1569ac4c593aa4d44dc64e78bcf657b4`。
+- 当前通过 CI 的源码基线提交：Windows `7822954999d94fc1bba0cdd0f70f5e51a900dc78`，Android `443c4cef1569ac4c593aa4d44dc64e78bcf657b4`。
 - Windows CI #38 与 Android CI #24 均通过；双端本地 `test:music-sync` 均通过 4/4，正式 `src` 与临时 Git 工作区逐文件 SHA-256 对比为 0 差异。
 - 本轮未创建标签、Release、候选安装包，也未更新 COS 或服务器；同步前完整 `src` 回退备份仍保留在本机临时目录。
 
