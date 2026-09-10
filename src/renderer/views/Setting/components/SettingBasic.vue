@@ -55,7 +55,6 @@ dd
           span(v-if="item.statusLabel" :class="$style.status") {{ item.statusLabel }}
     .p.gap-top
       base-btn.btn(min @click="isShowUserApiModal = true") {{ $t('setting__basic_source_user_api_btn') }}
-    ManagedSourceUpdate
 
 dd
   h3#basic_window_size {{ $t('setting__basic_window_size') }}
@@ -132,7 +131,6 @@ import ThemeSelectorModal from './ThemeSelectorModal.vue'
 import ThemeEditModal from './ThemeEditModal/index.vue'
 import PlayTimeoutModal from './PlayTimeoutModal.vue'
 import UserApiModal from './UserApiModal.vue'
-import ManagedSourceUpdate from './ManagedSourceUpdate.vue'
 import { appSetting, updateSetting } from '@renderer/store/setting'
 import { getThemes, applyTheme, findTheme, buildBgUrl } from '@renderer/store/utils'
 
@@ -143,7 +141,6 @@ export default {
     ThemeEditModal,
     PlayTimeoutModal,
     UserApiModal,
-    ManagedSourceUpdate,
   },
   setup() {
     const t = useI18n()
