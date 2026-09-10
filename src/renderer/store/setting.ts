@@ -22,7 +22,15 @@ export const mergeSetting = (newSetting: Partial<LX.AppSetting>) => {
 
 export const updateSetting = window.lxData.updateSetting = (setting: Partial<LX.AppSetting>) => {
   // console.warn(setting)
-  return saveSetting(setting)
+  void saveSetting(setting)
+}
+
+/**
+ * 保存是否同意协议
+ * @param isAgreePact 是否同意协议
+ */
+export const saveAgreePact = (isAgreePact: boolean) => {
+  updateSetting({ 'common.isAgreePact': isAgreePact })
 }
 
 /**

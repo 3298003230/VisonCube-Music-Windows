@@ -6,7 +6,6 @@ import mg from './mg/index'
 import bd from './bd/index'
 import xm from './xm'
 import { supportQuality } from './api-source'
-import { versionChars } from './versionChars'
 
 
 const sources = {
@@ -115,14 +114,8 @@ export default {
     const fSinger = filterStr(sortSingle(singer)).toLowerCase()
     const fAlbumName = filterStr(albumName).toLowerCase()
     const fInterval = getIntv(interval)
-    const isEqualsInterval = (intv) => Math.abs((fInterval || intv) - (intv || fInterval)) <= 5
-    const isEqualsVersionMusicNameChar = (name) => {
-      for (const char of versionChars) {
-        if (name.includes(char) != fMusicName.includes(char)) return false
-      }
-      return true
-    }
-    const isIncludesName = (name) => (fMusicName.includes(name) || name.includes(fMusicName)) && isEqualsVersionMusicNameChar(name)
+    const isEqualsInterval = (intv) => Math.abs((fInterval || intv) - (intv || fInterval)) < 5
+    const isIncludesName = (name) => (fMusicName.includes(name) || name.includes(fMusicName))
     const isIncludesSinger = (singer) => fSinger ? (fSinger.includes(singer) || singer.includes(fSinger)) : true
     const isEqualsAlbum = (album) => fAlbumName ? fAlbumName == album : true
 

@@ -345,4 +345,3 @@ export const setTitle = (title: string | null) => {
   title ||= 'VisonCube Music'
   dom_title.innerText = title
 }
-

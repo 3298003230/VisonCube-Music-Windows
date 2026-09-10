@@ -5,7 +5,6 @@ import {
   onUpdateError,
   onUpdateNotAvailable,
   onUpdateProgress,
-  downloadUpdate,
   getIgnoreVersion,
   getLastStartInfo,
   saveLastStartInfo,
@@ -154,9 +153,7 @@ export default () => {
     versionInfo.isLatest = false
     if (appSetting['common.tryAutoUpdate']) {
       versionInfo.status = 'downloading'
-      versionInfo.downloadProgress = null
       startUpdateTimeout()
-      downloadUpdate()
     }
     void nextTick(() => {
       showUpdateModal()
@@ -177,7 +174,7 @@ export default () => {
   })
   const rUpdateError = onUpdateError((params) => {
     clearUpdateTimeout()
-    versionInfo.status = 'error'
+    // versionInfo.status = 'error'
     void nextTick(() => {
       showUpdateModal('error')
     })
@@ -187,7 +184,7 @@ export default () => {
   })
   const rUpdateDownloaded = onUpdateDownloaded(({ params: info }) => {
     clearUpdateTimeout()
-    versionInfo.status = 'downloaded'
+    // versionInfo.status = 'downloaded'
     void nextTick(() => {
       showUpdateModal('downloaded')
     })

@@ -226,9 +226,7 @@ export const request = async <T = unknown>(url: string, options: Options = {}): 
     if (!headers['Content-Type'] || headers['Content-Type'].includes(CONTENT_TYPE.json)) {
       try {
         body = JSON.parse(body as string) as T
-      } catch {
-        // Preserve the raw response when it is not valid JSON.
-      }
+      } catch {}
     }
     return {
       body,

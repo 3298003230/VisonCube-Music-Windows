@@ -9,7 +9,7 @@ import { httpOverHttp, httpsOverHttp } from 'tunnel'
 // import fs from 'fs'
 
 const httpsRxp = /^https:/
-export const getRequestAgent = url => {
+const getRequestAgent = url => {
   let options
   if (proxy.enable && proxy.host) {
     options = {

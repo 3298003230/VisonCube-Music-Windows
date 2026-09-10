@@ -110,7 +110,6 @@ declare namespace LX {
   type UpdateStatus = 'downloaded' | 'downloading' | 'error' | 'checking' | 'idle'
   interface VersionInfo {
     version: string
-    displayVersion?: string
     desc: string
   }
 }

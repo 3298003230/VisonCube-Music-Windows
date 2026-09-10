@@ -40,7 +40,7 @@ const handleUpdate = async(key, value) => {
 
   value = Math.round(value)
   // values[index] = value
-  await updateSetting({ [`player.soundEffect.biquadFilter.hz${key}`]: value })
+  updateSetting({ [`player.soundEffect.biquadFilter.hz${key}`]: value })
   // console.log(index, event.target.value, bfs)
 }
 
@@ -49,11 +49,11 @@ const handleReset = () => {
   for (const key of freqs) {
     setting[`player.soundEffect.biquadFilter.hz${key}`] = 0
   }
-  void updateSetting(setting)
+  updateSetting(setting)
 }
 
 const handleSetPreset = (item) => {
-  void updateSetting({
+  updateSetting({
     'player.soundEffect.biquadFilter.hz31': item.hz31,
     'player.soundEffect.biquadFilter.hz62': item.hz62,
     'player.soundEffect.biquadFilter.hz125': item.hz125,

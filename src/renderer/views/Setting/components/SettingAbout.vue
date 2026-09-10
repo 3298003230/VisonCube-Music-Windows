@@ -6,14 +6,12 @@ dd
 </template>
 
 <script>
-import { versionInfo } from '@renderer/store'
 import { APP_DISPLAY_VERSION } from '@common/version'
 
 export default {
   name: 'SettingAbout',
   setup() {
     return {
-      versionInfo,
       APP_DISPLAY_VERSION,
     }
   },

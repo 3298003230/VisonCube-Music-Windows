@@ -8,9 +8,7 @@ const handleSyncSourceList = async(waitUpdateLists: LX.List.UserListInfo[]) => {
   // console.log(targetListInfo)
   try {
     await syncSourceList(targetListInfo)
-  } catch {
-    // A failed background update must not interrupt app startup.
-  }
+  } catch {}
   void handleSyncSourceList(waitUpdateLists)
 }
 

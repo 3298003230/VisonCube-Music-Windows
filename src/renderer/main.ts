@@ -14,6 +14,8 @@ import { i18nPlugin } from './plugins/i18n'
 
 import App from './App.vue'
 import router from './router'
+// import store from './store'
+
 
 import { getSetting, updateSetting } from './utils/ipc'
 import { langList } from '@root/lang'
@@ -21,9 +23,12 @@ import type { I18n } from '@root/lang/i18n'
 
 import { initSetting } from './store/setting'
 import { restoreSession } from './features/auth/state'
+// import { bubbleCursor } from './utils/cursor-effects/bubbleCursor'
 
 import './worker'
 import { saveViewPrevState } from './utils/data'
+
+// sync(store, router)
 
 router.afterEach((to) => {
   if (to.path != '/songList/detail') {
@@ -35,6 +40,7 @@ router.afterEach((to) => {
 })
 
 void getSetting().then(setting => {
+  // window.lx.appSetting = setting
   // Set language automatically
   if (!setting['common.langId'] || !window.i18n.availableLocales.includes(setting['common.langId'])) {
     let langId: I18n['locale'] | null = null
@@ -61,6 +67,7 @@ void getSetting().then(setting => {
     void updateSetting({ 'common.windowSizeId': 1 })
   }
 
+  // store.commit('setSetting', setting)
   initSetting(setting)
 
   void restoreSession()
@@ -68,8 +75,11 @@ void getSetting().then(setting => {
   const app = createApp(App)
   app
     .use(router)
+    // .use(store)
     .use(i18nPlugin)
   initPlugins(app)
   mountComponents(app)
   app.mount('#root')
 })
+
+// bubbleCursor()

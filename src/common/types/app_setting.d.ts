@@ -54,6 +54,11 @@ declare global {
       'common.randomAnimate': boolean
 
       /**
+       * 是否同意软件协议
+       */
+      'common.isAgreePact': boolean
+
+      /**
        * 控制按钮位置，左边、右边
        */
       'common.controlBtnPosition': 'left' | 'right'

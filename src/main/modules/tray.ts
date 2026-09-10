@@ -137,9 +137,6 @@ const getIconPath = (id: number) => {
     ? global.lx.theme.shouldUseDarkColors
       ? themeList[0] : themeList[2]
     : themeList.find(item => item.id === id) ?? themeList[0]
-
-  // Template images are monochrome and are only automatically inverted by
-  // macOS. Windows uses a dedicated high-contrast Music icon instead.
   const fileName = isWin && (id === 0 || id === TRAY_AUTO_ID) ? 'tray_music' : theme.fileName
   return path.join(global.staticPath, 'images/tray', fileName + (isWin ? '.ico' : '.png'))
 }
@@ -149,8 +146,6 @@ const getTrayImage = (themeId: number) => {
   const image = nativeImage.createFromPath(iconPath)
   if (!image.isEmpty()) return image
 
-  // Some packaged Electron builds cannot decode an ICO through an asar path.
-  // The corresponding PNG is copied beside it and is a safe fallback.
   if (isWin) {
     const pngImage = nativeImage.createFromPath(iconPath.replace(/\.ico$/i, '.png'))
     if (!pngImage.isEmpty()) return pngImage

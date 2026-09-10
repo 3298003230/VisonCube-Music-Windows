@@ -10,14 +10,15 @@ dd
       base-checkbox(id="setting_start_in_fullscreen" :model-value="appSetting['common.startInFullscreen']" :label="$t('setting__basic_start_in_fullscreen')" @update:model-value="updateSetting({'common.startInFullscreen': $event})")
     .gap-top
       base-checkbox(id="setting_to_tray" :model-value="appSetting['tray.enable']" :label="$t('setting__basic_to_tray')" @update:model-value="updateSetting({'tray.enable': $event})")
-    .gap-top
-      p(:class="$style.settingLabel") {{ $t('setting__basic_close_action_title') }}
-      base-checkbox.gap-left(
-        v-for="item in closeActionList" :id="`setting_close_action_${item.id}`" :key="item.id"
-        name="setting_close_action" need :model-value="appSetting['common.closeAction']" :value="item.id" :label="item.label"
-        @update:model-value="handleCloseActionChange($event)")
     .p.gap-top
       base-btn.btn(min @click="isShowPlayTimeoutModal = true") {{ $t('setting__play_timeout')}} {{ timeLabel ? ` (${timeLabel})` : '' }}
+
+dd
+  h3#basic_close_action {{ $t('setting__basic_close_action_title') }}
+  div
+    base-checkbox.gap-left(id="setting_close_action_ask" name="setting_close_action" need :model-value="appSetting['common.closeAction']" value="ask" :label="$t('setting__basic_close_action_ask')" @update:model-value="updateCloseAction($event)")
+    base-checkbox.gap-left(id="setting_close_action_tray" name="setting_close_action" need :model-value="appSetting['common.closeAction']" value="tray" :label="$t('setting__basic_close_action_tray')" @update:model-value="updateCloseAction($event)")
+    base-checkbox.gap-left(id="setting_close_action_quit" name="setting_close_action" need :model-value="appSetting['common.closeAction']" value="quit" :label="$t('setting__basic_close_action_quit')" @update:model-value="updateCloseAction($event)")
 
 dd
   h3#basic_theme {{ $t('setting__basic_theme') }}
@@ -54,6 +55,7 @@ dd
           span(v-if="item.statusLabel" :class="$style.status") {{ item.statusLabel }}
     .p.gap-top
       base-btn.btn(min @click="isShowUserApiModal = true") {{ $t('setting__basic_source_user_api_btn') }}
+    ManagedSourceUpdate
 
 dd
   h3#basic_window_size {{ $t('setting__basic_window_size') }}
@@ -130,6 +132,7 @@ import ThemeSelectorModal from './ThemeSelectorModal.vue'
 import ThemeEditModal from './ThemeEditModal/index.vue'
 import PlayTimeoutModal from './PlayTimeoutModal.vue'
 import UserApiModal from './UserApiModal.vue'
+import ManagedSourceUpdate from './ManagedSourceUpdate.vue'
 import { appSetting, updateSetting } from '@renderer/store/setting'
 import { getThemes, applyTheme, findTheme, buildBgUrl } from '@renderer/store/utils'
 
@@ -140,6 +143,7 @@ export default {
     ThemeEditModal,
     PlayTimeoutModal,
     UserApiModal,
+    ManagedSourceUpdate,
   },
   setup() {
     const t = useI18n()
@@ -232,7 +236,7 @@ export default {
       if (themeId.value == theme.id) return
       themeId.value = theme.id
       applyTheme(theme.id, appSetting['theme.lightId'], appSetting['theme.darkId'], dataPath)
-      void updateSetting({ 'theme.id': theme.id })
+      updateSetting({ 'theme.id': theme.id })
     }
 
     watch(() => [appSetting['theme.lightId'], appSetting['theme.darkId']], () => {
@@ -256,6 +260,11 @@ export default {
     const { timeLabel } = useTimeout()
 
     const isShowUserApiModal = ref(false)
+    const updateCloseAction = (action) => {
+      const setting = { 'common.closeAction': action }
+      if (action == 'tray') setting['tray.enable'] = true
+      void updateSetting(setting)
+    }
     const getApiStatus = () => {
       let status
       if (userApi.status) status = t('setting__basic_source_status_success')
@@ -300,21 +309,6 @@ export default {
       ]
     })
 
-    const closeActionList = computed(() => {
-      return [
-        { id: 'ask', label: t('setting__basic_close_action_ask') },
-        { id: 'tray', label: t('setting__basic_close_action_tray') },
-        { id: 'quit', label: t('setting__basic_close_action_quit') },
-      ]
-    })
-
-    const handleCloseActionChange = (action) => {
-      if (!action || action == appSetting['common.closeAction']) return
-      const setting = { 'common.closeAction': action }
-      if (action == 'tray') setting['tray.enable'] = true
-      void updateSetting(setting)
-    }
-
     const systemFontList = ref([])
     const fontList = computed(() => {
       return [{ id: '', label: t('setting__desktop_lyric_font_default') }, ...systemFontList.value]
@@ -332,7 +326,7 @@ export default {
       let font = []
       if (font1) font.push(font1)
       if (font2) font.push(font2)
-      void updateSetting({ 'common.font': font.join(', ') })
+      updateSetting({ 'common.font': font.join(', ') })
     }
     const fontSizeList = computed(() => {
       return [
@@ -365,12 +359,11 @@ export default {
       timeLabel,
       apiSources,
       isShowUserApiModal,
+      updateCloseAction,
       windowSizeList,
       langList,
       sourceNameTypes,
       controlBtnPositionList,
-      closeActionList,
-      handleCloseActionChange,
       fontList,
       isFullscreen,
       toggleTheme,
@@ -573,12 +566,6 @@ export default {
   .status {
     margin-left: 5px;
   }
-}
-
-.settingLabel {
-  margin-bottom: 8px;
-  color: var(--color-font-label);
-  font-size: 14px;
 }
 
 </style>

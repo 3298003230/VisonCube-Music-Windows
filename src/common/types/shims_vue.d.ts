@@ -8,8 +8,3 @@ declare module '*.vue' {
   const component: Component
   export default component
 }
-
-declare module '*.png' {
-  const source: string
-  export default source
-}

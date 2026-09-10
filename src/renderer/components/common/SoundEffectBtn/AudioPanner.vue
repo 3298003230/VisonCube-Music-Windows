@@ -42,14 +42,14 @@ const updateEnabled = async(enabled) => {
     await setMediaDeviceId('default').catch(_ => _)
     saveMediaDeviceId('default')
   }
-  await updateSetting({ 'player.soundEffect.panner.enable': enabled })
+  updateSetting({ 'player.soundEffect.panner.enable': enabled })
 }
 
 const handleUpdateSoundR = (value) => {
-  void updateSetting({ 'player.soundEffect.panner.soundR': Math.round(value) })
+  updateSetting({ 'player.soundEffect.panner.soundR': Math.round(value) })
 }
 const handleUpdateSpeed = (value) => {
-  void updateSetting({ 'player.soundEffect.panner.speed': Math.round(value) })
+  updateSetting({ 'player.soundEffect.panner.speed': Math.round(value) })
 }
 
 

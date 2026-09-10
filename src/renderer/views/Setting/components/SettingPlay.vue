@@ -94,7 +94,7 @@ export default {
           confirmButtonText: t('confirm_button_text'),
         })
         if (confirm) {
-          await updateSetting({
+          updateSetting({
             'player.audioVisualization': false,
             'player.mediaDeviceId': mediaDeviceId.value,
           })
@@ -115,7 +115,7 @@ export default {
       } else {
         setPowerSaveBlocker(false, true)
       }
-      void updateSetting({ 'player.powerSaveBlocker': enabled })
+      updateSetting({ 'player.powerSaveBlocker': enabled })
     }
 
     const isMaxOutputChannelCount = ref(appSetting['player.isMaxOutputChannelCount'])
@@ -134,7 +134,7 @@ export default {
         await setMediaDeviceId('default').catch(_ => _)
         saveMediaDeviceId('default')
       }
-      await updateSetting({ 'player.isMaxOutputChannelCount': enabled })
+      updateSetting({ 'player.isMaxOutputChannelCount': enabled })
     }
 
 

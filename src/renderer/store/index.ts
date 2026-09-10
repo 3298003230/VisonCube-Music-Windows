@@ -106,11 +106,12 @@ export const sourceNames = computed(() => {
 
 export const windowSizeList = markRaw(configWindowSizeList)
 
+export const isShowPact = ref(false)
+
 export const versionInfo = window.lxData.versionInfo = reactive<{
   version: string
   newVersion: {
     version: string
-    displayVersion?: string
     desc: string
     history?: LX.VersionInfo[]
   } | null

@@ -1,7 +1,5 @@
-import { net } from 'electron'
 import { autoUpdater } from 'electron-updater'
-import { MUSIC_WINDOWS_RELEASE_API_URL } from '@common/visoncubeConfig'
-import { log } from '@common/utils'
+import { log, isWin } from '@common/utils'
 import { mainOn } from '@common/mainIpc'
 import { isExistWindow, sendEvent } from './index'
 import { WIN_MAIN_RENDERER_EVENT_NAME } from '@common/ipcNames'
@@ -107,22 +105,13 @@ export default () => {
   })
 
   mainOn(WIN_MAIN_RENDERER_EVENT_NAME.update_check, () => {
-    void checkUpdate()
+    console.log('check')
+    checkUpdate()
   })
 
   mainOn(WIN_MAIN_RENDERER_EVENT_NAME.update_download_update, () => {
-    if (!autoUpdater.isUpdaterActive()) {
-      handleSendEvent({
-        type: WIN_MAIN_RENDERER_EVENT_NAME.update_error,
-        info: 'Automatic updates are unavailable for this installation.',
-      })
-      return
-    }
-
-    sendStatusToWindow('Starting update download...')
-    // electron-updater emits its own error event. Consume the rejection here to
-    // avoid leaving the IPC callback with an unhandled promise rejection.
-    void autoUpdater.downloadUpdate().catch(() => {})
+    if (!autoUpdater.isUpdaterActive()) return
+    void autoUpdater.downloadUpdate()
   })
 
   mainOn(WIN_MAIN_RENDERER_EVENT_NAME.quit_update, () => {
@@ -134,7 +123,7 @@ export default () => {
   })
 }
 
-const checkUpdate = async() => {
+const checkUpdate = () => {
   // if (!isFirstCheckedUpdate) {
   //   if (waitEvent.length) {
   //     waitEvent.forEach((event, index) => {
@@ -148,23 +137,11 @@ const checkUpdate = async() => {
   // }
   // isFirstCheckedUpdate = false
 
-  try {
-    const response = await net.fetch(MUSIC_WINDOWS_RELEASE_API_URL)
-    if (!response.ok) throw new Error('Failed to fetch release information')
-    const release = await response.json() as { feed_url?: unknown }
-    if (typeof release.feed_url != 'string' || !release.feed_url) {
-      throw new Error('Release feed is not configured')
-    }
-
-    const feedUrl = new URL(release.feed_url)
-    if (!['http:', 'https:'].includes(feedUrl.protocol)) {
-      throw new Error('Release feed protocol is invalid')
-    }
-
-    autoUpdater.setFeedURL({ provider: 'generic', url: feedUrl.toString() })
-    await autoUpdater.checkForUpdates()
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to check for updates'
-    handleSendEvent({ type: WIN_MAIN_RENDERER_EVENT_NAME.update_error, info: message })
+  // 由于集合安装包中不包含win arm版，这将会导致arm版更新失败
+  if (isWin && process.arch.includes('arm')) {
+    handleSendEvent({ type: WIN_MAIN_RENDERER_EVENT_NAME.update_error, info: 'failed' })
+  } else {
+    autoUpdater.autoDownload = global.lx.appSetting['common.tryAutoUpdate']
+    void autoUpdater.checkForUpdates()
   }
 }

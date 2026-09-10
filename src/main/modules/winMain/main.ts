@@ -16,16 +16,14 @@ type CloseAction = 'tray' | 'quit' | 'cancel'
 
 const handleCloseAction = (action: CloseAction) => {
   isClosePromptPending = false
-  if (!browserWindow || browserWindow.isDestroyed()) return
+  if (!browserWindow || browserWindow.isDestroyed() || action == 'cancel') return
 
-  if (action == 'cancel') return
   if (action == 'quit') {
     global.lx.isSkipTrayQuit = true
     browserWindow.close()
     return
   }
 
-  // 托盘关闭策略必须保证存在恢复窗口和退出菜单的入口。
   if (!global.lx.appSetting['tray.enable']) {
     global.lx.event_app.update_config({ 'tray.enable': true })
   }
@@ -40,6 +38,7 @@ const requestCloseAction = () => {
     return
   }
   if (isClosePromptPending) return
+
   isClosePromptPending = true
   try {
     mainSend(browserWindow, WIN_MAIN_RENDERER_EVENT_NAME.close_request)
@@ -60,7 +59,6 @@ const winEvent = () => {
       return
     }
 
-    // 关闭策略是 Windows 端行为；其他桌面平台保持 Electron 默认关闭语义。
     if (!isWin) return
 
     const closeAction = global.lx.appSetting['common.closeAction']

@@ -11,24 +11,11 @@ import { appSetting } from '@renderer/store/setting'
 import { langS2T, toNewMusicInfo, toOldMusicInfo } from '@renderer/utils'
 import { requestMsg } from '@renderer/utils/message'
 import { apis } from '@renderer/utils/musicSdk/api-source'
-import { assertMusicUrlAvailable } from './musicUrlValidator'
 
 
 const getOtherSourcePromises = new Map()
 const otherSourceCache = new Map<LX.Music.MusicInfo | LX.Download.ListItem, LX.Music.MusicInfoOnline[]>()
 export const existTimeExp = /\[\d{1,2}:.*\d{1,4}\]/
-
-interface MusicSdkLyricRequest {
-  promise: Promise<LX.Music.LyricInfo>
-}
-
-const getMusicSdkLyricPromise = async(musicInfo: LX.Music.MusicInfoOnline): Promise<LX.Music.LyricInfo> => {
-  try {
-    return (musicSdk[musicInfo.source].getLyric(toOldMusicInfo(musicInfo)) as unknown as MusicSdkLyricRequest).promise
-  } catch (err) {
-    return Promise.reject(err)
-  }
-}
 
 export const getOtherSource = async(musicInfo: LX.Music.MusicInfo | LX.Download.ListItem, isRefresh = false): Promise<LX.Music.MusicInfoOnline[]> => {
   // if (!isRefresh && musicInfo.id) {
@@ -288,8 +275,7 @@ export const getOnlineOtherSourceMusicUrl = async({ musicInfos, quality, onToggl
   }
   // retryedSource.includes(musicInfo.source)
   // eslint-disable-next-line @typescript-eslint/promise-function-async
-  return reqPromise.then(async({ url, type }: { url: string, type: LX.Quality }) => {
-    await assertMusicUrlAvailable(url)
+  return reqPromise.then(({ url, type }: { url: string, type: LX.Quality }) => {
     return { musicInfo, url, quality: type, isFromCache: false }
     // eslint-disable-next-line @typescript-eslint/promise-function-async
   }).catch((err: any) => {
@@ -324,8 +310,7 @@ export const handleGetOnlineMusicUrl = async({ musicInfo, quality, onToggleSourc
   } catch (err: any) {
     reqPromise = Promise.reject(err)
   }
-  return reqPromise.then(async({ url, type }: { url: string, type: LX.Quality }) => {
-    await assertMusicUrlAvailable(url)
+  return reqPromise.then(({ url, type }: { url: string, type: LX.Quality }) => {
     return { musicInfo, url, quality: type, isFromCache: false }
   }).catch(async(err: any) => {
     console.log(err)
@@ -459,7 +444,13 @@ export const getOnlineOtherSourceLyricInfo = async({ musicInfos, onToggleSource,
     if (lyricInfo) return { musicInfo, lyricInfo, isFromCache: true }
   }
 
-  const reqPromise = getMusicSdkLyricPromise(musicInfo)
+  let reqPromise
+  try {
+    // TODO: remove any type
+    reqPromise = (musicSdk[musicInfo.source].getLyric(toOldMusicInfo(musicInfo)) as any).promise
+  } catch (err: any) {
+    reqPromise = Promise.reject(err)
+  }
   // retryedSource.includes(musicInfo.source)
   // eslint-disable-next-line @typescript-eslint/promise-function-async
   return reqPromise.then((lyricInfo: LX.Music.LyricInfo) => {
@@ -489,7 +480,13 @@ export const handleGetOnlineLyricInfo = async({ musicInfo, onToggleSource, isRef
   isFromCache: boolean
 }> => {
   // console.log(musicInfo.source)
-  const reqPromise = getMusicSdkLyricPromise(musicInfo)
+  let reqPromise
+  try {
+    // TODO: remove any type
+    reqPromise = (musicSdk[musicInfo.source].getLyric(toOldMusicInfo(musicInfo)) as any).promise
+  } catch (err) {
+    reqPromise = Promise.reject(err)
+  }
   // eslint-disable-next-line @typescript-eslint/promise-function-async
   return reqPromise.then((lyricInfo: LX.Music.LyricInfo) => {
     return existTimeExp.test(lyricInfo.lyric) ? {

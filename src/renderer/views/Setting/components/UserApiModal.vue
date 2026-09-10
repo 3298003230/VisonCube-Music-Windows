@@ -19,7 +19,6 @@ material-modal(:show="modelValue" bg-close teleport="#view" @close="handleClose"
       div(:class="$style.noitem") {{ $t('user_api__noitem') }}
     div(:class="$style.note")
       p {{ $t('user_api__note') }}
-    ManagedSourceUpdate
     div(:class="$style.footer")
       base-btn(:class="$style.footerBtn" @click="isShowOnlineImportModal = true") {{ $t('user_api__btn_import_online') }}
       base-btn(:class="$style.footerBtn" @click="handleImport") {{ $t('user_api__btn_import') }}
@@ -37,12 +36,10 @@ import { computed, ref } from '@common/utils/vueTools'
 import { dialog } from '@renderer/plugins/Dialog'
 
 import UserApiOnlineImportModal from './UserApiOnlineImportModal.vue'
-import ManagedSourceUpdate from './ManagedSourceUpdate.vue'
 
 export default {
   components: {
     UserApiOnlineImportModal,
-    ManagedSourceUpdate,
   },
   props: {
     modelValue: {
@@ -82,7 +79,7 @@ export default {
         title: this.$t('user_api__import_file'),
         properties: ['openFile'],
         filters: [
-          { name: 'LX API File', extensions: ['js'] },
+          { name: 'Music Source File', extensions: ['js'] },
           { name: 'All Files', extensions: ['*'] },
         ],
       }).then(async result => {
@@ -101,7 +98,7 @@ export default {
       if (appSetting['common.apiSource'] == api.id) {
         let backApi = apiSourceInfo.find(api => !api.disabled)
         if (!backApi) backApi = userApi.list[0]
-        await updateSetting({ 'common.apiSource': backApi?.id ?? '' })
+        updateSetting({ 'common.apiSource': backApi?.id ?? '' })
       }
       userApi.list = await removeUserApi([api.id])
     },

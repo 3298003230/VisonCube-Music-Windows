@@ -7,44 +7,65 @@ material-modal(:show="versionInfo.showModal" max-width="60%" @close="handleClose
         h3 当前版本：{{ APP_DISPLAY_VERSION }}
         pre(v-if="versionInfo.newVersion?.desc" :class="$style.desc" v-text="versionInfo.newVersion.desc")
     div(:class="$style.footer")
-      base-btn(v-if="versionInfo.status == 'checking'" :class="$style.btn" disabled) 检查更新中...
-      base-btn(v-else :class="$style.btn" @click="handleCheckUpdate") 重新检查更新
+      div(:class="$style.btns")
+        base-btn(v-if="versionInfo.status == 'checking'" :class="$style.btn" disabled) 检查更新中...
+        base-btn(v-else :class="$style.btn" @click="handleCheckUpdate") 重新检查更新
   main(v-else-if="versionInfo.isUnknown" :class="$style.main")
     h2 更新信息获取失败
     div.scroll.select(:class="$style.info")
       div(:class="$style.current")
         h3 当前版本：{{ APP_DISPLAY_VERSION }}
-        p(:class="$style.failureTip") 更新信息获取失败，请手动检查更新！
+        div(:class="$style.desc")
+          p 更新信息获取失败，请稍后重试或在设置中手动检查更新。
     div(:class="$style.footer")
       div(:class="$style.btns")
         base-btn(v-if="versionInfo.status == 'error'" :class="$style.btn2" @click="handleCheckUpdate") 重新检查更新
         base-btn(v-else :class="$style.btn2" disabled) 检查更新中...
-        base-btn(:disabled="disabledIgnoreFailBtn" :class="$style.btn2" @click="handleIgnoreFailTipClick") 一周内不再提醒
+        base-btn(:disabled="disabledIgnoreFailBtn" :class="$style.btn2" @click="handleIgnoreFailTipClick") 一个星期内不再提醒
   main(v-else-if="versionInfo.status == 'downloaded'" :class="$style.main")
     h2 更新已下载
+
     div.scroll.select(:class="$style.info")
       div(:class="$style.current")
         h3 最新版本：{{ versionInfo.newVersion?.displayVersion || versionInfo.newVersion?.version }}
         h3 当前版本：{{ APP_DISPLAY_VERSION }}
-        pre(v-if="versionInfo.newVersion?.desc" :class="$style.desc" v-text="versionInfo.newVersion.desc")
+        h3 版本变化：
+        pre(:class="$style.desc" v-text="versionInfo.newVersion?.desc")
+      div(v-if="history.length" :class="[$style.history, $style.desc]")
+        h3 历史版本：
+        div(v-for="(ver, index) in history" :key="index" :class="$style.item")
+          h4 v{{ ver.version }}
+          pre(v-text="ver.desc")
     div(:class="$style.footer")
-      base-btn(:class="$style.btn" @click="handleRestartClick") 重启并安装
+      div(:class="$style.desc")
+        p 新版本已下载完毕，
+        p
+          | 你可以选择
+          strong 立即重启更新
+          | 或稍后
+          strong 关闭程序时
+          | 自动更新~
+      div(:class="$style.btns")
+        base-btn(:class="$style.btn" @click="handleRestartClick") 立即重启更新
   main(v-else :class="$style.main")
     h2 发现新版本
     div.scroll.select(:class="$style.info")
       div(:class="$style.current")
         h3 最新版本：{{ versionInfo.newVersion?.displayVersion || versionInfo.newVersion?.version }}
         h3 当前版本：{{ APP_DISPLAY_VERSION }}
-        pre(v-if="versionInfo.newVersion?.desc" :class="$style.desc" v-text="versionInfo.newVersion.desc")
+        h3 版本变化：
+        pre(:class="$style.desc" v-text="versionInfo.newVersion?.desc")
       div(v-if="history.length" :class="[$style.history, $style.desc]")
-        h3 历史版本
+        h3 历史版本：
         div(v-for="(ver, index) in history" :key="index" :class="$style.item")
           h4 v{{ ver.version }}
           pre(v-text="ver.desc")
+
     div(:class="$style.footer")
-      p(v-if="progress" :class="$style.progress") {{ progress }}
+      div(:class="$style.desc")
+        p(v-if="progress") 当前下载进度：{{ progress }}
       div(:class="$style.btns")
-        base-btn(:class="$style.btn2" @click="handleIgnoreClick") {{ isIgnored ? '取消忽略' : '忽略此版本' }}
+        base-btn(:class="$style.btn2" @click="handleIgnoreClick") {{ isIgnored ? '取消忽略' : '忽略更新该版本' }}
         base-btn(v-if="versionInfo.status == 'downloading'" :class="$style.btn2" disabled) 下载更新中...
         base-btn(v-else :class="$style.btn2" @click="handleDownloadClick") 下载更新
 </template>
@@ -72,14 +93,19 @@ export default {
   computed: {
     history() {
       if (!this.versionInfo.newVersion?.history) return []
-      const currentVer = this.versionInfo.version
-      return this.versionInfo.newVersion.history.filter(ver => compareVer(currentVer, ver.version) < 0)
+      let arr = []
+      let currentVer = this.versionInfo.version
+      this.versionInfo.newVersion?.history.forEach(ver => {
+        if (compareVer(currentVer, ver.version) < 0) arr.push(ver)
+      })
+
+      return arr
     },
     progress() {
       return this.versionInfo.status == 'downloading'
         ? this.versionInfo.downloadProgress
           ? `${this.versionInfo.downloadProgress.percent.toFixed(2)}% - ${sizeFormate(this.versionInfo.downloadProgress.transferred)}/${sizeFormate(this.versionInfo.downloadProgress.total)} - ${sizeFormate(this.versionInfo.downloadProgress.bytesPerSecond)}/s`
-          : '正在准备下载...'
+          : '处理更新中...'
         : ''
     },
     isIgnored() {
@@ -113,15 +139,22 @@ export default {
           cancelButtonText: window.i18n.t('update__ignore_cancel'),
           confirmButtonText: window.i18n.t('update__ignore_confirm'),
         })) {
+          setTimeout(() => {
+            void dialog({
+              message: window.i18n.t('update__ignore_confirm_tip'),
+              confirmButtonText: window.i18n.t('update__ignore_confirm_tip_confirm'),
+            })
+          }, 500)
           return
         }
       }
       saveIgnoreVersion(this.ignoreVersion = this.versionInfo.newVersion?.version)
+      // saveIgnoreVersion(this.versionInfo.newVersion?.version)
+      // this.handleClose()
     },
     handleDownloadClick() {
       if (this.isIgnored) saveIgnoreVersion(this.ignoreVersion = null)
       versionInfo.status = 'downloading'
-      versionInfo.downloadProgress = null
       downloadUpdate()
     },
     handleCheckUpdate() {
@@ -133,25 +166,30 @@ export default {
     handleIgnoreFailTipClick() {
       localStorage.setItem('update__check_failed_tip', Date.now().toString())
       this.disabledIgnoreFailBtn = true
-      this.handleClose()
     },
   },
 }
 </script>
 
+
 <style lang="less" module>
 @import '@renderer/assets/styles/layout.less';
 
 .main {
+  position: relative;
   padding: 15px 0;
+  // max-width: 450px;
   min-width: 300px;
   display: flex;
   flex-flow: column nowrap;
+  justify-content: center;
   overflow: hidden;
+  // overflow-y: auto;
   * {
     box-sizing: border-box;
   }
   h2 {
+    flex: 0 0 none;
     font-size: 16px;
     color: var(--color-font);
     line-height: 1.3;
@@ -174,45 +212,85 @@ export default {
   font-size: 14px;
   line-height: 1.5;
   overflow-y: auto;
+  height: 100%;
   padding: 0 15px;
 }
+.current {
+  > p {
+    padding-left: 15px;
+  }
+}
+
 .desc {
-  margin-top: 10px;
-}
-.failureTip,
-.progress {
-  margin-top: 10px;
-  font-size: 13px;
-  color: var(--color-primary-font);
-  line-height: 1.5;
-}
-.history {
-  margin-top: 15px;
   h3, h4 {
     font-weight: bold;
   }
+  h3 {
+    padding: 5px 0 3px;
+  }
+  ul {
+    list-style: initial;
+    padding-inline-start: 30px;
+  }
+  p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
 }
-.item {
-  padding-top: 10px;
+
+.history {
+  h3 {
+    padding-top: 15px;
+  }
+
+  .item {
+    h3 {
+      padding: 5px 0 3px;
+    }
+    padding: 0 15px;
+    + .item {
+      padding-top: 15px;
+    }
+    h4 {
+      font-weight: 700;
+    }
+    > p {
+      padding-left: 15px;
+    }
+  }
+
 }
 .footer {
   flex: 0 0 none;
-  padding: 10px 15px 0;
+  padding: 0 15px;
+  .desc {
+    padding-top: 10px;
+    font-size: 13px;
+    color: var(--color-primary-font);
+    line-height: 1.25;
+
+    p {
+      font-size: 13px;
+      color: var(--color-primary-font);
+      line-height: 1.25;
+    }
+  }
 }
 .btns {
   display: flex;
   flex-flow: row nowrap;
   gap: 15px;
 }
-.btn,
-.btn2 {
+
+.btn {
   margin-top: 10px;
   display: block;
-}
-.btn {
   width: 100%;
 }
 .btn2 {
+  margin-top: 10px;
+  display: block;
   width: 50%;
 }
+
 </style>

@@ -6,6 +6,7 @@
 - 保留全部 VisonCube Music 自定义功能，只移植原作者稳定修复并处理真实 lint、类型和明确死注释。
 - 不实现历史 TODO，不抽取 Android 横竖屏歌词组件，不删除原作者受 Git 跟踪的调试或备份文件，不做大版本依赖升级。
 - 双端共有问题必须同步处理，公共接口、同步协议、设置字段和默认行为保持兼容。
+- 2026-09-09 起以原作者最新源码快照为双端 `src` 底座；仅合并品牌、账号、云同步、托管音源、自有更新、Android 包身份/签名配置和 Windows 关闭策略。首次页面切换补丁与 Android 设置分组大改不合并。
 
 ## 关闭策略
 
@@ -25,4 +26,5 @@
 - Windows 继续未签名 x64 发布并在说明中公开标注；Android 只接受既有证书指纹签名的 APK。
 - 候选和正式发布分离；创建标签、GitHub Release、写入 COS、修改服务器清单均需在动作前单独确认。
 - 取消 GitHub Actions 直连 Music COS/服务器的生产同步 workflow；不得继续为该 workflow 申请或保存 COS Secret。
+- 服务器 `releases.json` 的 Music 条目更新必须同时维护 `asset_path` 和显式下载字段；只改 `version`、`sha256` 或 `download_url` 会导致接口仍指向旧文件。
 - COS 电视安装包只在列出精确对象并再次确认后删除；不触碰 Music 历史对象、本地 TV 项目或源码目录。

@@ -16,8 +16,8 @@ material-modal(:show="isShowChangeLog" max-width="60%" @close="isShowChangeLog =
 
     div(:class="$style.footer")
       div(:class="$style.desc")
-        p 📢&nbsp;为了减少疑问，我们墙裂建议阅读版本更新日志来了解当前所用版本的变化！
-        p(v-if="!info.isLatest") 🚀&nbsp;发现新版本 (v{{ versionInfo.newVersion.displayVersion || versionInfo.newVersion.version }})！建议去「设置 → 软件更新」更新新版本。
+        p 建议阅读版本更新日志，了解当前版本的变化。
+        p(v-if="!info.isLatest") 发现新版本 (v{{ versionInfo.newVersion.displayVersion || versionInfo.newVersion.version }})，可在「设置 → 软件更新」更新。
 </template>
 
 <script>

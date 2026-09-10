@@ -9,6 +9,7 @@
     <layout-icons />
     <layout-change-log-modal />
     <layout-update-modal />
+    <layout-pact-modal />
     <layout-sync-mode-modal />
     <layout-sync-auth-code-modal />
     <layout-play-detail />

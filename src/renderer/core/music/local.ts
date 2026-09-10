@@ -19,11 +19,7 @@ import {
 const getOtherSourceByLocal = async<T>(musicInfo: LX.Music.MusicInfoLocal, handler: (infos: LX.Music.MusicInfoOnline[]) => Promise<T>) => {
   let result: LX.Music.MusicInfoOnline[] = []
   result = await getOtherSource(musicInfo)
-  if (result.length) {
-    try { return await handler(result) } catch {
-      // Try the next matching source.
-    }
-  }
+  if (result.length) try { return await handler(result) } catch {}
   if (musicInfo.name.includes('-')) {
     const [name, singer] = musicInfo.name.split('-').map(val => val.trim())
     result = await getOtherSource({
@@ -31,21 +27,13 @@ const getOtherSourceByLocal = async<T>(musicInfo: LX.Music.MusicInfoLocal, handl
       name,
       singer,
     }, true)
-    if (result.length) {
-      try { return await handler(result) } catch {
-        // Try the next matching source.
-      }
-    }
+    if (result.length) try { return await handler(result) } catch {}
     result = await getOtherSource({
       ...musicInfo,
       name: singer,
       singer: name,
     }, true)
-    if (result.length) {
-      try { return await handler(result) } catch {
-        // Try the next matching source.
-      }
-    }
+    if (result.length) try { return await handler(result) } catch {}
   }
   let fileName = musicInfo.meta.filePath.split(/\/|\\/).at(-1)
   if (fileName) {
@@ -58,11 +46,7 @@ const getOtherSourceByLocal = async<T>(musicInfo: LX.Music.MusicInfoLocal, handl
           name,
           singer,
         }, true)
-        if (result.length) {
-          try { return await handler(result) } catch {
-            // Try the next matching source.
-          }
-        }
+        if (result.length) try { return await handler(result) } catch {}
         result = await getOtherSource({
           ...musicInfo,
           name: singer,
@@ -75,11 +59,7 @@ const getOtherSourceByLocal = async<T>(musicInfo: LX.Music.MusicInfoLocal, handl
           singer: '',
         }, true)
       }
-      if (result.length) {
-        try { return await handler(result) } catch {
-          // Try the next matching source.
-        }
-      }
+      if (result.length) try { return await handler(result) } catch {}
     }
   }
 
@@ -102,9 +82,7 @@ export const getMusicUrl = async({ musicInfo, isRefresh, allowToggleSource = tru
       if (!isFromCache) void saveMusicUrl(musicInfo, quality, url)
       return url
     })
-  } catch {
-    // Continue with the next source when this URL lookup fails.
-  }
+  } catch {}
 
   if (!allowToggleSource) throw new Error('failed')
 
@@ -137,9 +115,7 @@ export const getPicUrl = async({ musicInfo, listId, isRefresh, onToggleSource = 
     return await getOnlineOtherSourcePicByLocal(musicInfo).then(({ url }) => {
       return url
     })
-  } catch {
-    // Continue with the next source when this URL lookup fails.
-  }
+  } catch {}
 
   onToggleSource()
   return getOtherSourceByLocal(musicInfo, async(otherSource) => {
@@ -177,9 +153,7 @@ export const getLyricInfo = async({ musicInfo, isRefresh, onToggleSource = () =>
       if (!isFromCache) void saveLyric(musicInfo, lyricInfo)
       return buildLyricInfo(lyricInfo)
     })
-  } catch {
-    // Continue with the next source when lyric lookup fails.
-  }
+  } catch {}
 
   onToggleSource()
   return getOtherSourceByLocal(musicInfo, async(otherSource) => {

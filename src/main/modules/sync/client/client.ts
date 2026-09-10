@@ -108,9 +108,7 @@ const heartbeatTools = {
       if (client) {
         try {
           client.close(SYNC_CLOSE_CODE.failed)
-        } catch {
-          // Closing an already-failed client is best effort.
-        }
+        } catch {}
       }
       if (++this.failedNum > this.maxTryNum) {
         this.failedNum = 0

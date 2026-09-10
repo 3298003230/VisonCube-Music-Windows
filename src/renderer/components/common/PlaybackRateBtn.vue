@@ -36,7 +36,7 @@ const handleUpdatePlaybackRate = (val) => {
 
 
 const updatePreservesPitch = (enabled) => {
-  void updateSetting({ 'player.preservesPitch': enabled })
+  updateSetting({ 'player.preservesPitch': enabled })
 }
 
 // const icon = computed(() => {

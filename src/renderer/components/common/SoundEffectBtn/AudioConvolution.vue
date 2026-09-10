@@ -54,19 +54,19 @@ const updateConvolution = async val => {
     setting['player.soundEffect.convolution.mainGain'] = target.mainGain * 10
     setting['player.soundEffect.convolution.sendGain'] = target.sendGain * 10
   }
-  await updateSetting(setting)
+  updateSetting(setting)
 }
 
 const handleUpdateMainGain = (value) => {
-  void updateSetting({ 'player.soundEffect.convolution.mainGain': Math.round(value) })
+  updateSetting({ 'player.soundEffect.convolution.mainGain': Math.round(value) })
 }
 const handleUpdateSendGain = (value) => {
-  void updateSetting({ 'player.soundEffect.convolution.sendGain': Math.round(value) })
+  updateSetting({ 'player.soundEffect.convolution.sendGain': Math.round(value) })
 }
 
 const handleSetPreset = (item) => {
   if (appSetting['player.mediaDeviceId'] != 'default') saveMediaDeviceId('default')
-  void updateSetting({
+  updateSetting({
     'player.soundEffect.convolution.fileName': item.source,
     'player.soundEffect.convolution.mainGain': item.mainGain,
     'player.soundEffect.convolution.sendGain': item.sendGain,

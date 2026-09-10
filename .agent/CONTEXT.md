@@ -13,6 +13,11 @@
 - 来源歌单通过鉴权接口同步，使用 revision/CAS、删除墓碑和幂等操作编号；应用云端顺序时保留本地歌曲。
 - 原作者稳定修复在双端按适用范围同步，定制账号、云歌单、托管音源和关闭策略不得被上游更新覆盖。
 
+## 2026-09 源码底座
+
+- 双端 `src` 已以原作者最新快照为底座，只重新接入品牌、账号、云同步、托管音源、自有更新和 Windows 关闭策略；未保留首次页面切换等临时补丁。
+- 用户可见的首页、加载、导入和更新提示采用无表情的中性文案；许可证、第三方归属、协议兼容标识和音乐评论表情解码不作为品牌清理目标。
+
 ## 构建与依赖
 
 - 双端定制 npm 包固定使用 `VisonCube-Music-Dependent` 的不可变 Release `deps-2026-07-30-aeadf24`。
@@ -25,5 +30,7 @@
 - Windows 只发布 x64 安装包、`.blockmap`、`latest.yml` 和 SHA-256 清单，沿用明确标注的未签名发布方式。
 - Android 发布四个 ABI APK 与 universal APK；基础版本号为 86，ABI 包沿用 Gradle 的 86001–86004 映射。
 - Android 正式包必须通过证书 SHA-256 指纹 `9C951C4BBA399D21751F4B194E839DA3A49EFD60534CF9B3B9D35859A6D6BC95` 校验。
-- 2026-09-08 已取消 GitHub Actions 直连 COS/服务器的生产同步方案；Music COS 和服务器清单后续保持人工门禁，不在 GitHub 保存发布专用 SSH 或 COS Secret。
+- 2026-09-08 已正式发布 Music 2.13.5：双端 GitHub Release、Music COS 白名单资产和服务器更新接口均切换到 `2.13.5`。
+- 服务器更新接口通过 `/home/ubuntu/ServerCode/VisonCube/update/releases.json` 管理，后端实际下载文件名依赖 `asset_path`；更新版本时需同步 `asset_path`、`file_name`、`download_url` 和 `sha256`。
+- 2026-09-08 已取消 GitHub Actions 直连 COS/服务器的生产同步方案；后续生产同步继续保持人工门禁，不在 GitHub 保存发布专用 SSH 或 COS Secret。
 - 本地 TV 项目不属于 Music 清理范围。

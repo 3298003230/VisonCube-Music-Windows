@@ -1,5 +1,25 @@
 # 当前进度
 
+## 2026-09-09 原作者源码底座还原（待完整 CI）
+
+- Windows 与 Android 正式 `src` 已从经验证的原作者快照重建，并只合并白名单的 VisonCube 功能；非 `src` 配置逐文件 SHA-256 与还原前正式目录一致。
+- 已完成双端用户可见文案审查：清理加载、导入、更新与请求异常中的表情及原作者导向；不修改许可证、第三方归属、同步协议标识或评论表情数据。
+- Windows 保留关闭选择、托盘图标、账号、云同步和托管音源；Android 保留账号、云同步、托管音源、自有更新、包名和原生图标配置。
+- 本地双端 `test:music-sync` 均通过 4/4；项目目录未安装 `node_modules`，完整 lint、Webpack、React Native bundle、Gradle 和真机验收仍待候选 CI。
+- 本轮未提交、推送、创建标签、发布或更新 COS/服务器；已保留同步前的完整 `src` 回退备份于本机临时目录。
+
+## 2026-09-08 Music 2.13.5 正式发布与生产切换
+
+- 用户测试当前候选包未发现问题后，已按确认进入正式发布与生产同步。
+- 已确认 GitHub Release `v2.13.5` 存在且非草稿、非预发布：Windows 资产包含 x64 安装包、`.blockmap`、`latest.yml`、`SHA256SUMS.txt`；Android 资产包含 arm64-v8a、armeabi-v7a、x86、x86_64、universal 五个 APK 和 `SHA256SUMS.txt`。
+- 已通过腾讯云控制台登录态上传 Music 白名单资产到 COS，未使用或保存长期 COS Secret：Windows 安装包、`.blockmap`、`latest.yml`、`SHA256SUMS.txt`，Android universal APK 和 `SHA256SUMS.txt`。
+- 已通过腾讯云轻量应用服务器自动化助手更新 `/home/ubuntu/ServerCode/VisonCube/update/releases.json`，只修改 `music-windows` 与 `music-android`；更新前保留服务器备份：
+  - `/home/ubuntu/ServerCode/VisonCube/update/backups/release-music-2.13.5-20260908T101837Z/releases.json`
+  - `/home/ubuntu/ServerCode/VisonCube/update/backups/release-music-2.13.5-asset-path-20260908T102516Z/releases.json`
+- 首次清单更新后发现后端接口优先使用 `asset_path` 生成下载文件名；已补充修正 Music 双端 `asset_path` 并重新验证。
+- 公网验证通过：`/api/releases/music-windows` 与 `/api/releases/music-android` 均返回 `2.13.5` 且文件名、下载 URL 和 SHA-256 指向 2.13.5；Windows 安装包 Range 请求返回 `206 Partial Content`；公网下载的 Windows 安装包与 Android universal APK 长度和 SHA-256 均匹配。
+- 本机使用 Android SDK `apksigner.jar` 复验 universal APK 证书指纹，匹配 `9C951C4BBA399D21751F4B194E839DA3A49EFD60534CF9B3B9D35859A6D6BC95`；`aapt dump badging` 确认包名 `com.visoncube.music`、`versionName=2.13.5`、`versionCode=86`。
+
 ## 2026-09-08 生产同步方案回退
 
 - 按用户要求停止 COS 密钥创建流程，不再获取或配置 COS Secret。
@@ -29,4 +49,4 @@
 ## 待完成
 
 - 本机没有项目 `node_modules`；需要重新出包时，完整候选包构建仍需由双端候选 Actions 验证。本轮 Windows `main` CI 已通过，Android 本轮未改代码。
-- 真实 Windows/Android 设备验收、Music COS 和服务器清单更新仍需后续单独门禁；GitHub 直连生产同步已取消。
+- 2.13.5 已切换生产，后续继续观察用户设备上的自动更新、覆盖安装和运行反馈；GitHub 直连生产同步保持取消。

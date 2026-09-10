@@ -143,18 +143,13 @@ export const setUserDataPath = () => {
 }
 
 export const registerDeeplink = (startApp: () => void) => {
-  const protocols = ['visoncubemusic', 'lxmusic']
   if (process.env.NODE_ENV !== 'production' && process.platform === 'win32') {
     // Set the path of electron.exe and your app.
     // These two additional parameters are only available on windows.
     // console.log(process.execPath, process.argv)
-    for (const protocol of protocols) {
-      app.setAsDefaultProtocolClient(protocol, process.execPath, process.argv.slice(1))
-    }
+    app.setAsDefaultProtocolClient('lxmusic', process.execPath, process.argv.slice(1))
   } else {
-    for (const protocol of protocols) {
-      app.setAsDefaultProtocolClient(protocol)
-    }
+    app.setAsDefaultProtocolClient('lxmusic')
   }
 
   // deep link
@@ -293,19 +288,13 @@ const backupDB = (backupPath: string) => {
   const dbPath = path.join(global.lxDataPath, 'lx.data.db')
   try {
     renameSync(dbPath, backupPath)
-  } catch {
-    // The database sidecar may not exist; continue backing up other files.
-  }
+  } catch {}
   try {
     renameSync(`${dbPath}-wal`, `${backupPath}-wal`)
-  } catch {
-    // The database sidecar may not exist; continue backing up other files.
-  }
+  } catch {}
   try {
     renameSync(`${dbPath}-shm`, `${backupPath}-shm`)
-  } catch {
-    // The database sidecar may not exist; continue backing up other files.
-  }
+  } catch {}
   openDirInExplorer(backupPath)
 }
 

@@ -1,4 +1,4 @@
-export const URL_SCHEME_RXP = /^(?:lxmusic|visoncubemusic):\/\//
+export const URL_SCHEME_RXP = /^lxmusic:\/\//
 
 export const SPLIT_CHAR = {
   DISLIKE_NAME: '@',
@@ -32,7 +32,6 @@ export const LIST_IDS = {
 } as const
 
 export const DATA_KEYS = {
-  authSession: 'authSession',
   viewPrevState: 'viewPrevState',
   playInfo: 'playInfo',
   searchHistoryList: 'searchHistoryList',
