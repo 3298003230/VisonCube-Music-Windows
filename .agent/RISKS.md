@@ -1,6 +1,7 @@
 # 当前风险
 
-- 双端源码目录没有 `node_modules`；当前 Windows `7822954` 与 Android `443c4ce` 已通过 Actions 源码 CI，但后续修改仍需由 Actions 执行完整 ESLint、Webpack、React Native 与 Gradle 验证。
+- Music 许可仍使用“VisonCube 维护方”等通用发布主体表述；如进行正式商业发布，权利人应补齐发布主体、隐私政策、联系信息、适用法和生效日期，并取得当地专业法律审阅。
+- 双端源码目录没有 `node_modules`；Windows `7822954` 与 Android `443c4ce` 是本轮修改前已通过的 Actions 基线。本轮品牌、设置分类和启动路由修改已通过本地静态检查与同步模型测试，仍需由候选 Actions 执行完整 ESLint、Webpack、React Native 与 Gradle 验证。
 - 还原后的双端源码尚未生成候选安装包并完成真机回归；账号登录与会话恢复、云同步、托管音源、Windows 关闭/托盘以及 Android 覆盖安装仍需候选包验证。
 - Android 本机签名恢复目录当前不存在；当前已发布 universal APK 已用 `apksigner` 复验指纹，后续重新出包仍需通过候选构建、`apksigner` 指纹和 APK 元数据校验。
 - Windows 安装包按维护者决定保持未签名，干净系统可能显示“未知发布者”。

@@ -6,6 +6,7 @@
 - Android 源码：`D:\Code\VisonCube\Music\Android`，React Native 与 React Native Navigation。
 - 两个目录均为扁平源码目录且不包含 `.git`；提交和推送使用临时 Git 工作区。
 - 当前发布版本为 Windows/Android `2.13.5`，Android 基础 `versionCode=86`。
+- Music 用户许可的唯一源文件为 `D:\Code\VisonCube\Music\VisonCube-Music-许可协议.md`（版本 1.1）；Windows 安装页文本/RTF 与 Windows、Android 首次协议弹窗均从该文件同步。该协议只适用于 Music，不替代通用协议、TV 协议或第三方开源许可证。
 
 ## 定制功能
 
@@ -15,8 +16,9 @@
 
 ## 2026-09 源码底座
 
-- 双端 `src` 已以原作者最新快照为底座，只重新接入品牌、账号、云同步、托管音源、自有更新和 Windows 关闭策略；未保留首次页面切换等临时补丁。
+- 双端 `src` 已以原作者最新快照为底座，只重新接入品牌、账号、云同步、托管音源、自有更新和 Windows 关闭策略；保留已验证的 Windows 首屏路由竞争保护与双端设置分类。
 - 用户可见的首页、加载、导入和更新提示采用无表情的中性文案；许可证、第三方归属、协议兼容标识和音乐评论表情解码不作为品牌清理目标。
+- 用户可见的无封面占位统一使用 `V/C`，应用图标继续以双端各自的 `visoncube-music-icon.svg` 为几何源；Windows 托盘使用独立小尺寸资源。
 - 当前通过 CI 的源码基线提交为 Windows `7822954999d94fc1bba0cdd0f70f5e51a900dc78`、Android `443c4cef1569ac4c593aa4d44dc64e78bcf657b4`。
 
 ## 构建与依赖

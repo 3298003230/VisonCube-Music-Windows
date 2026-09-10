@@ -5,7 +5,7 @@
     </div>
     <div :class="$style.picContent" :aria-label="$t('player__pic_tip')" @contextmenu="handleToMusicLocation" @click="showPlayerDetail">
       <img v-if="musicInfo.pic" :src="musicInfo.pic" decoding="async" @error="imgError">
-      <div v-else :class="$style.emptyPic">L<span>X</span></div>
+      <div v-else :class="$style.emptyPic">V<span>C</span></div>
     </div>
     <div :class="$style.infoContent">
       <div :class="$style.title" :aria-label="title + $t('copy_tip')" @click="handleCopy(title)">
