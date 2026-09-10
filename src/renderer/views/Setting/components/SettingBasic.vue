@@ -263,7 +263,7 @@ export default {
     const updateCloseAction = (action) => {
       const setting = { 'common.closeAction': action }
       if (action == 'tray') setting['tray.enable'] = true
-      void updateSetting(setting)
+      updateSetting(setting)
     }
     const getApiStatus = () => {
       let status

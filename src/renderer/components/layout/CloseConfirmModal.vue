@@ -15,8 +15,8 @@ material-modal(:show="show" :bg-close="false" @close="handleCancel")
 
 <script>
 import { onBeforeUnmount, onMounted, ref } from '@common/utils/vueTools'
-import { appSetting, updateSetting } from '@renderer/store/setting'
-import { onCloseRequest, sendCloseAction, sendCloseReady } from '@renderer/utils/ipc'
+import { appSetting } from '@renderer/store/setting'
+import { onCloseRequest, sendCloseAction, sendCloseReady, updateSetting } from '@renderer/utils/ipc'
 
 export default {
   name: 'CloseConfirmModal',
