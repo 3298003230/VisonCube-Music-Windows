@@ -37,3 +37,7 @@
 - 服务器更新接口通过 `/home/ubuntu/ServerCode/VisonCube/update/releases.json` 管理，后端实际下载文件名依赖 `asset_path`；更新版本时需同步 `asset_path`、`file_name`、`download_url` 和 `sha256`。
 - 2026-09-08 已取消 GitHub Actions 直连 COS/服务器的生产同步方案；后续生产同步继续保持人工门禁，不在 GitHub 保存发布专用 SSH 或 COS Secret。
 - 本地 TV 项目不属于 Music 清理范围。
+
+## 对外展示
+
+- 对外的安装器许可、应用内首次许可、公开仓库文档、Issue 模板、发布更新说明和包元数据统一使用 VisonCube Music；顶层开源许可证、第三方归属以及兼容标识仍按其原有约束保留。

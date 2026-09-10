@@ -33,3 +33,8 @@
 - 取消 GitHub Actions 直连 Music COS/服务器的生产同步 workflow；不得继续为该 workflow 申请或保存 COS Secret。
 - 服务器 `releases.json` 的 Music 条目更新必须同时维护 `asset_path` 和显式下载字段；只改 `version`、`sha256` 或 `download_url` 会导致接口仍指向旧文件。
 - COS 电视安装包只在列出精确对象并再次确认后删除；不触碰 Music 历史对象、本地 TV 项目或源码目录。
+
+## 2026-09-10 对外展示收敛
+
+- 用户可见和公开仓库的品牌文本统一为 VisonCube Music；更新记录只保留当前 VisonCube Music 版本说明，不再向用户展示旧项目导向。
+- 顶层 LICENSE、第三方许可证、版权归属及 `lxmusic` 协议、数据目录等兼容标识不改名，避免违反许可证或破坏已有数据和链接。

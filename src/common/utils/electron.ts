@@ -38,7 +38,6 @@ export const clipboardReadText = (): string => {
 
 
 export const encodePath = (path: string) => {
-  // https://github.com/lyswhut/lx-music-desktop/issues/963
-  // https://github.com/lyswhut/lx-music-desktop/issues/1461
+  // Escape special URL-path characters before passing paths to Electron.
   return path.replaceAll('%', '%25').replaceAll('#', '%23')
 }

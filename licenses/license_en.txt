@@ -1,52 +1,93 @@
-This project is issued based on the Apache License 2.0 license. The following agreements are supplemental to the Apache License 2.0. In the event of a conflict, the following agreements shall prevail.
+VisonCube Music 软件许可协议
 
-DEFINITIONS:
+版本：1.1
+发布日期：2026 年 9 月 10 日
 
-"This Project" refers to the LX Music Desktop Edition (aka lx-music-desktop) project. "User" refers to the user who signed this agreement. "Official Music Streaming Service" refers to collectively the official streaming service corresponding to the music source. "Copyrighted Data" refers to data including, but not limited to, pictures, audio, names, etc., for which others own the copyright.
+本协议适用于 VisonCube Music 的手机、平板和电脑端客户端、配套工具、安装包、更新组件和界面资源（以下合称“本软件”）。本软件由 VisonCube 维护方提供。下载、安装、复制、运行或使用本软件，即表示你已阅读并同意本协议；如果你不同意，请停止使用并卸载本软件。
 
-1. Data Source
+一、许可授予
 
-1.1 The principle of the online data sources of the various official music streaming services of this project is to draw data from its open servers (the same as the data obtained in the unlogged-in state in the official music streaming service app). After simply screening and merging the data, this project is responsible for the legitimacy and accuracy of the data.
+在你遵守本协议的前提下，VisonCube 维护方授予你一项有限的、非独占的、不可转让的、不可再许可的许可，仅用于个人或你有权管理的设备上安装、运行和使用本软件。
 
-1.2 The ability of this project itself does not obtain certain audio data. The online audio data source used in this project comes from the online link provided by the "API" selected in the software settings. For example, when playing a song, this project only transmits information such as the song title, artist, and other information to the "API". If the "API" returns a link, this project will think that this is the audio data of the song for use, but as for whether this is the correct audio data, this project cannot verify its accuracy. So, in the process of using this project, there may be a problem that the audio you want to play does not correspond to the audio you actually play, or you cannot play it.
+除本协议明确授予的权利外，VisonCube 维护方不向你转让任何商标、著作权、专利、商业秘密或其他知识产权。VisonCube 名称、标识、图标、界面设计、文案及其他品牌元素仍归其权利人所有。
 
-1.3 Data in this project other than official music streaming service (such as lists in "Your Library") comes from the user's local system or a synchronization service that the user connected to. This project is not responsible for the legality and accuracy of this data.
+二、允许的使用
 
-2. Copyrighted Data
+你可以：
 
-2.1 During the process of using this project, copyrighted data may be generated. For this copyrighted data, this project does not have their ownership. In order to avoid infringement, users must remove copyrighted data generated during the process of using this project ** within  24 hours **.
+1. 在自己拥有或合法控制的手机、平板和电脑上安装并运行本软件；
+2. 为个人备份目的保存一份本软件安装包；
+3. 使用本软件提供的音乐搜索、播放、歌单、收藏、历史、同步、歌词、音源配置及其他功能，但前提是这些使用符合适用法律以及相关服务条款；
+4. 按本协议第三条及安装包内随附的开源许可证，行使第三方开源组件授予的权利。
 
-3. Alias of Music Streaming Service
+三、第三方组件与开源许可证
 
-3.1 The official music streaming service alias within this project is a term used within this project to refer to the official music streaming service and does not contain malicious intent. If the operator of the official music streaming service feels it is inappropriate, you can contact this project to request changes or removals.
+本软件可能包含第三方软件、开源代码、运行库、字体、媒体组件或其他受独立许可证约束的内容。此类组件不适用本协议中与其许可证冲突的条款，其权利和义务以对应的开源许可证、版权声明和归属文件为准。
 
-4. Use of Resources
+安装包、源码仓库或“关于/许可证”页面中提供的许可证文本和开源声明属于本协议的一部分。对于采用 GPL、LGPL、Apache、MIT 或其他许可证的组件，相关许可证授予的权利继续有效；本协议不得解释为限制这些许可证已经授予的权利。
 
-4.1 The parts used in this project include, but are not limited to, fonts, pictures, and other resources from the Internet. If infringement occurs, you can contact this project.
+四、用户配置与内容责任
 
-5. Disclaimer
+本软件是音乐播放和配置管理客户端，不存储、制作、审核、托管或主动提供音乐、歌词、专辑封面或其他第三方内容。软件显示、加载或播放的内容、地址、元数据、广告及服务，可能来自你自行添加的配置或第三方站点。
 
-5.1 The use of this project includes any direct, indirect, special, accidental, or result damage due to any nature caused by this agreement or use or inability to use this item (including but not limited to the loss of goodwill, stop work, computer, computer Damage compensation caused by faults or any or all other commercial damage or losses) is the responsibility of users.
+你应确保：
 
-6. Use Restrictions
+1. 你对所添加、访问或传播的配置、地址和内容具有合法授权；
+2. 你的使用不侵犯他人的著作权、商标权、隐私权、个人信息权益或其他合法权益；
+3. 你的使用符合所在地法律法规、网络服务商规则以及第三方内容来源的服务条款；
+4. 你不会利用本软件传播违法、侵权、恶意、欺诈或危害他人及网络安全的内容。
 
-6.1 This project is completely free and open source and is published on GitHub for the learning exchanges of technology for people all over the world. This project does not guarantee that the technology in this project may violate local laws and regulations.
+VisonCube 维护方不对第三方来源的可用性、准确性、合法性、连续性或内容质量作保证，也不因你配置或访问第三方来源而成为该内容的提供者。
 
-6.2 ** This project is prohibited in violation of local laws and regulations. ** The user is solely responsible for any violation of law caused by the use of this project that the user knows or does not know is not permitted by local law and regulations.
+五、账号、同步与网络服务
 
-7. Copyright Protection
+如果你使用账号、历史、收藏、配置同步或其他在线功能，你同意提供真实、合法且必要的信息，并自行保管账号凭据。在线功能可能受网络、设备、第三方服务、维护、限流或政策变化影响；VisonCube 维护方可以在必要时进行维护、调整、暂停或终止相关服务。
 
-7.1 The operation of a music streaming service is not an easy task. Please respect copyrights and support the genuine.
+网络请求、账号数据和同步数据的处理以适用的隐私政策、服务说明和你选择的第三方服务规则为准。除非法律要求或你主动配置，本软件不会因本协议而获得超出功能所需的内容授权。
 
-8. Non-commercial Nature
+六、更新与兼容性
 
-8.1 This project is only used for exploring and research on technical feasibility and does not accept any business (including but not limited to advertising, etc.) cooperation and donations.
+VisonCube 维护方可以发布修复、安全更新、功能更新或配置兼容更新。更新可能改变界面、功能、系统要求、网络地址或第三方组件版本。你可以根据设备设置和更新提示决定是否安装；安装更新后继续使用本软件，即视为接受更新后的本协议版本（如有）。
 
-9. Accepting Agreement
+不同平台、处理器架构和系统版本可能提供不同功能。VisonCube 维护方不保证本软件在所有设备、系统、网络环境或第三方配置下均可用。
 
-9.1 If you use this project, it will represent you accept this agreement.
+七、禁止行为
 
-* If the agreement is updated, you will not be notified separately. You can check it out by visiting the project address.
-* The content of this agreement is translated from the Chinese version of the agreement.
+除适用法律明确允许或相关开源许可证明确授予外，你不得：
 
-By: lyswhut
+1. 移除、遮盖或篡改本软件中的版权、许可证、商标或来源声明；
+2. 出租、出售、出借、再许可、分发或提供本软件的商业化托管服务；
+3. 对本软件进行反向工程、反编译、反汇编或试图取得源代码，但法律允许的范围或适用开源许可证允许的范围除外；
+4. 绕过授权、访问控制、签名校验、安全机制或更新机制；
+5. 使用本软件实施攻击、滥用接口、批量抓取、欺诈、侵权或规避第三方服务限制；
+6. 将本软件或其组件用于违反法律、监管要求或第三方权利的用途。
+
+八、免责声明
+
+在适用法律允许的最大范围内，本软件按“现状”和“可用”基础提供，不作任何明示或默示保证，包括但不限于适销性、特定用途适用性、权利不受侵害、无错误、无中断、无恶意代码以及适合你的设备或内容来源。
+
+播放效果、加载或缓冲时间、音频质量、歌词、专辑封面、网络访问和第三方配置结果会受到设备、网络、服务端和内容来源影响。软件中的过滤、提示、缓存和安全处理不构成对第三方内容合法性的判断或保证。
+
+九、责任限制
+
+在适用法律允许的最大范围内，VisonCube 维护方及其贡献者不对因使用或无法使用本软件、第三方内容或在线服务产生的任何间接、附带、特殊、惩罚性或后果性损失负责，包括数据丢失、业务中断、利润损失、设备损坏或服务中断。
+
+对于法律不得排除或限制的责任，本条不限制相应责任。你应在使用本软件前自行备份重要数据，并对自己的配置、账号、设备和内容访问行为负责。
+
+十、协议终止
+
+本许可自你接受时生效。若你违反本协议，许可将在违约发生时自动终止；你也可以随时停止使用并卸载本软件。许可终止后，你应停止使用并删除你持有的本软件副本，但依法保留的开源组件副本及其许可证权利不受影响。
+
+十一、协议变更
+
+VisonCube 维护方可以因法律、平台、服务或安全要求更新本协议。更新后的版本会通过安装包、应用内页面或源码仓库发布，并标注版本和日期。若你在更新生效后继续使用本软件，则表示接受更新后的条款；如果你不同意，应停止使用并卸载本软件。
+
+十二、适用法律与争议解决
+
+本协议的解释、效力和争议解决适用软件发布主体所在地及用户所在地适用的强制性法律。双方应先通过合理协商解决争议；协商不成时，提交有管辖权的法院或依法有权的争议解决机构处理。本条不排除消费者依法享有的强制性权利。
+
+如需用于正式商业发布，请由软件权利人核对发布主体全称、隐私政策、适用司法管辖地和生效日期，并由当地专业法律顾问审阅。
+
+---
+
+本协议不取代安装包内的第三方开源许可证、隐私政策或依法必须向用户提供的其他声明。发生冲突时，适用法律和第三方开源许可证在其适用范围内优先。
