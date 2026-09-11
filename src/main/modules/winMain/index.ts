@@ -1,7 +1,7 @@
 import initRendererEvent, { handleKeyDown, hotKeyConfigUpdate } from './rendererEvent'
 
 import { APP_EVENT_NAMES } from '@common/constants'
-import { createWindow, minimize, setProgressBar, setProxy, setThumbarButtons, toggleHide, toggleMinimize } from './main'
+import { closeWindow, createWindow, minimize, setProgressBar, setProxy, setThumbarButtons, toggleHide, toggleMinimize } from './main'
 import initUpdate from './autoUpdate'
 import { HOTKEY_COMMON } from '@common/hotKey'
 
