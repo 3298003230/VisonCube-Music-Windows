@@ -143,13 +143,18 @@ export const setUserDataPath = () => {
 }
 
 export const registerDeeplink = (startApp: () => void) => {
+  const protocols = ['visoncubemusic', 'lxmusic']
   if (process.env.NODE_ENV !== 'production' && process.platform === 'win32') {
     // Set the path of electron.exe and your app.
     // These two additional parameters are only available on windows.
     // console.log(process.execPath, process.argv)
-    app.setAsDefaultProtocolClient('lxmusic', process.execPath, process.argv.slice(1))
+    for (const protocol of protocols) {
+      app.setAsDefaultProtocolClient(protocol, process.execPath, process.argv.slice(1))
+    }
   } else {
-    app.setAsDefaultProtocolClient('lxmusic')
+    for (const protocol of protocols) {
+      app.setAsDefaultProtocolClient(protocol)
+    }
   }
 
   // deep link

@@ -4,7 +4,6 @@ import { APP_EVENT_NAMES } from '@common/constants'
 import { createWindow, minimize, setProgressBar, setProxy, setThumbarButtons, toggleHide, toggleMinimize } from './main'
 import initUpdate from './autoUpdate'
 import { HOTKEY_COMMON } from '@common/hotKey'
-import { quitApp } from '@main/app'
 
 export default () => {
   initRendererEvent()
@@ -15,7 +14,7 @@ export default () => {
     if (info?.type != APP_EVENT_NAMES.winMainName) return
     switch (info.action) {
       case HOTKEY_COMMON.close.action:
-        quitApp()
+        closeWindow()
         break
       case HOTKEY_COMMON.hide_toggle.action:
         toggleHide()
