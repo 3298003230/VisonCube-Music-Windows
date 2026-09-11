@@ -10,7 +10,7 @@ import {
   cancelRequest,
   setAllowShowUpdateAlert,
 } from '@main/modules/userApi'
-import { hydrateManagedSource, installManagedSource } from '@main/modules/userApi/managedSource'
+import { clearManagedSourceCache, hydrateManagedSource, installManagedSource, MANAGED_USER_API_ID } from '@main/modules/userApi/managedSource'
 import { sendEvent } from '@main/modules/winMain/main'
 
 export default () => {
@@ -19,6 +19,7 @@ export default () => {
   })
 
   mainHandle<string[], LX.UserApi.UserApiInfo[]>(WIN_MAIN_RENDERER_EVENT_NAME.remove_user_api, async({ params: apiIds }) => {
+    if (apiIds.includes(MANAGED_USER_API_ID)) await clearManagedSourceCache()
     return removeApi(apiIds)
   })
 

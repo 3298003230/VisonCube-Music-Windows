@@ -53,6 +53,10 @@ export const installManagedSource = async(params: { userId: number, manifest: Ma
   return getUserApis()
 }
 
+export const clearManagedSourceCache = async() => {
+  await fs.promises.rm(getCacheDir(), { recursive: true, force: true })
+}
+
 export const hydrateManagedSource = async(userId: number) => {
   try {
     const manifest = JSON.parse(await fs.promises.readFile(getManifestPath(), 'utf8')) as ManagedSourceManifest & { user_id?: number }

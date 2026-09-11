@@ -5,7 +5,7 @@
 - Windows 源码：`D:\Code\VisonCube\Music\Windows`，Electron 40.9.2、Vue 3、TypeScript、Webpack。
 - Android 源码：`D:\Code\VisonCube\Music\Android`，React Native 与 React Native Navigation。
 - 两个目录均为扁平源码目录且不包含 `.git`；提交和推送使用临时 Git 工作区。
-- 当前发布版本为 Windows/Android `2.13.5`，Android 基础 `versionCode=86`。
+- 当前生产发布版本为 Windows/Android `2.13.5`；下一候选版本为双端 `2.13.6`，Android 基础 `versionCode=87`。
 - Music 用户许可的唯一源文件为 `D:\Code\VisonCube\Music\VisonCube-Music-许可协议.md`（版本 1.1）；Windows 安装页文本/RTF 与 Windows、Android 首次协议弹窗均从该文件同步。该协议只适用于 Music，不替代通用协议、TV 协议或第三方开源许可证。
 
 ## 定制功能

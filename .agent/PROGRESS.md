@@ -1,5 +1,11 @@
 # 当前进度
 
+## 2026-09-11 托管音源删除缓存修复
+
+- 保留退出账号时的托管订阅源和缓存；双端仅在用户手动删除 `managed_user_api` / `user_api_managed` 时清除独立缓存。
+- Windows 在主进程删除事件中清理 `managed-source` 目录；Android 在删除入口清理清单、脚本和临时文件；普通本地/在线导入源删除路径不变。
+- 新增双端托管源接线回归测试；Windows 5/5、Android 8/8 本地模型/接线测试通过。候选版本已更新为双端 `2.13.6`、Android 基础 `versionCode=87`；完整 lint、构建和真机测试仍由候选 Actions 验证，不创建正式 Release、不更新生产。
+
 ## 2026-09-10 品牌与设置体验收敛
 
 - 双端无封面占位已统一为 `V/C`，Windows 遗留 LX SVG 已替换为现有 C/V 几何；静态扫描未再发现用户界面的 `LX Music`、`落雪` 或 `L/X` 占位。
@@ -71,3 +77,11 @@
 - 本地 Windows/Android 源码和临时 Git 工作区已同步安装器许可、README、FAQ、Issue 模板、更新日志与发布元数据；Windows 包元数据维护者已改为 VisonCube Music。
 - 静态审计确认对外资料与安装器许可不再含旧品牌、旧仓库、旧文档或旧作者导向；Windows `033cf5f` 与 Android `984e940` 已推送。
 - 首轮双端候选构建仅因手写 `version.json` 与 `npm run publish` 的规范化输出不一致而在元数据校验阶段失败；现已用项目脚本重新生成，待推送并重跑候选构建。
+
+## 2026-09-10 Android 托管音源播放修复
+
+- 真机反馈托管音源更新成功后播放仍提示换源失败；确认播放适配器仍只识别 `user_api*`，没有识别 Android 使用的 `managed_user_api`，因此必然落入空的内置音源表并抛出 `Api is not found`。
+- Android 改用现有 `isUserApiSource` 统一判定并增加回归测试，提交 `4189817` 已普通推送至 `main`；Windows 托管源 ID 为 `user_api_managed`，现有路径正确，未修改。
+- 候选 workflow run `34492760126` 成功：发布元数据、7 项测试、零警告 lint、JS bundle、签名构建、APK 元数据和证书指纹均通过；正式 Release 任务未执行。
+- arm64-v8a 候选 APK 已下载到本机并与 CI 校验清单一致，包名 `com.visoncube.music`、版本 `2.13.5`、versionCode `86003`、ABI `arm64-v8a`，证书指纹匹配既有正式证书。
+- 本轮未创建 Release、未更新 COS 或服务器清单；修复后的实际播放仍需实体 Android 设备验收。
