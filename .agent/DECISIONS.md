@@ -26,7 +26,7 @@
 
 ## 版本、签名与发布
 
-- 下一候选版本固定为双端 `2.13.6`，Android 基础 `versionCode=87`；生产仍保持 `2.13.5`，直至候选验收后再次确认发布。
+- 更新回归修复正式版本固定为双端 `2.13.7`、Android 基础 `versionCode=89`；用于验证升级链路的 2.13.6 修复包使用基础 `versionCode=88`，不覆盖既有 2.13.6 标签或 Release。
 - `npm run publish` 只幂等同步 `publish/version.json`，不得修改 package 版本、增加 Android versionCode 或重复写 CHANGELOG。
 - Windows 继续未签名 x64 发布并在说明中公开标注；Android 只接受既有证书指纹签名的 APK。
 - 候选和正式发布分离；创建标签、GitHub Release、写入 COS、修改服务器清单均需在动作前单独确认。
