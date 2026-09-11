@@ -3,6 +3,12 @@ import * as authApi from './api'
 import type { AuthSession, AuthUser, PasswordCredentials, RegisterCredentials } from './models'
 import { clearSession, loadSession, saveSession } from './storage'
 import { stopMusicCloudSync, updateMusicCloudSyncSession } from '@renderer/features/musicSync'
+import { MANAGED_USER_API_ID } from '@common/musicSource'
+import { setUserApi } from '@renderer/core/apiSource'
+import { userApi } from '@renderer/store'
+import { appSetting } from '@renderer/store/setting'
+import { removeUserApi } from '@renderer/utils/ipc'
+import apiSourceInfo from '@renderer/utils/musicSdk/api-source-info'
 
 export const authSession = ref<AuthSession | null>(null)
 export const authReady = ref(false)
@@ -53,10 +59,24 @@ export const changePassword = async(oldPassword: string, newPassword: string) =>
   return persistSession(await authApi.changePassword(authSession.value.token, oldPassword, newPassword))
 }
 
+const removeManagedSourceForSignOut = async() => {
+  const isManagedSourceActive = appSetting['common.apiSource'] == MANAGED_USER_API_ID
+  userApi.list = await removeUserApi([MANAGED_USER_API_ID])
+  if (!isManagedSourceActive) return
+
+  const fallback = apiSourceInfo.find(api => !api.disabled)
+  if (fallback) await setUserApi(fallback.id)
+}
+
 export const signOut = async() => {
   const session = authSession.value
   authSession.value = null
   stopMusicCloudSync()
+  try {
+    await removeManagedSourceForSignOut()
+  } catch {
+    // 音源清理失败不能阻止本地会话退出；下次启动仍会按缓存校验处理失效音源。
+  }
   clearSession()
   if (!session || !isSessionUsable(session)) return
   try {
