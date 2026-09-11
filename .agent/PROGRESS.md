@@ -1,11 +1,13 @@
 # 当前进度
 
-## 2026-09-11 Music 2.13.7 更新回归修复
+## 2026-09-11 Music 2.13.7 正式发布与生产切换
 
 - 修复 Windows 动态更新 Feed、下载异常提示和关闭快捷键接线；双端恢复 `lxmusic://` 与 `visoncubemusic://` 运行时解析。
 - 修复 Android 安装 Provider、未知来源授权提示和安装失败重试，并恢复单曲 URL 缓存清理入口；未使用的 URL 预检文件已删除，避免额外 Range 请求。
 - 2.13.6 修复测试包已通过候选 Actions；Windows 安装包与 arm64-v8a APK 已下载并复验哈希、版本、Provider、ABI 和 Android 证书指纹。
-- 2.13.7 候选 Actions 已通过：Windows run `34595946913`、Android run `34595950965`；正式发布、COS 和服务器清单仍未切换。
+- 2.13.7 候选 Actions 已通过：Windows run `34595946913`、Android run `34595950965`；正式 Actions 也已通过：Windows run `34596679085`、Android run `34596682213`。
+- 双端 `v2.13.7` GitHub Release 已创建；Windows x64 安装包、`.blockmap`、`latest.yml`、SHA-256 清单以及 Android universal APK、SHA-256 清单已上传到既有 Music COS 目录，历史对象均保留。
+- 服务器 `releases.json` 已先备份，再经 JSON 校验与同目录原子替换切换到 2.13.7；公网接口、文件长度、SHA-256、Windows Range 206 和 `latest.yml` 均验证通过。
 
 ## 2026-09-11 托管音源退出清理修复
 
@@ -76,8 +78,8 @@
 
 ## 待完成
 
-- 还原后的双端源码尚未生成候选安装包，也未完成 Windows 关闭/托盘、账号云同步、托管音源和 Android 覆盖安装等真机回归。
-- 需要重新出包时，继续由双端手动候选 Actions 构建并完成真机验收；GitHub 直连生产同步保持取消。
+- 继续观察 2.13.6 到 2.13.7 的真实设备应用内更新：Windows 下载、安装和重启，以及 Android 未知来源授权、返回重试和覆盖安装。
+- GitHub 直连生产同步保持取消；后续重新出包仍先运行双端候选 Actions 并完成真机验收。
 
 ## 2026-09-10 对外展示收敛
 

@@ -26,12 +26,13 @@
 
 ## 版本、签名与发布
 
-- 更新回归修复正式版本固定为双端 `2.13.7`、Android 基础 `versionCode=89`；用于验证升级链路的 2.13.6 修复包使用基础 `versionCode=88`，不覆盖既有 2.13.6 标签或 Release。
+- 更新回归修复已正式发布为双端 `2.13.7`、Android 基础 `versionCode=89`；用于验证升级链路的 2.13.6 修复包使用基础 `versionCode=88`，未覆盖既有 2.13.6 标签或 Release。
 - `npm run publish` 只幂等同步 `publish/version.json`，不得修改 package 版本、增加 Android versionCode 或重复写 CHANGELOG。
 - Windows 继续未签名 x64 发布并在说明中公开标注；Android 只接受既有证书指纹签名的 APK。
 - 候选和正式发布分离；创建标签、GitHub Release、写入 COS、修改服务器清单均需在动作前单独确认。
 - 取消 GitHub Actions 直连 Music COS/服务器的生产同步 workflow；不得继续为该 workflow 申请或保存 COS Secret。
 - 服务器 `releases.json` 的 Music 条目更新必须同时维护 `asset_path` 和显式下载字段；只改 `version`、`sha256` 或 `download_url` 会导致接口仍指向旧文件。
+- Android APK 生产下载使用 `https://download.sjmf.xyz` 自定义域名，不使用会返回 `DownloadForbidden` 的 COS 默认域名。
 - 托管订阅源遵循与普通自定义音源不同的删除边界：用户手动删除或退出账号时，双端同时清除托管缓存并卸载列表项；重新登录后必须再次更新音源或重新导入。此规则避免单份缓存被另一账号覆盖后留下账号归属不一致状态；普通自定义音源不受影响。
 - COS 电视安装包只在列出精确对象并再次确认后删除；不触碰 Music 历史对象、本地 TV 项目或源码目录。
 
