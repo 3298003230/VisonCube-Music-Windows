@@ -11,10 +11,53 @@ export interface PlaylistSnapshot<T extends MusicIdentity = MusicIdentity> {
   deleted: boolean
 }
 
+export const USER_PLAYLIST_SYNC_SOURCE = 'visoncube-user'
+
+const RESERVED_LIST_IDS = new Set(['default', 'love', 'temp'])
+
+export interface PlaylistSyncIdentity {
+  source: string
+  sourceListId: string
+  isUserPlaylist: boolean
+}
+
+export const isUserPlaylistSyncSource = (source: string) => source === USER_PLAYLIST_SYNC_SOURCE
+
+export const isValidUserPlaylistSyncId = (id: string) =>
+  Boolean(id.trim()) && id.length <= 512 && !RESERVED_LIST_IDS.has(id)
+
 export const normalizeSourceListId = (source: string, sourceListId: string) => {
+  if (isUserPlaylistSyncSource(source)) return sourceListId
   const legacyPrefix = `${source}__`
   return sourceListId.startsWith(legacyPrefix) ? sourceListId.slice(legacyPrefix.length) : sourceListId
 }
+
+export const getPlaylistSyncIdentity = (list: {
+  id: string
+  source?: string
+  sourceListId?: string
+}): PlaylistSyncIdentity | null => {
+  if (list.source && list.sourceListId) {
+    if (isUserPlaylistSyncSource(list.source)) {
+      return isValidUserPlaylistSyncId(list.sourceListId)
+        ? { source: USER_PLAYLIST_SYNC_SOURCE, sourceListId: list.sourceListId, isUserPlaylist: true }
+        : null
+    }
+    const sourceListId = normalizeSourceListId(list.source, list.sourceListId)
+    return sourceListId
+      ? { source: list.source, sourceListId, isUserPlaylist: false }
+      : null
+  }
+  return isValidUserPlaylistSyncId(list.id)
+    ? { source: USER_PLAYLIST_SYNC_SOURCE, sourceListId: list.id, isUserPlaylist: true }
+    : null
+}
+
+export const shouldKeepPlaylistLocalOnly = (
+  isUserPlaylist: boolean,
+  syncableSongCount: number,
+  localOnlyAfterRemoteDelete: boolean | undefined,
+) => isUserPlaylist && syncableSongCount === 0 && localOnlyAfterRemoteDelete === true
 
 export const playlistKey = (source: string, sourceListId: string) =>
   JSON.stringify([source, normalizeSourceListId(source, sourceListId)])

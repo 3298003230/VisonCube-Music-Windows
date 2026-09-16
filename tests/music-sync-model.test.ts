@@ -3,10 +3,13 @@ import test from 'node:test'
 
 import {
   decidePlaylistChange,
+  getPlaylistSyncIdentity,
   isSamePlaylistSnapshot,
   mergeOnlineSongsPreservingLocal,
   normalizeSourceListId,
   playlistKey,
+  shouldKeepPlaylistLocalOnly,
+  USER_PLAYLIST_SYNC_SOURCE,
   type PlaylistSnapshot,
 } from '../src/renderer/features/musicSync/model.ts'
 
@@ -20,6 +23,44 @@ void test('normalizes legacy composite source list ids without changing board id
   assert.equal(normalizeSourceListId('kw', '123'), '123')
   assert.equal(normalizeSourceListId('kw', 'board__hot'), 'board__hot')
   assert.equal(playlistKey('kw', 'kw__123'), playlistKey('kw', '123'))
+})
+
+void test('uses the online source identity for imported source playlists', () => {
+  assert.deepEqual(getPlaylistSyncIdentity({
+    id: 'userlist_1',
+    source: 'kw',
+    sourceListId: 'kw__123',
+  }), {
+    source: 'kw',
+    sourceListId: '123',
+    isUserPlaylist: false,
+  })
+})
+
+void test('uses the stable local id for created and imported user playlists', () => {
+  assert.deepEqual(getPlaylistSyncIdentity({ id: 'userlist_123' }), {
+    source: USER_PLAYLIST_SYNC_SOURCE,
+    sourceListId: 'userlist_123',
+    isUserPlaylist: true,
+  })
+  assert.deepEqual(getPlaylistSyncIdentity({
+    id: 'userlist_cloud_legacy',
+    source: USER_PLAYLIST_SYNC_SOURCE,
+    sourceListId: 'userlist_123',
+  }), {
+    source: USER_PLAYLIST_SYNC_SOURCE,
+    sourceListId: 'userlist_123',
+    isUserPlaylist: true,
+  })
+  assert.equal(getPlaylistSyncIdentity({ id: 'love' }), null)
+  assert.equal(normalizeSourceListId(USER_PLAYLIST_SYNC_SOURCE, 'visoncube-user__kept'), 'visoncube-user__kept')
+})
+
+void test('does not resurrect a remotely deleted user playlist kept for local files', () => {
+  assert.equal(shouldKeepPlaylistLocalOnly(true, 0, true), true)
+  assert.equal(shouldKeepPlaylistLocalOnly(true, 1, true), false)
+  assert.equal(shouldKeepPlaylistLocalOnly(false, 0, true), false)
+  assert.equal(shouldKeepPlaylistLocalOnly(true, 0, undefined), false)
 })
 
 void test('keeps local songs while replacing online songs in remote order', () => {
