@@ -5,8 +5,8 @@ import { openUrl } from '@common/utils/electron'
 import { qualityList, userApi } from '@renderer/store'
 import { appSetting } from '@renderer/store/setting'
 import { dialog } from '@renderer/plugins/Dialog'
-import { setUserApi } from '@renderer/core/apiSource'
-import { hydrateManagedSource } from '@renderer/features/musicSource/managedSource'
+import { getActiveUserApiId, setUserApi } from '@renderer/core/apiSource'
+import { hydrateManagedSource, managedSourceStatus, MANAGED_USER_API_ID } from '@renderer/features/musicSource/managedSource'
 
 const sendUserApiRequest: typeof sendUserApiRequestRemote = async(data) => {
   let stop: () => void
@@ -25,10 +25,10 @@ export default () => {
 
   const rUserApiStatus = onUserApiStatus(({ params: { status, message, apiInfo } }) => {
     // console.log({ status, message, apiInfo })
+    if (!apiInfo || apiInfo.id !== getActiveUserApiId()) return
     userApi.status = status
     userApi.message = message
 
-    if (!apiInfo || apiInfo.id !== appSetting['common.apiSource']) return
     if (status) {
       if (apiInfo.sources) {
         let apis: any = {}
@@ -132,7 +132,7 @@ export default () => {
         userApi.apis = apis
       }
     } else {
-      if (message) {
+      if (message && !(apiInfo.id == MANAGED_USER_API_ID && managedSourceStatus.value.phase == 'updating')) {
         void dialog({
           message: `${t('user_api__init_failed_alert', { name: apiInfo.name })}\n${message}`,
           selection: true,

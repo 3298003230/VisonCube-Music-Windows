@@ -53,6 +53,7 @@ export const hydrateManagedSource = async() => {
 export const updateManagedSource = async() => {
   const session = authSession.value
   if (!session) throw new Error('请先登录账号')
+  const isCurrentSession = () => authSession.value?.user.id === session.user.id && authSession.value?.token === session.token
   managedSourceStatus.value = { phase: 'updating' }
   try {
     const manifestResponse = await request(`${AUTH_SERVER_URL}/api/music-source`, session.token, 'application/json')
@@ -62,8 +63,10 @@ export const updateManagedSource = async() => {
     }
     const contentResponse = await request(manifest.content_url, session.token, 'application/javascript')
     const script = await contentResponse.text()
-    userApi.list = await installManagedSourceRemote({ userId: session.user.id, manifest, script }) as LX.UserApi.UserApiInfo[]
-    managedSourceStatus.value = { phase: 'ready', manifest }
+    if (!isCurrentSession()) throw new Error('登录状态已变化，请重新更新音源')
+    const list = await installManagedSourceRemote({ userId: session.user.id, manifest, script }) as LX.UserApi.UserApiInfo[]
+    if (!isCurrentSession()) throw new Error('登录状态已变化，请重新更新音源')
+    userApi.list = list
     return manifest
   } catch (error) {
     const message = error instanceof Error ? error.message : '音源更新失败'

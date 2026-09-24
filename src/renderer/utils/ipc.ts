@@ -569,6 +569,10 @@ export const setWindowSize = (width: number, height: number) => {
   rendererSend(WIN_MAIN_RENDERER_EVENT_NAME.set_window_size, params)
 }
 
+export const setAuthWindowMode = (mode: 'auth' | 'main') => {
+  rendererSend(WIN_MAIN_RENDERER_EVENT_NAME.auth_window_mode, mode)
+}
+
 
 export const getPlayerLyric = async(musicInfo: LX.Music.MusicInfo) => {
   return rendererInvoke<string, LX.Player.LyricInfo>(WIN_MAIN_RENDERER_EVENT_NAME.get_palyer_lyric, musicInfo.id)
