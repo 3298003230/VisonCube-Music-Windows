@@ -33,7 +33,7 @@ export default {
         const manifest = await updateManagedSource()
         if (authSession.value?.user.id !== userId) throw new Error('登录状态已变化，请重新更新音源')
         await setUserApi(MANAGED_USER_API_ID, true)
-        if (!await window.lx.apiInitPromise[0]) throw new Error(userApi.message || t('setting__basic_source_update_failed'))
+        if (!await window.lx.apiInitPromise[0]) throw new Error(userApi.message ? userApi.message : t('setting__basic_source_update_failed'))
         if (authSession.value?.user.id !== userId) throw new Error('登录状态已变化，请重新更新音源')
         managedSourceStatus.value = { phase: 'ready', manifest }
         void dialog({ message: t('setting__basic_source_update_success'), confirmButtonText: t('ok') })
