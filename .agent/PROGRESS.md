@@ -1,10 +1,20 @@
 # 当前进度
 
+## 2026-09-29 Music 2.13.9 正式发布与新域名切换
+
+- Windows 提交 `8c9f13b`、Android 提交 `accf122` 已推送；两端服务域名统一为 `linux.visoncube.cn`，生产下载统一为 `download.visoncube.cn`。
+- 候选 Actions 全部成功：Windows run `36533958009`、Android run `36533961054`。Windows 安装包与 blockmap/latest.yml、Android 五种 ABI APK 均下载复核；Android universal 包为 `com.visoncube.music`、`versionName=2.13.9`、`versionCode=91`，v1/v2 签名与既有证书指纹匹配。
+- 生产已发布非强制更新：Windows x64 安装包 SHA-256 `E31F414DFB0753BE8EBCED94AE8D6474CB4AEAE7443223BE505D603FC5C1220B`；Android universal APK SHA-256 `E88D3B27D16EA761954C3BEC98F959DF80D766C9C73A9A73BD1A1A0FF8C47277`。更新接口、COS 文件长度与 Range 206 已验证。
+
+## 2026-09-16 普通用户歌单同步补齐
+
+- 修复双端账号同步仅收集带平台来源标识歌单的问题；用户新建歌单和普通导入歌单现按稳定本地 ID 同步，来源歌单原有身份与刷新行为不变。
+- 普通歌单远端恢复后仍保持普通歌单语义；本地文件歌曲不上传，远端删除含本地歌曲的歌单时只移除在线歌曲。
+- 双端接线测试分别通过 Windows 10/10、Android 13/13，相关 TypeScript 文件通过 Node 语法检查；因正式源码目录按约定无 `node_modules`，本机完整 lint/build 未运行，尚需候选 CI 与双端实机跨账号/跨设备验收。
+
 ## 2026-09-11 Music 2.13.7 正式发布与生产切换
 
-- 修复 Windows 动态更新 Feed、下载异常提示和关闭快捷键接线；双端恢复 `lxmusic://` 与 `visoncubemusic://` 运行时解析。
-- 修复 Android 安装 Provider、未知来源授权提示和安装失败重试，并恢复单曲 URL 缓存清理入口；未使用的 URL 预检文件已删除，避免额外 Range 请求。
-- 2.13.6 修复测试包已通过候选 Actions；Windows 安装包与 arm64-v8a APK 已下载并复验哈希、版本、Provider、ABI 和 Android 证书指纹。
+- 仅修复 Windows 动态更新 Feed、下载异常提示和关闭快捷键接线，双端协议解析，以及 Android 安装 Provider、未知来源授权、安装失败重试和单曲 URL 缓存清理入口；账号、同步、音源、播放、品牌、许可、依赖和目录结构未改。
 - 2.13.7 候选 Actions 已通过：Windows run `34595946913`、Android run `34595950965`；正式 Actions 也已通过：Windows run `34596679085`、Android run `34596682213`。
 - 双端 `v2.13.7` GitHub Release 已创建；Windows x64 安装包、`.blockmap`、`latest.yml`、SHA-256 清单以及 Android universal APK、SHA-256 清单已上传到既有 Music COS 目录，历史对象均保留。
 - 服务器 `releases.json` 已先备份，再经 JSON 校验与同目录原子替换切换到 2.13.7；公网接口、文件长度、SHA-256、Windows Range 206 和 `latest.yml` 均验证通过。
@@ -78,8 +88,8 @@
 
 ## 待完成
 
-- 继续观察 2.13.6 到 2.13.7 的真实设备应用内更新：Windows 下载、安装和重启，以及 Android 未知来源授权、返回重试和覆盖安装。
-- GitHub 直连生产同步保持取消；后续重新出包仍先运行双端候选 Actions 并完成真机验收。
+- 还原后的双端源码尚未生成候选安装包，也未完成 Windows 关闭/托盘、账号云同步、托管音源和 Android 覆盖安装等真机回归。
+- 需要重新出包时，继续由双端手动候选 Actions 构建并完成真机验收；GitHub 直连生产同步保持取消。
 
 ## 2026-09-10 对外展示收敛
 
@@ -94,3 +104,9 @@
 - 候选 workflow run `34492760126` 成功：发布元数据、7 项测试、零警告 lint、JS bundle、签名构建、APK 元数据和证书指纹均通过；正式 Release 任务未执行。
 - arm64-v8a 候选 APK 已下载到本机并与 CI 校验清单一致，包名 `com.visoncube.music`、版本 `2.13.5`、versionCode `86003`、ABI `arm64-v8a`，证书指纹匹配既有正式证书。
 - 本轮未创建 Release、未更新 COS 或服务器清单；修复后的实际播放仍需实体 Android 设备验收。
+
+## 2026-09-11 Music 2.13.6 正式发布与生产切换
+
+- 双端 `v2.13.6` GitHub Release 已创建；Windows x64 安装包、`.blockmap`、`latest.yml` 与 SHA-256 清单，及 Android universal APK 与 SHA-256 清单已上传至既有 Music COS 目录，未上传源码、依赖或签名材料。
+- 服务器 `/home/ubuntu/ServerCode/VisonCube/update/releases.json` 已先备份至带 UTC 时间戳的 `backups/release-music-2.13.6-*` 目录，再完成 JSON 校验与原子替换；仅更新 `music-windows`、`music-android` 两个条目并同步 `asset_path`。
+- 公网验证通过：两个更新接口均返回 `2.13.6` 和对应 SHA-256；Windows 安装包 HTTP `200`、Range `206`、长度 `107274457`，Android universal APK HTTP `200`、长度 `29117428`；`latest.yml` 与两个公开 SHA-256 清单均指向 2.13.6。

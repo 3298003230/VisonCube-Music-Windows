@@ -1,11 +1,24 @@
 # 当前有效决策
 
+## 2026-09-29 2.13.9 与统一域名
+
+- Windows/Android 正式版本统一为 `2.13.9`，Android 基础 `versionCode=91`；生产源码提交分别为 `8c9f13b` 和 `accf122`。
+- 认证与更新 API 使用 `https://linux.visoncube.cn`，公开安装包及 Windows 更新元数据使用 `https://download.visoncube.cn`。旧域名只保留给历史客户端兼容，新源码和新发布元数据不得再生成旧域名链接。
+- 继续使用候选 Actions 构建和验证；生产文件由维护端上传 COS，服务器发布清单原子更新，GitHub Actions 不直接写生产 COS 或服务器。
+
+## 2026-09-11 2.13.7 回归修复范围
+
+- Windows 更新只接受由自有 HTTPS 发布接口返回并通过校验的 `feed_url`，默认 `updates.invalid` 仍保留为拒绝失配配置的安全回退；关闭快捷键必须调用与标题栏、Alt+F4 相同的 `closeWindow()` 路径。
+- 双端须同时兼容 `lxmusic://` 与 `visoncubemusic://`；Android 安装桥接只能从运行时包名派生 Provider authority，并对未知来源授权、安装 Intent 和 Provider 失败提供可重试的可见反馈。
+- Android 单曲 URL 清理按既有“歌曲 ID + 音质”缓存键删除全部该歌曲音质，不修改全局缓存格式；旧 URL 可用性预检不恢复，避免额外 Range 请求造成播放等待。
+
 ## 结构与优化范围
 
 - 保持 Windows Electron main/renderer/renderer-lyric 和 Android `index.js → src/app.ts → React Native Navigation` 的现有目录结构。
 - 保留全部 VisonCube Music 自定义功能，只移植原作者稳定修复并处理真实 lint、类型和明确死注释。
 - 不实现历史 TODO，不抽取 Android 横竖屏歌词组件，不删除原作者受 Git 跟踪的调试或备份文件，不做大版本依赖升级。
 - 双端共有问题必须同步处理，公共接口、同步协议、设置字段和默认行为保持兼容。
+- 普通用户歌单使用保留的远端来源 `visoncube-user` 与本地稳定歌单 ID 同步；新版远端恢复时不把该标识写入本地歌单的 `source/sourceListId`，避免被误当成可刷新的平台来源歌单，同时兼容旧客户端已生成的保留来源元数据。本地歌曲继续不上传，云端删除时仍保留本地歌曲。
 - 2026-09-09 起以原作者最新源码快照为双端 `src` 底座；仅合并品牌、账号、云同步、托管音源、自有更新、Android 包身份/签名配置和 Windows 关闭策略。2026-09-10 恢复此前已验证的 Windows 首屏路由竞争保护及双端设置分类，不恢复其他旧源码。
 - 双端无封面占位使用 `V/C`；Android 启动器前景相对缩小 10%，Windows 应用图标相对放大 10%，托盘专用图标不随应用图标缩放。
 
@@ -32,7 +45,7 @@
 - 候选和正式发布分离；创建标签、GitHub Release、写入 COS、修改服务器清单均需在动作前单独确认。
 - 取消 GitHub Actions 直连 Music COS/服务器的生产同步 workflow；不得继续为该 workflow 申请或保存 COS Secret。
 - 服务器 `releases.json` 的 Music 条目更新必须同时维护 `asset_path` 和显式下载字段；只改 `version`、`sha256` 或 `download_url` 会导致接口仍指向旧文件。
-- Android APK 生产下载使用 `https://download.sjmf.xyz` 自定义域名，不使用会返回 `DownloadForbidden` 的 COS 默认域名。
+- Android APK 生产下载使用 `https://download.visoncube.cn` 自定义域名，不使用会返回 `DownloadForbidden` 的 COS 默认域名。
 - 托管订阅源遵循与普通自定义音源不同的删除边界：用户手动删除或退出账号时，双端同时清除托管缓存并卸载列表项；重新登录后必须再次更新音源或重新导入。此规则避免单份缓存被另一账号覆盖后留下账号归属不一致状态；普通自定义音源不受影响。
 - COS 电视安装包只在列出精确对象并再次确认后删除；不触碰 Music 历史对象、本地 TV 项目或源码目录。
 
