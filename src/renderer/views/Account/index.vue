@@ -1,5 +1,10 @@
 <template>
-  <main :class="$style.page">
+  <main :class="[$style.page, !authUser && isWin ? $style.compactPage : '']">
+    <div v-if="!authUser && isWin" :class="$style.windowBar">
+      <div :class="$style.windowDrag" />
+      <button type="button" :class="$style.windowButton" :aria-label="$t('min')" :title="$t('min')" @click="minWindow">−</button>
+      <button type="button" :class="$style.windowButton" :aria-label="$t('close')" :title="$t('close')" @click="closeWindow">×</button>
+    </div>
     <section v-if="!authReady" :class="$style.panel">
       <p :class="$style.loadingState">{{ $t('account__loading') }}</p>
     </section>
@@ -113,6 +118,8 @@ import {
   syncMusicCloudNow,
 } from '@renderer/features/musicSync'
 import logoImage from '@renderer/assets/images/visoncube-music-logo.png'
+import { isWin } from '@common/utils'
+import { closeWindow, minWindow } from '@renderer/utils/ipc'
 
 const router = useRouter()
 const t = useI18n()
@@ -398,6 +405,48 @@ h1 {
   border-top: 1px solid var(--color-primary-alpha-300);
 }
 
+.compactPage {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+
+  .panel {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+.windowBar {
+  display: flex;
+  flex: none;
+  height: 34px;
+  background: var(--color-content-background);
+}
+
+.windowDrag {
+  flex: 1;
+  -webkit-app-region: drag;
+}
+
+.windowButton {
+  flex: none;
+  width: 46px;
+  border: 0;
+  color: var(--color-font-label);
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+  -webkit-app-region: no-drag;
+
+  &:hover { background: var(--color-primary-alpha-300); }
+}
+
 .syncSection h2 {
   margin: 0;
   font-size: 16px;
@@ -435,6 +484,11 @@ h1 {
   .page {
     align-items: flex-start;
     padding-top: 20px;
+  }
+
+  .compactPage {
+    align-items: stretch;
+    padding-top: 0;
   }
 }
 </style>

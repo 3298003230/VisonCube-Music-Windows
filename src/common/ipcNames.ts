@@ -74,6 +74,7 @@ const modules = {
     update_not_available: 'update_not_available',
     set_ignore_mouse_events: 'set_ignore_mouse_events',
     set_window_size: 'set_window_size',
+    auth_window_mode: 'auth_window_mode',
 
     handle_request: 'handle_request',
     cancel_request: 'cancel_request',

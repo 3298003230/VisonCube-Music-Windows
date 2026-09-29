@@ -14,6 +14,7 @@ import {
   getCacheSize,
   toggleDevTools,
   setWindowBounds,
+  setAuthWindowMode,
   setIgnoreMouseEvents,
   // setThumbnailClip,
   toggleMinimize,
@@ -109,6 +110,9 @@ export default () => {
 
   mainOn<Partial<Electron.Rectangle>>(WIN_MAIN_RENDERER_EVENT_NAME.set_window_size, ({ params }) => {
     setWindowBounds(params)
+  })
+  mainOn<'auth' | 'main'>(WIN_MAIN_RENDERER_EVENT_NAME.auth_window_mode, ({ params }) => {
+    if (params == 'auth' || params == 'main') setAuthWindowMode(params)
   })
 
   mainOn<boolean>(WIN_MAIN_RENDERER_EVENT_NAME.set_ignore_mouse_events, ({ params: isIgnored }) => {

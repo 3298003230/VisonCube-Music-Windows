@@ -5,13 +5,18 @@
 </template>
 
 <script setup>
-import { onMounted } from '@common/utils/vueTools'
+import { onMounted, watch } from '@common/utils/vueTools'
 // import BubbleCursor from '@common/utils/effects/cursor-effects/bubbleCursor'
 // import '@common/utils/effects/snow.min'
 import { authReady, authUser } from '@renderer/features/auth/state'
+import { setAuthWindowMode } from '@renderer/utils/ipc'
 import Account from './views/Account/index.vue'
 import AuthenticatedShell from './components/layout/AuthenticatedShell.vue'
 import CloseConfirmModal from './components/layout/CloseConfirmModal.vue'
+
+watch(() => [authReady.value, !!authUser.value], ([ready, loggedIn]) => {
+  if (ready) setAuthWindowMode(loggedIn ? 'main' : 'auth')
+}, { immediate: true })
 
 onMounted(() => {
   document.getElementById('root').style.display = 'block'

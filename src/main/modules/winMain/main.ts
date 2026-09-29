@@ -1,4 +1,4 @@
-import { BrowserWindow, dialog, session } from 'electron'
+import { BrowserWindow, dialog, screen, session } from 'electron'
 import path from 'node:path'
 import { createTaskBarButtons, getWindowSizeInfo } from './utils'
 import { getPlatform, isLinux, isWin } from '@common/utils'
@@ -11,6 +11,49 @@ import { encodePath } from '@common/utils/electron'
 let browserWindow: Electron.BrowserWindow | null = null
 let isCloseRendererReady = false
 let isClosePromptPending = false
+let isReadyToShow = false
+let hasShownInitially = false
+let windowMode: 'auth' | 'main' | null = null
+let normalBounds: Electron.Rectangle | null = null
+let wasFullScreen = false
+let initialShowTimeout: ReturnType<typeof setTimeout> | null = null
+
+const showInitialWindow = () => {
+  if (!browserWindow || !isReadyToShow || hasShownInitially || global.envParams.cmdParams.hidden) return
+  hasShownInitially = true
+  showWindow()
+  setThumbarButtons()
+}
+
+export const setAuthWindowMode = (mode: 'auth' | 'main') => {
+  if (!isWin || !browserWindow || browserWindow.isDestroyed() || windowMode == mode) return
+
+  if (mode == 'auth') {
+    normalBounds = browserWindow.getNormalBounds()
+    wasFullScreen = browserWindow.isFullScreen()
+    if (wasFullScreen) browserWindow.setFullScreen(false)
+    const workArea = screen.getDisplayMatching(normalBounds).workArea
+    const width = Math.min(460, workArea.width)
+    const height = Math.min(600, workArea.height)
+    browserWindow.setBounds({
+      x: workArea.x + Math.round((workArea.width - width) / 2),
+      y: workArea.y + Math.round((workArea.height - height) / 2),
+      width,
+      height,
+    })
+  } else if (normalBounds) {
+    browserWindow.setBounds(normalBounds)
+    if (wasFullScreen) browserWindow.setFullScreen(true)
+    normalBounds = null
+    wasFullScreen = false
+  }
+  windowMode = mode
+  if (initialShowTimeout) {
+    clearTimeout(initialShowTimeout)
+    initialShowTimeout = null
+  }
+  showInitialWindow()
+}
 
 type CloseAction = 'tray' | 'quit' | 'cancel'
 
@@ -80,9 +123,16 @@ const winEvent = () => {
   })
 
   browserWindow.on('closed', () => {
+    if (initialShowTimeout) clearTimeout(initialShowTimeout)
+    initialShowTimeout = null
     browserWindow = null
     isCloseRendererReady = false
     isClosePromptPending = false
+    isReadyToShow = false
+    hasShownInitially = false
+    windowMode = null
+    normalBounds = null
+    wasFullScreen = false
   })
 
   // browserWindow.on('restore', () => {
@@ -98,10 +148,9 @@ const winEvent = () => {
   })
 
   browserWindow.once('ready-to-show', () => {
-    if (!global.envParams.cmdParams.hidden) {
-      showWindow()
-      setThumbarButtons()
-    }
+    isReadyToShow = true
+    if (windowMode) showInitialWindow()
+    else initialShowTimeout = setTimeout(showInitialWindow, 5000)
     global.lx.event_app.main_window_ready_to_show()
   })
 
@@ -127,6 +176,13 @@ const winEvent = () => {
 
 export const createWindow = () => {
   closeWindow()
+  if (initialShowTimeout) clearTimeout(initialShowTimeout)
+  initialShowTimeout = null
+  isReadyToShow = false
+  hasShownInitially = false
+  windowMode = null
+  normalBounds = null
+  wasFullScreen = false
   const windowSizeInfo = getWindowSizeInfo(global.lx.appSetting['common.windowSizeId'])
 
   const { shouldUseDarkColors, theme } = global.lx.theme
