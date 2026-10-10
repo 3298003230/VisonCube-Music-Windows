@@ -1,10 +1,13 @@
 import { BrowserWindow, dialog, screen, session } from 'electron'
 import path from 'node:path'
 import { createTaskBarButtons, getWindowSizeInfo } from './utils'
-import { getPlatform, isLinux, isWin } from '@common/utils'
+import { getPlatform, isLinux, isWin, log } from '@common/utils'
 import { getProxy, openDevTools as handleOpenDevTools } from '@main/utils'
 import { mainSend } from '@common/mainIpc'
 import { WIN_MAIN_RENDERER_EVENT_NAME } from '@common/ipcNames'
+import { DATA_KEYS, STORE_NAMES } from '@common/constants'
+import { isSessionUsable, type StoredAuthSession } from '@common/utils/authSession'
+import getStore from '@main/utils/store'
 import { sendFocus, sendTaskbarButtonClick } from './rendererEvent'
 import { encodePath } from '@common/utils/electron'
 
@@ -16,7 +19,6 @@ let hasShownInitially = false
 let windowMode: 'auth' | 'main' | null = null
 let normalBounds: Electron.Rectangle | null = null
 let wasFullScreen = false
-let initialShowTimeout: ReturnType<typeof setTimeout> | null = null
 
 const showInitialWindow = () => {
   if (!browserWindow || !isReadyToShow || hasShownInitially || global.envParams.cmdParams.hidden) return
@@ -48,10 +50,6 @@ export const setAuthWindowMode = (mode: 'auth' | 'main') => {
     wasFullScreen = false
   }
   windowMode = mode
-  if (initialShowTimeout) {
-    clearTimeout(initialShowTimeout)
-    initialShowTimeout = null
-  }
   showInitialWindow()
 }
 
@@ -123,8 +121,6 @@ const winEvent = () => {
   })
 
   browserWindow.on('closed', () => {
-    if (initialShowTimeout) clearTimeout(initialShowTimeout)
-    initialShowTimeout = null
     browserWindow = null
     isCloseRendererReady = false
     isClosePromptPending = false
@@ -149,8 +145,7 @@ const winEvent = () => {
 
   browserWindow.once('ready-to-show', () => {
     isReadyToShow = true
-    if (windowMode) showInitialWindow()
-    else initialShowTimeout = setTimeout(showInitialWindow, 5000)
+    showInitialWindow()
     global.lx.event_app.main_window_ready_to_show()
   })
 
@@ -176,8 +171,6 @@ const winEvent = () => {
 
 export const createWindow = () => {
   closeWindow()
-  if (initialShowTimeout) clearTimeout(initialShowTimeout)
-  initialShowTimeout = null
   isReadyToShow = false
   hasShownInitially = false
   windowMode = null
@@ -225,6 +218,18 @@ export const createWindow = () => {
     if (isLinux) options.resizable = true
   }
   browserWindow = new BrowserWindow(options)
+
+  if (isWin) {
+    // 用同一份本地会话预先确定首屏尺寸，避免窗口等待渲染层回传；登录状态仍由渲染层恢复。
+    let mode: 'auth' | 'main' = 'auth'
+    try {
+      const storedSession = getStore(STORE_NAMES.DATA).get<StoredAuthSession | null>(DATA_KEYS.authSession)
+      if (isSessionUsable(storedSession)) mode = 'main'
+    } catch {
+      log.warn('Unable to read the initial window session; the renderer will restore authentication.')
+    }
+    setAuthWindowMode(mode)
+  }
 
   const winURL = process.env.NODE_ENV !== 'production' ? 'http://localhost:9080' : `file://${path.join(encodePath(__dirname), 'index.html')}`
   void browserWindow.loadURL(winURL + `?os=${getPlatform()}&dt=${global.envParams.cmdParams.dt}&dark=${shouldUseDarkColors}&theme=${encodeURIComponent(JSON.stringify(theme))}`)

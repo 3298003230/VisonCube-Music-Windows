@@ -1,4 +1,5 @@
 import { computed, ref } from '@common/utils/vueTools'
+import { isSessionUsable } from '@common/utils/authSession'
 import * as authApi from './api'
 import type { AuthSession, AuthUser, PasswordCredentials, RegisterCredentials } from './models'
 import { clearSession, loadSession, saveSession } from './storage'
@@ -13,12 +14,6 @@ import apiSourceInfo from '@renderer/utils/musicSdk/api-source-info'
 export const authSession = ref<AuthSession | null>(null)
 export const authReady = ref(false)
 export const authUser = computed<AuthUser | null>(() => authSession.value?.user ?? null)
-
-const isSessionUsable = (session: AuthSession | null) => {
-  if (!session?.token || !session.user?.username) return false
-  if (!session.expires_at_ms || session.expires_at_ms <= 0) return true
-  return Date.now() + 60000 < session.expires_at_ms
-}
 
 const persistSession = (session: AuthSession) => {
   authSession.value = session
