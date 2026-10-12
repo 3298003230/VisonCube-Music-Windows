@@ -9,14 +9,16 @@ import {
   registerDeeplink,
   listenerAppEvent,
 } from './app'
-import { isLinux } from '@common/utils'
+import { isLinux, log } from '@common/utils'
 import { initAppSetting } from '@main/app'
 import registerModules from '@main/modules'
 
 // 初始化应用
 const init = () => {
+  const startedAt = Date.now()
   console.log('init')
   void initAppSetting().then(() => {
+    log.info(`[Startup] Base initialization: ${Date.now() - startedAt}ms`)
     registerModules()
     global.lx.event_app.app_inited()
   })
@@ -32,5 +34,6 @@ listenerAppEvent(init)
 
 // https://github.com/electron/electron/issues/16809
 void app.whenReady().then(() => {
+  log.info(`[Startup] App ready: ${Math.round(process.uptime() * 1000)}ms since process start`)
   isLinux ? setTimeout(init, 300) : init()
 })

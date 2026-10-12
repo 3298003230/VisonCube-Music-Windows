@@ -73,7 +73,7 @@ const router = createRouter({
     {
       path: '/account/password',
       name: 'AccountPassword',
-      component: require('./views/Account/Password.vue').default,
+      component: () => import('./views/Account/Password.vue'),
       meta: {
         name: 'Account',
       },

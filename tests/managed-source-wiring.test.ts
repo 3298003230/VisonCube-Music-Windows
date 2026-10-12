@@ -3,25 +3,161 @@ import { EventEmitter } from 'node:events'
 import { readFile } from 'node:fs/promises'
 import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
+import zlib from 'node:zlib'
 import test from 'node:test'
 import { runInNewContext } from 'node:vm'
 import { isSessionUsable, type StoredAuthSession } from '../src/common/utils/authSession.ts'
 
 const readSource = (path: string) => readFile(new URL(path, import.meta.url), 'utf8')
 
+// 执行实际音源存储代码；只用内存 Store，避免测试写入用户配置。
+const createManagedApiHarness = async(existingApis: object[] = []) => {
+  const writes: Array<{ key: string, value: LX.UserApi.UserApiInfoFull[] }> = []
+  const source = stripTypeScriptTypes(await readSource('../src/main/modules/userApi/utils.ts'))
+    .replace(/^import .*\r?\n/gm, '')
+    .replace(/^export /gm, '')
+  const api = runInNewContext(source + '\n({ upsertManagedApi, removeManagedApi, getUserApis, getScript })', {
+    defaultUserApis: [], STORE_NAMES: { USER_API: 'user_api' }, MANAGED_USER_API_ID: 'managed-test', Buffer, zlib,
+    getStore: (name: string) => {
+      assert.equal(name, 'user_api')
+      return {
+        get: (key: string) => { assert.equal(key, 'userApis'); return existingApis },
+        set: (key: string, value: LX.UserApi.UserApiInfoFull[]) => {
+          writes.push({ key, value: JSON.parse(JSON.stringify(value)) })
+        },
+      }
+    },
+  })
+  return { api, writes }
+}
+
+const managedTestScript = '/*\n * @name Test source\n * @version 1.0\n */\n// fixture only'
+const managedTestManifest = { name: 'Managed test source', version: '1.0' }
+
+void test('an unchanged managed source is not persisted again', async() => {
+  const { api, writes } = await createManagedApiHarness()
+  const first = await api.upsertManagedApi(managedTestScript, managedTestManifest)
+  const repeated = await api.upsertManagedApi(managedTestScript, managedTestManifest)
+  assert.equal(writes.length, 1)
+  assert.equal(repeated, first)
+  assert.equal(await api.getScript('managed-test'), managedTestScript)
+  await Promise.all([
+    api.upsertManagedApi(managedTestScript, managedTestManifest),
+    api.upsertManagedApi(managedTestScript, managedTestManifest),
+  ])
+  assert.equal(writes.length, 1)
+  const restored = await createManagedApiHarness(writes[0].value)
+  await restored.api.upsertManagedApi(managedTestScript, managedTestManifest)
+  assert.equal(restored.writes.length, 0)
+})
+
+void test('changed managed source content and metadata are still persisted', async() => {
+  const { api, writes } = await createManagedApiHarness()
+  await api.upsertManagedApi(managedTestScript, managedTestManifest)
+  await api.upsertManagedApi(managedTestScript, { name: 'Renamed source', version: '1.1' })
+  assert.equal(writes.length, 2)
+  assert.equal(writes[1].value[0].name, 'Renamed source')
+  assert.equal(writes[1].value[0].version, '1.1')
+  const changedScript = managedTestScript + '\n// new content'
+  await api.upsertManagedApi(changedScript, { name: 'Renamed source', version: '1.1' })
+  assert.equal(writes.length, 3)
+  assert.equal(await api.getScript('managed-test'), changedScript)
+  await assert.rejects(api.upsertManagedApi('invalid script', managedTestManifest))
+  assert.equal(writes.length, 3)
+})
+
+void test('a compression failure retains the previously stored managed source', async t => {
+  const { api, writes } = await createManagedApiHarness()
+  await api.upsertManagedApi(managedTestScript, managedTestManifest)
+  t.mock.method(zlib, 'deflate', (_input: Buffer, callback: (error: Error) => void) => {
+    callback(new Error('fixture compression failure'))
+  })
+  await assert.rejects(api.upsertManagedApi(managedTestScript + '\n// changed', managedTestManifest), /fixture compression failure/)
+  assert.equal(writes.length, 1)
+  assert.equal(await api.getScript('managed-test'), managedTestScript)
+})
+
+void test('removing an absent managed source does not rewrite ordinary sources', async() => {
+  const { api, writes } = await createManagedApiHarness([
+    { id: 'ordinary', name: 'Imported source', version: '1.0', allowShowUpdateAlert: true, script: 'ordinary fixture' },
+  ])
+  api.getUserApis()
+  api.removeManagedApi()
+  assert.equal(writes.length, 0)
+  await api.upsertManagedApi(managedTestScript, managedTestManifest)
+  api.removeManagedApi()
+  assert.equal(writes.length, 2)
+  assert.equal(api.getUserApis().length, 1)
+  assert.equal(await api.getScript('ordinary'), 'ordinary fixture')
+  assert.equal(await api.getScript('managed-test'), '')
+  api.removeManagedApi()
+  assert.equal(writes.length, 2)
+  await api.upsertManagedApi(managedTestScript, managedTestManifest)
+  assert.equal(writes.length, 3)
+})
+
+void test('the password route loads its existing page only when entered', async() => {
+  const loaded: string[] = []
+  const source = (await readSource('../src/renderer/router.ts'))
+    .replace(/^import .*\r?\n/gm, '')
+    .replace(/import\(([^)]+)\)/g, 'loadView($1)')
+    .replace(/export default router/, '')
+  const router = runInNewContext(source + '\nrouter', {
+    createRouter: (options: object) => options,
+    createWebHashHistory: () => ({}),
+    require: () => ({ default: {} }),
+    loadView: async(view: string) => { loaded.push(view); return { default: {} } },
+  })
+  const passwordRoute = router.routes.find((route: { path: string }) => route.path == '/account/password')
+  assert.equal(typeof passwordRoute.component, 'function')
+  assert.equal(loaded.length, 0)
+  await passwordRoute.component()
+  assert.deepEqual(loaded, ['./views/Account/Password.vue'])
+  assert.equal(passwordRoute.meta.name, 'Account')
+})
+
 void test('removing the managed source clears its persistent cache', async() => {
-  const [rendererEvent, managedSource, authState] = await Promise.all([
+  const [rendererEvent, managedSource] = await Promise.all([
     readSource('../src/main/modules/winMain/rendererEvent/userApi.ts'),
     readSource('../src/main/modules/userApi/managedSource.ts'),
-    readSource('../src/renderer/features/auth/state.ts'),
   ])
 
   assert.match(managedSource, /export const clearManagedSourceCache\s*=/)
   assert.match(managedSource, /rm\(getCacheDir\(\), \{ recursive: true, force: true \}\)/)
   assert.match(rendererEvent, /apiIds\.includes\(MANAGED_USER_API_ID\)/)
   assert.match(rendererEvent, /await clearManagedSourceCache\(\)/)
-  assert.match(authState, /await removeUserApi\(\[MANAGED_USER_API_ID\]\)/)
-  assert.match(authState, /await setUserApi\(fallback\.id\)/)
+})
+
+void test('signing out clears authentication and stops sync without deleting or switching sources', async() => {
+  const source = stripTypeScriptTypes(await readSource('../src/renderer/features/auth/state.ts'))
+    .replace(/^import .*\r?\n/gm, '').replace(/^export /gm, '')
+  const validSession = { token: 'test-token', user: { username: 'test-user' } }
+  for (const session of [null, validSession, { ...validSession, expires_at_ms: 1 }]) {
+    for (const logoutFails of [false, true]) {
+      const calls: string[] = []
+      const sourceList = [{ id: 'managed-test' }]
+      const userApi = { list: sourceList }
+      const api = runInNewContext(source + '\n({ restoreSession, signOut, authSession })', {
+        ref: (value: unknown) => ({ value }), computed: (getter: () => unknown) => ({ get value() { return getter() } }),
+        isSessionUsable, loadSession: async() => session,
+        clearSession: () => calls.push('session-clear'), stopMusicCloudSync: () => calls.push('sync-stop'),
+        authApi: { logout: async() => { calls.push('logout'); if (logoutFails) throw new Error('fixture logout failure') } },
+        MANAGED_USER_API_ID: 'managed-test', userApi, appSetting: { 'common.apiSource': 'managed-test' },
+        apiSourceInfo: [{ id: 'fallback' }],
+        removeUserApi: async() => { calls.push('source-remove'); return [] },
+        setUserApi: async() => { calls.push('source-switch') },
+      })
+      await api.restoreSession()
+      calls.length = 0
+      await api.signOut()
+      assert.equal(api.authSession.value, null)
+      assert.equal(userApi.list, sourceList)
+      assert.deepEqual(calls, ['sync-stop', 'session-clear', ...(isSessionUsable(session) ? ['logout'] : [])])
+      calls.length = 0
+      await api.signOut()
+      assert.deepEqual(calls, ['sync-stop', 'session-clear'])
+    }
+  }
 })
 
 void test('managed source update reloads the active script and waits for initialization', async() => {
@@ -94,6 +230,7 @@ const createWindowHarness = async({
   const originalSettings = { ...settings }
   let timersScheduled = 0
   const warnings: string[] = []
+  const diagnostics: string[] = []
   class FakeWindow extends EventEmitter {
     bounds = { x: 120, y: 80, width: 1024, height: 640 }
     boundsAtLoad = { ...this.bounds }
@@ -135,7 +272,7 @@ const createWindowHarness = async({
     session: { fromPartition: () => ({ setProxy: async() => {} }) }, path,
     getWindowSizeInfo: () => ({ width: 1024, height: 640 }), createTaskBarButtons: () => [],
     getPlatform: () => isWindows ? 'windows' : 'mac', isLinux: false, isWin: isWindows,
-    log: { warn: (message: string) => warnings.push(message) },
+    log: { warn: (message: string) => warnings.push(message), info: (message: string) => diagnostics.push(message) },
     getProxy: () => undefined, handleOpenDevTools: () => {}, mainSend: () => {},
     WIN_MAIN_RENDERER_EVENT_NAME: { close_request: 'close_request' },
     DATA_KEYS: { authSession: 'authSession' }, STORE_NAMES: { DATA: 'data' }, isSessionUsable,
@@ -145,7 +282,7 @@ const createWindowHarness = async({
       return { get: (key: string) => { assert.equal(key, 'authSession'); return storedSession } }
     },
     sendFocus: () => {}, sendTaskbarButtonClick: () => {}, encodePath: (value: string) => value,
-    process: { env: { NODE_ENV: 'production' } }, __dirname: '/fixture',
+    process: { env: { NODE_ENV: 'production' }, uptime: () => 0.5 }, __dirname: '/fixture',
     setTimeout: () => { timersScheduled++; return 1 }, clearTimeout: () => {},
     global: { envParams: { cmdParams: { hidden, dt: true } }, lx: {
       appSetting: settings,
@@ -154,8 +291,21 @@ const createWindowHarness = async({
     } },
   })
   api.createWindow()
-  return { api, window: windows[0], settings, originalSettings, warnings, getTimersScheduled: () => timersScheduled }
+  return { api, window: windows[0], settings, originalSettings, warnings, diagnostics, getTimersScheduled: () => timersScheduled }
 }
+
+void test('startup diagnostics record timings without session contents or new waits', async() => {
+  const { window, diagnostics, getTimersScheduled } = await createWindowHarness({
+    storedSession: { token: 'private-test-token', user: { username: 'private-test-user' } },
+  })
+  assert.equal(diagnostics.length, 0)
+  window.emit('ready-to-show')
+  assert.equal(window.visible, true)
+  assert.equal(diagnostics.length, 1)
+  assert.match(diagnostics[0], /^\[Startup\] Window ready-to-show: session=\d+ms; prepare=\d+ms; page=\d+ms; process=500ms$/)
+  assert.doesNotMatch(diagnostics.join('\n'), /private-test|token|username/)
+  assert.equal(getTimersScheduled(), 0)
+})
 
 void test('first window shows at ready-to-show without any renderer authentication reply', async() => {
   for (const storedSession of [null, { token: 'test', user: { username: 'test' }, expires_at_ms: 1 }]) {

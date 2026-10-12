@@ -170,6 +170,8 @@ const winEvent = () => {
 
 
 export const createWindow = () => {
+  const startedAt = Date.now()
+  let sessionReadMs = 0
   closeWindow()
   isReadyToShow = false
   hasShownInitially = false
@@ -222,19 +224,26 @@ export const createWindow = () => {
   if (isWin) {
     // 用同一份本地会话预先确定首屏尺寸，避免窗口等待渲染层回传；登录状态仍由渲染层恢复。
     let mode: 'auth' | 'main' = 'auth'
+    const sessionReadStartedAt = Date.now()
     try {
       const storedSession = getStore(STORE_NAMES.DATA).get<StoredAuthSession | null>(DATA_KEYS.authSession)
       if (isSessionUsable(storedSession)) mode = 'main'
     } catch {
       log.warn('Unable to read the initial window session; the renderer will restore authentication.')
     }
+    sessionReadMs = Date.now() - sessionReadStartedAt
     setAuthWindowMode(mode)
   }
 
+  const pageLoadStartedAt = Date.now()
   const winURL = process.env.NODE_ENV !== 'production' ? 'http://localhost:9080' : `file://${path.join(encodePath(__dirname), 'index.html')}`
   void browserWindow.loadURL(winURL + `?os=${getPlatform()}&dt=${global.envParams.cmdParams.dt}&dark=${shouldUseDarkColors}&theme=${encodeURIComponent(JSON.stringify(theme))}`)
 
   winEvent()
+  // 首屏就绪后再记录分段耗时，避免诊断日志本身阻塞页面加载。
+  browserWindow.once('ready-to-show', () => {
+    log.info(`[Startup] Window ready-to-show: session=${sessionReadMs}ms; prepare=${pageLoadStartedAt - startedAt}ms; page=${Date.now() - pageLoadStartedAt}ms; process=${Math.round(process.uptime() * 1000)}ms`)
+  })
 
   if (global.envParams.cmdParams.odt) handleOpenDevTools(browserWindow.webContents)
 

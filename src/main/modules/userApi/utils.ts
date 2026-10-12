@@ -164,6 +164,10 @@ export const upsertManagedApi = async(script: string, manifest: { name: string, 
     allowShowUpdateAlert: false,
   }
   const index = userApis.findIndex(api => api.id == MANAGED_USER_API_ID)
+  // 内容和元数据均未变化时保留已有记录，避免每次恢复缓存都同步写盘。
+  if (index >= 0 && scripts.get(MANAGED_USER_API_ID) === compressedScript && JSON.stringify(userApis[index]) === JSON.stringify(apiInfo)) {
+    return userApis[index]
+  }
   if (index >= 0) userApis.splice(index, 1, apiInfo)
   else userApis.push(apiInfo)
   scripts.set(MANAGED_USER_API_ID, compressedScript)
@@ -174,6 +178,7 @@ export const upsertManagedApi = async(script: string, manifest: { name: string, 
 export const removeManagedApi = () => {
   if (!userApis) return
   const index = userApis.findIndex(api => api.id == MANAGED_USER_API_ID)
+  if (index < 0 && !scripts.has(MANAGED_USER_API_ID)) return
   if (index >= 0) userApis.splice(index, 1)
   scripts.delete(MANAGED_USER_API_ID)
   saveData()
