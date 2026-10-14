@@ -243,6 +243,41 @@ export const createWindow = () => {
   // 首屏就绪后再记录分段耗时，避免诊断日志本身阻塞页面加载。
   browserWindow.once('ready-to-show', () => {
     log.info(`[Startup] Window ready-to-show: session=${sessionReadMs}ms; prepare=${pageLoadStartedAt - startedAt}ms; page=${Date.now() - pageLoadStartedAt}ms; process=${Math.round(process.uptime() * 1000)}ms`)
+    if (!isWin || !browserWindow || browserWindow.webContents.isDestroyed()) return
+    // 不等待采样；仅收集固定名称与数值，避免把资源路径或账号数据写入日志。
+    void browserWindow.webContents.executeJavaScript(`(() => {
+      const navigation = performance.getEntriesByType('navigation')[0]
+      const resources = performance.getEntriesByType('resource')
+      const markNames = [
+        'startup:entry', 'startup:get-setting:start', 'startup:get-setting:end', 'startup:settings-applied',
+        'startup:session-restore:start', 'startup:session-restore:end', 'startup:mount:start', 'startup:plugins-ready',
+        'startup:components:start', 'startup:components:end', 'startup:mount:end',
+        'startup:managed-cache:start', 'startup:managed-cache:end', 'startup:api-load:start', 'startup:api-load:end'
+      ]
+      const startTime = (name, type) => {
+        const entry = performance.getEntriesByName(name, type)[0]
+        return entry ? Math.round(entry.startTime) : null
+      }
+      const resourceEnd = type => resources.reduce((end, entry) => entry.initiatorType === type ? Math.max(end, entry.responseEnd) : end, 0)
+      return JSON.stringify({
+        snapshotMs: Math.round(performance.now()),
+        navigation: navigation ? {
+          responseEnd: Math.round(navigation.responseEnd) || null,
+          domInteractive: Math.round(navigation.domInteractive) || null,
+          domContentLoadedEventEnd: Math.round(navigation.domContentLoadedEventEnd) || null,
+          loadEventEnd: Math.round(navigation.loadEventEnd) || null
+        } : null,
+        scriptResponseEndMs: Math.round(resourceEnd('script')),
+        cssResponseEndMs: Math.round(resourceEnd('css')),
+        firstPaintMs: startTime('first-paint', 'paint'),
+        firstContentfulPaintMs: startTime('first-contentful-paint', 'paint'),
+        marks: Object.fromEntries(markNames.map(name => [name, startTime(name, 'mark')]))
+      })
+    })()`).then(timings => {
+      log.info(`[Startup] Renderer timings: ${timings}`)
+    }).catch(() => {
+      log.warn('[Startup] Renderer timing collection failed.')
+    })
   })
 
   if (global.envParams.cmdParams.odt) handleOpenDevTools(browserWindow.webContents)

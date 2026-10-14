@@ -146,6 +146,7 @@ void test('signing out clears authentication and stops sync without deleting or 
         apiSourceInfo: [{ id: 'fallback' }],
         removeUserApi: async() => { calls.push('source-remove'); return [] },
         setUserApi: async() => { calls.push('source-switch') },
+        performance: { mark: () => {} },
       })
       await api.restoreSession()
       calls.length = 0
@@ -224,6 +225,7 @@ const createWindowHarness = async({
   workArea = { x: 0, y: 0, width: 1920, height: 1080 },
   isWindows = true,
   storeFails = false,
+  collectTiming = async(_script: string) => '{}',
 } = {}) => {
   const windows: FakeWindow[] = []
   const settings = { 'common.windowSizeId': 1, 'common.startInFullscreen': fullScreen, 'common.closeAction': 'ask', 'tray.enable': false }
@@ -231,6 +233,7 @@ const createWindowHarness = async({
   let timersScheduled = 0
   const warnings: string[] = []
   const diagnostics: string[] = []
+  const timingRequests: Array<{ script: string, visible: boolean }> = []
   class FakeWindow extends EventEmitter {
     bounds = { x: 120, y: 80, width: 1024, height: 640 }
     boundsAtLoad = { ...this.bounds }
@@ -238,7 +241,13 @@ const createWindowHarness = async({
     visible = false
     destroyed = false
     showCount = 0
-    webContents = Object.assign(new EventEmitter(), { isDestroyed: () => false, isCrashed: () => false })
+    webContents = Object.assign(new EventEmitter(), {
+      isDestroyed: () => this.destroyed, isCrashed: () => false,
+      executeJavaScript: (script: string) => {
+        timingRequests.push({ script, visible: this.visible })
+        return collectTiming(script)
+      },
+    })
     constructor() {
       super()
       windows.push(this)
@@ -291,8 +300,147 @@ const createWindowHarness = async({
     } },
   })
   api.createWindow()
-  return { api, window: windows[0], settings, originalSettings, warnings, diagnostics, getTimersScheduled: () => timersScheduled }
+  return { api, window: windows[0], settings, originalSettings, warnings, diagnostics, timingRequests, getTimersScheduled: () => timersScheduled }
 }
+
+void test('renderer timing collection starts after showing and only includes fixed numeric fields', async() => {
+  const performance = {
+    now: () => 500,
+    getEntriesByType: (type: string) => ({
+      navigation: [{ responseEnd: 10, domInteractive: 300, domContentLoadedEventEnd: 310, loadEventEnd: 0, name: 'private-file-path' }],
+      resource: [{ initiatorType: 'script', responseEnd: 250, name: 'private-script-url' }, { initiatorType: 'css', responseEnd: 40 }],
+    })[type] ?? [],
+    getEntriesByName: (name: string) => ['startup:entry', 'first-paint'].includes(name) ? [{ startTime: 260 }] : [],
+  }
+  const { window, diagnostics, timingRequests, getTimersScheduled } = await createWindowHarness({
+    collectTiming: async(script: string) => runInNewContext(script, { performance }),
+  })
+  assert.equal(timingRequests.length, 0)
+  window.emit('ready-to-show')
+  assert.equal(timingRequests.length, 1)
+  assert.equal(timingRequests[0].visible, true)
+  await Promise.resolve()
+  const summary = JSON.parse(diagnostics[1].replace('[Startup] Renderer timings: ', ''))
+  assert.equal(summary.snapshotMs, 500)
+  assert.equal(summary.navigation.responseEnd, 10)
+  assert.equal(summary.navigation.loadEventEnd, null)
+  assert.equal(summary.scriptResponseEndMs, 250)
+  assert.equal(summary.cssResponseEndMs, 40)
+  assert.equal(summary.marks['startup:entry'], 260)
+  assert.equal(summary.marks['startup:managed-cache:end'], null)
+  assert.equal(summary.firstPaintMs, 260)
+  assert.doesNotMatch(diagnostics.join('\n'), /private-|token|username/)
+  assert.equal(getTimersScheduled(), 0)
+  window.emit('ready-to-show')
+  assert.equal(timingRequests.length, 1)
+})
+
+void test('pending or failed renderer timing collection cannot delay showing or expose errors', async() => {
+  const collectors = [
+    async() => new Promise<string>(() => {}),
+    async() => { throw new Error('private-diagnostic-failure') },
+  ]
+  for (const [index, collectTiming] of collectors.entries()) {
+    const { window, warnings, getTimersScheduled } = await createWindowHarness({ collectTiming })
+    window.emit('ready-to-show')
+    assert.equal(window.visible, true)
+    await Promise.resolve()
+    await Promise.resolve()
+    assert.deepEqual(warnings, index ? ['[Startup] Renderer timing collection failed.'] : [])
+    assert.doesNotMatch(warnings.join('\n'), /private-diagnostic-failure/)
+    assert.equal(getTimersScheduled(), 0)
+  }
+})
+
+void test('renderer timing handles missing entries and skips destroyed or non-Windows renderers', async() => {
+  const { window, diagnostics } = await createWindowHarness({
+    collectTiming: async(script: string) => runInNewContext(script, {
+      performance: { now: () => 0, getEntriesByType: () => [], getEntriesByName: () => [] },
+    }),
+  })
+  window.emit('ready-to-show')
+  await Promise.resolve()
+  const summary = JSON.parse(diagnostics[1].replace('[Startup] Renderer timings: ', ''))
+  assert.equal(summary.navigation, null)
+  assert.equal(summary.scriptResponseEndMs, 0)
+  assert.equal(summary.cssResponseEndMs, 0)
+  assert.equal(summary.firstPaintMs, null)
+  assert.ok(Object.values(summary.marks).every(value => value === null))
+  for (const options of [{ isWindows: false }, {}]) {
+    const harness = await createWindowHarness(options)
+    if (options.isWindows !== false) harness.window.destroyed = true
+    harness.window.emit('ready-to-show')
+    assert.equal(harness.timingRequests.length, 0)
+  }
+})
+
+void test('renderer entry marks preserve settings and mount order without awaiting session restoration', async() => {
+  const calls: string[] = []
+  let resolveSetting!: (value: object) => void
+  const source = stripTypeScriptTypes(await readSource('../src/renderer/main.ts')).replace(/^import .*\r?\n/gm, '')
+  const app = { use() { return app }, mount: (root: string) => { assert.equal(root, '#root'); calls.push('mount') } }
+  runInNewContext(source, {
+    performance: { mark: (name: string) => calls.push(name) },
+    router: { afterEach: () => {} }, getSetting: async() => new Promise(resolve => { resolveSetting = resolve }),
+    initSetting: () => calls.push('settings'), restoreSession: async() => new Promise(() => {}),
+    createApp: () => app, App: {}, i18nPlugin: {},
+    initPlugins: () => calls.push('plugins'), mountComponents: () => calls.push('components'),
+    window: { i18n: { availableLocales: ['en-us'], setLanguage() {} }, setLang() {}, screen: { availHeight: 1080, availWidth: 1920 } },
+    document: { body: { clientHeight: 600, clientWidth: 1024 } },
+  })
+  assert.deepEqual(calls, ['startup:entry', 'startup:get-setting:start'])
+  resolveSetting({ 'common.langId': 'en-us' })
+  // getSetting 的原有 Promise 回调完成后即可挂载，无需等待会话 Promise。
+  for (let i = 0; i < 4; i++) await Promise.resolve()
+  assert.deepEqual(calls, [
+    'startup:entry', 'startup:get-setting:start', 'startup:get-setting:end', 'settings', 'startup:settings-applied',
+    'startup:mount:start', 'plugins', 'startup:plugins-ready', 'startup:components:start', 'components', 'startup:components:end', 'mount', 'startup:mount:end',
+  ])
+})
+
+void test('managed source timing retains hydration order and error propagation', async() => {
+  const source = stripTypeScriptTypes(await readSource('../src/renderer/core/useApp/useInitUserApi.ts'))
+    .replace(/^import .*\r?\n/gm, '').replace('export default', 'const useInitUserApi =')
+  for (const failure of ['', 'cache', 'api']) {
+    const calls: string[] = []
+    const error = new Error('fixture failure')
+    const initialize = runInNewContext(source + '\nuseInitUserApi()', {
+      performance: { mark: (name: string) => calls.push(name) },
+      useI18n: () => () => '', onUserApiStatus: () => () => {}, onShowUserApiUpdateAlert: () => () => {}, onBeforeUnmount: () => {},
+      hydrateManagedSource: async() => { calls.push('cache'); if (failure == 'cache') throw error },
+      setUserApi: async(id: string) => { assert.equal(id, 'managed-test'); calls.push('api'); if (failure == 'api') throw error },
+      appSetting: { 'common.apiSource': 'managed-test' }, userApi: {},
+      getUserApiList: async() => { calls.push('list'); return [] },
+    })
+    if (failure) await assert.rejects(initialize(), err => err === error)
+    else await initialize()
+    assert.deepEqual(calls, [
+      'startup:managed-cache:start', 'cache', 'startup:managed-cache:end',
+      ...(failure == 'cache' ? [] : ['startup:api-load:start', 'api', 'startup:api-load:end', ...(failure ? [] : ['list'])]),
+    ])
+  }
+})
+
+void test('session restoration marks retain empty, invalid and failed storage handling', async() => {
+  const source = stripTypeScriptTypes(await readSource('../src/renderer/features/auth/state.ts'))
+    .replace(/^import .*\r?\n/gm, '').replace(/^export /gm, '')
+  for (const state of ['empty', 'invalid', 'failed']) {
+    const calls: string[] = []
+    const api = runInNewContext(source + '\n({ restoreSession, authReady, authSession })', {
+      ref: (value: unknown) => ({ value }), computed: () => ({}), isSessionUsable,
+      performance: { mark: (name: string) => calls.push(name) },
+      loadSession: async() => {
+        if (state == 'failed') throw new Error('private-storage-error')
+        return state == 'invalid' ? { token: '' } : null
+      },
+      clearSession: () => calls.push('clear'),
+    })
+    await api.restoreSession()
+    assert.equal(api.authReady.value, true)
+    assert.equal(api.authSession.value, null)
+    assert.deepEqual(calls, ['startup:session-restore:start', ...(state == 'empty' ? [] : ['clear']), 'startup:session-restore:end'])
+  }
+})
 
 void test('startup diagnostics record timings without session contents or new waits', async() => {
   const { window, diagnostics, getTimersScheduled } = await createWindowHarness({

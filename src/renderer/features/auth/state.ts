@@ -17,6 +17,7 @@ const persistSession = (session: AuthSession) => {
 }
 
 export const restoreSession = async() => {
+  performance.mark('startup:session-restore:start')
   try {
     const session = await loadSession()
     if (session && isSessionUsable(session)) {
@@ -28,6 +29,7 @@ export const restoreSession = async() => {
     clearSession()
   } finally {
     authReady.value = true
+    performance.mark('startup:session-restore:end')
   }
 }
 

@@ -30,6 +30,8 @@ import { saveViewPrevState } from './utils/data'
 
 // sync(store, router)
 
+performance.mark('startup:entry')
+
 router.afterEach((to) => {
   if (to.path != '/songList/detail') {
     saveViewPrevState({
@@ -39,7 +41,9 @@ router.afterEach((to) => {
   }
 })
 
+performance.mark('startup:get-setting:start')
 void getSetting().then(setting => {
+  performance.mark('startup:get-setting:end')
   // window.lx.appSetting = setting
   // Set language automatically
   if (!setting['common.langId'] || !window.i18n.availableLocales.includes(setting['common.langId'])) {
@@ -69,17 +73,23 @@ void getSetting().then(setting => {
 
   // store.commit('setSetting', setting)
   initSetting(setting)
+  performance.mark('startup:settings-applied')
 
   void restoreSession()
 
+  performance.mark('startup:mount:start')
   const app = createApp(App)
   app
     .use(router)
     // .use(store)
     .use(i18nPlugin)
   initPlugins(app)
+  performance.mark('startup:plugins-ready')
+  performance.mark('startup:components:start')
   mountComponents(app)
+  performance.mark('startup:components:end')
   app.mount('#root')
+  performance.mark('startup:mount:end')
 })
 
 // bubbleCursor()

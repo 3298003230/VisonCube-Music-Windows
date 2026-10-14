@@ -172,8 +172,18 @@ export default () => {
   })
 
   return async() => {
-    await hydrateManagedSource()
-    await setUserApi(appSetting['common.apiSource'])
+    performance.mark('startup:managed-cache:start')
+    try {
+      await hydrateManagedSource()
+    } finally {
+      performance.mark('startup:managed-cache:end')
+    }
+    performance.mark('startup:api-load:start')
+    try {
+      await setUserApi(appSetting['common.apiSource'])
+    } finally {
+      performance.mark('startup:api-load:end')
+    }
     void getUserApiList().then(list => {
       // console.log(list)
       // if (![...apiSourceInfo.map(s => s.id), ...list.map(s => s.id)].includes(appSetting['common.apiSource'])) {
