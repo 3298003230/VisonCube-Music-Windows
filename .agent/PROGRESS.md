@@ -6,6 +6,7 @@
 - Windows 增加 QQ 推荐歌单接线与双端 IEC 容量单位；Android 同步腾讯 QRC 歌词解码、QQ 搜索、MG 图片/歌曲 ID/歌词兼容修复，并保留现有缓存与账号行为。
 - 版本更新为 Windows/Android 2.13.10，Android versionCode=92；新增对应静态回归测试和变更记录。
 - 已创建前置备份 backups/music-upstream-sync-20261024；本轮尚未完成本机完整 lint/build，待测试通过后使用临时 Git 工作区普通推送 main，不创建 Release、不更新 COS 或服务器。
+- 最终提交为 2a5a074（同步修复）和 b0bca9e（lint 风格修复），已普通推送 Windows main；CI run 40112614211 成功，包含同步测试、零警告 lint、源码构建和 Windows 候选流程。Android 对应提交和 CI 结果已在 Android 文档记录。
 
 ## 2026-10-24 Music 深色图标资源切换（本地资源验证完成）
 
