@@ -32,3 +32,22 @@ void test('the close shortcut and both Music protocols use the shared window and
   assert.match(app, /const protocols = \['visoncubemusic', 'lxmusic'\]/)
   assert.match(deeplink, /\^\(\?:lxmusic\|visoncubemusic\)/)
 })
+
+void test('stable upstream playlist fixes and IEC size units remain wired', async() => {
+  const [common, publishUtils, kg, tx] = await Promise.all([
+    readSource('../src/common/utils/common.ts'),
+    readSource('../publish/utils/index.js'),
+    readSource('../src/renderer/utils/musicSdk/kg/songList.js'),
+    readSource('../src/renderer/utils/musicSdk/tx/songList.js'),
+  ])
+
+  for (const source of [common, publishUtils]) {
+    assert.match(source, /KiB/)
+    assert.match(source, /MiB/)
+    assert.match(source, /GiB/)
+    assert.match(source, /TiB/)
+  }
+  assert.match(kg, /getListDetailByGcidChain/)
+  assert.match(tx, /name: '推荐'/)
+  assert.match(tx, /getRecommendList\(page\)/)
+})

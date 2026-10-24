@@ -11,8 +11,14 @@ export default {
   successCode: 0,
   sortList: [
     {
+      name: '推荐',
+      tid: 'recommend',
+      id: -1,
+    },
+    {
       name: '最热',
-      id: 5,
+      tid: 'hot',
+      id: 3,
     },
     {
       name: '最新',
@@ -112,17 +118,60 @@ export default {
     }))
   },
 
+  async getRecommendList(page) {
+    const { body } = await httpFetch(
+      `https://u.y.qq.com/cgi-bin/musicu.fcg?loginUin=0&hostUin=0&format=json&inCharset=utf-8&outCharset=utf-8&notice=0&platform=wk_v15.json&needNewCode=0&data=${encodeURIComponent(
+        JSON.stringify({
+          comm: { cv: 1602, ct: 20 },
+          playlist: {
+            module: 'music.playlist.PlaylistSquare',
+            method: 'GetRecommendWhole',
+            param: {
+              IsReqFeed: true,
+              FeedReq: {
+                From: (page - 1) * this.limit_list,
+                Size: this.limit_list,
+              },
+            },
+          },
+        }),
+      )}`,
+    ).promise
+    if (body.code !== this.successCode) throw new Error('tx getRecommendList failed')
+    return {
+      list: body.playlist.data.FeedRsp.List?.map(({ Playlist }) => ({
+        play_count: formatPlayCount(Playlist.basic.play_cnt),
+        id: String(Playlist.basic.tid),
+        author: decodeName(Playlist.basic.creator.nick),
+        name: decodeName(Playlist.basic.title),
+        time: Playlist.basic.modify_time ? dateFormat(Playlist.basic.modify_time * 1000, 'Y-M-D') : '',
+        img: Playlist.basic.cover.medium_url || Playlist.basic.cover.default_url,
+        total: Playlist.basic.song_cnt,
+        desc: decodeName(Playlist.basic.desc).replace(/<br>/g, '\n'),
+        source: 'tx',
+      })) || [],
+      total: body.playlist.data.FeedRsp.FromLimit,
+      limit: this.limit_list,
+      page,
+      source: 'tx',
+    }
+  },
+
   // 获取列表数据
   getList(sortId, tagId, page, tryNum = 0) {
     if (this._requestObj_list) this._requestObj_list.cancelHttp()
     if (tryNum > 2) return Promise.reject(new Error('try max num'))
+    if (!tagId) {
+      if (sortId == -1) return this.getRecommendList(page)
+      tagId = sortId
+    }
     this._requestObj_list = httpFetch(
       this.getListUrl(sortId, tagId, page),
     )
     // console.log(this.getListUrl(sortId, tagId, page))
     return this._requestObj_list.promise.then(({ body }) => {
       if (body.code !== this.successCode) return this.getList(sortId, tagId, page, ++tryNum)
-      return tagId ? this.filterList2(body.playlist.data, page) : this.filterList(body.playlist.data, page)
+      return this.filterList2(body.playlist.data, page)
     })
   },
 

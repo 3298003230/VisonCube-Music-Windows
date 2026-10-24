@@ -1,9 +1,26 @@
 # 当前进度
 
-## 2026-10-14 Windows 诊断安装包（已授权候选构建）
+## 2026-10-25 双端稳定上游修复与 2.13.10（源码阶段）
+
+- 按已核对的稳定上游版本同步酷狗分享链歌单回退、QQ 音乐推荐歌单和容量单位修复；保留账号、同步、托管音源、关闭策略、品牌资源和启动诊断。
+- Windows 增加 QQ 推荐歌单接线与双端 IEC 容量单位；Android 同步腾讯 QRC 歌词解码、QQ 搜索、MG 图片/歌曲 ID/歌词兼容修复，并保留现有缓存与账号行为。
+- 版本更新为 Windows/Android 2.13.10，Android versionCode=92；新增对应静态回归测试和变更记录。
+- 已创建前置备份 backups/music-upstream-sync-20261024；本轮尚未完成本机完整 lint/build，待测试通过后使用临时 Git 工作区普通推送 main，不创建 Release、不更新 COS 或服务器。
+
+## 2026-10-24 Music 深色图标资源切换（本地资源验证完成）
+
+- 使用用户提供的 `B-VC联结-深色/VisonCubeMusic` 方案替换 Windows 应用/安装器图标资源和 Android 启动器图标资源；保留原有目录、包名、托盘逻辑、版本、签名和业务代码。
+- Windows 使用深色 Music ICO，并从同一 1024 PNG 生成现有 16/32/48/64/128/256/512 与 `icon.png` 资源；Android 普通/圆形密度图从同一 PNG 生成，自适应图标使用深色背景和对应紫色/白色前景；前景安全区保持缩放和居中。
+- 修改前资源已备份至 `D:\Code\VisonCube\backups\music-dark-icon-20261024`，含 `MANIFEST.json` 哈希清单；本轮未修改 Mac `icon.icns`、托盘专用图标、TV、业务代码、版本或发布配置。
+- 已完成 PNG 尺寸/哈希、Android XML、Windows SVG 与资源引用静态检查；尚未运行完整 lint/build、未生成安装包、未提交或推送。
+
+## 2026-10-14 Windows 诊断安装包（已校验，待用户实测）
 
 - 用户要求提供安装包；仅提交现有首屏诊断白名单文件，并普通推送 Windows main 后手动触发 release.yml，publish_release=false。执行前远端 main 仍为 2650ece，临时 Git 工作区干净，本地 33 项测试和 5 个 TypeScript 语法检查再次通过。
 - 保持 2.13.9、不改 Android/依赖/安装器/生产；候选通过后下载到 Music/Installers/2.13.9-startup-diagnostics-candidate-20261014/Windows，并复核归档摘要、文件哈希、版本、latest.yml 与 NotSigned 状态。首屏慢和安装完成停顿的根因仍待该包在用户机器采样，不宣称已修复。
+- 提交 7f4c836 已普通推送 main；CI 38495770672 和候选 38495771054 全部成功，测试、零警告 lint、全部源码编译、x64 打包及资产核验通过；正式 Release job skipped，未更新 COS 或服务器。
+- 本机 EXE 为 107280376 字节、ProductVersion 2.13.9、NotSigned，SHA-256 为 56a7e6b5a8c8649da0aadb4f31a3c1af7b5b9940502469b167d8adba5ad08459。GitHub Artifact 11864070504 的归档摘要 e0e556d93b97e4ed960b5724a478a432ad1f78861aa6a8bc93960e5f822c9415、三个资产 SHA-256、latest.yml 的 SHA-512 与长度均复验一致；只读检查安装包内 app.asar，确认版本及主进程采样器、15 个渲染计时标记均已打包。
+- 本轮没有启动或安装新包；开机首次/彻底退出后二次启动，以及安装结束勾选/取消运行应用的停顿对照仍待用户实际设备验证。上述最终产物记录仅补充本地文档，不再为文档触发额外提交或候选构建。
 
 ## 2026-10-13 Windows 首屏分段诊断（本地验证完成，待候选构建）
 
