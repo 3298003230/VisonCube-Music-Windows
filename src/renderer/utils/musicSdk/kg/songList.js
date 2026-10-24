@@ -387,8 +387,7 @@ export default {
       if (songInfo.global_collection_id) {
         return this.getListDetailByGcidChain(songInfo.global_collection_id, chain)
           .catch(() => this.getUserListDetail2(songInfo.global_collection_id))
-      }
-      else return this.getUserListDetail4(songInfo, chain, page).catch(() => this.getUserListDetail5(chain))
+      } else return this.getUserListDetail4(songInfo, chain, page).catch(() => this.getUserListDetail5(chain))
     }
     let list = await this.getMusicInfos(songInfo.list)
     // console.log(info, songInfo)
