@@ -2,6 +2,7 @@
 
 - 2.13.10 双端源码接线、静态测试、GitHub Actions lint/build 已通过；Windows/Android 真机播放、歌词、歌单链链接入和升级验收仍需用户设备验证。
 - Android 腾讯 QRC 解码改为已核对的纯 JS 实现，运行时依赖现有 pako 与全局 Buffer；CI 已通过，实体设备仍需确认解码、内存占用及播放流程。
+- GitHub v2.13.10 Release 已发布；COS 对象、服务器 releases.json 和生产下载清单尚未同步，后续生产切换需单独确认并验证哈希、Range 和更新接口。
 
 - 深色图标资源已在本地静态验证，但尚未在 Windows 安装器、不同 DPI/任务栏主题、Android 旧系统和不同启动器上实机验收；系统可能缓存旧图标，覆盖安装后需退出旧进程并刷新资源缓存。
 - Mac `icon.icns` 和 Windows 托盘专用图标本轮未改；如需要 Mac 应用图标或托盘也切换深色方案，应单独生成对应格式并重新验收，不能把 Windows ICO 直接当作 Mac/托盘资源。
