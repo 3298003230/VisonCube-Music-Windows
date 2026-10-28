@@ -1,11 +1,24 @@
 # 当前进度
 
+## 2026-10-27 图标与 Windows 媒体封面回归修复
+
+- Windows 媒体会话更新增加歌曲 ID、封面 URL 和更新代次校验；快速切歌或同一封面 URL 复用时，旧图片加载回调不会再覆盖当前歌曲的系统媒体信息。
+- Windows 默认托盘资源切换为与 Music 深色 V/J 主图标一致的专用小尺寸几何，重新生成 16/20/24/32 PNG 和多尺寸 ICO；托盘主题设置与回退加载逻辑保持不变。
+- Android 自适应启动器前景移除错误的水平/垂直平移，恢复居中并保持既有深色背景、包名和签名；密度 PNG 未改变业务与版本配置。
+- 双端静态回归测试 49/49 通过；ICO 帧、Android 密度尺寸和 XML 引用已检查。尚未生成候选包，Windows/Android 真机图标与系统媒体控件验收待后续候选构建。
+
+## 2026-10-26 2.13.10 生产同步完成
+
+- GitHub Release `v2.13.10` 已发布；正式 Windows x64 安装包、`.blockmap`、`latest.yml`、校验文件已上传到既有 Music COS 路径，历史版本对象保留。
+- 服务器 `releases.json` 更新前已备份至 `/home/ubuntu/ServerCode/VisonCube/update/backups/release-music-2.13.10-20261025-111514Z/releases.json`；仅更新 `music-windows` 与 `music-android` 条目，JSON 校验通过后同目录原子替换。
+- 公网下载和更新接口均返回 `2.13.10`；资产 HTTP 200，Windows 安装包 Range 206，完整下载 SHA-256 与发布清单一致。Windows 按既有决定保持未签名；真实设备升级验收仍待用户完成。
+
 ## 2026-10-25 双端稳定上游修复与 2.13.10（源码阶段）
 
 - 按已核对的稳定上游版本同步酷狗分享链歌单回退、QQ 音乐推荐歌单和容量单位修复；保留账号、同步、托管音源、关闭策略、品牌资源和启动诊断。
 - Windows 增加 QQ 推荐歌单接线与双端 IEC 容量单位；Android 同步腾讯 QRC 歌词解码、QQ 搜索、MG 图片/歌曲 ID/歌词兼容修复，并保留现有缓存与账号行为。
 - 版本更新为 Windows/Android 2.13.10，Android versionCode=92；新增对应静态回归测试和变更记录。
-- 已创建前置备份 backups/music-upstream-sync-20261024；本轮已完成源码测试、GitHub CI、普通推送和正式 Release；COS 与服务器更新清单仍未修改。
+- 已创建前置备份 backups/music-upstream-sync-20261024；本条为源码阶段记录，当时 COS 与服务器更新清单尚未修改，生产同步结果见上方 2026-10-26 条目。
 - 最终提交为 2a5a074（同步修复）和 b0bca9e（lint 风格修复），已普通推送 Windows main；CI run 40112614211 成功，包含同步测试、零警告 lint、源码构建和 Windows 候选流程。Android 对应提交和 CI 结果已在 Android 文档记录。
 
 - 正式发布 workflow run 40155493400 成功，已创建 GitHub Release v2.13.10，包含 Windows x64 安装包、blockmap、latest.yml 和 SHA256SUMS.txt；Windows 安装包沿用未签名发布方式。

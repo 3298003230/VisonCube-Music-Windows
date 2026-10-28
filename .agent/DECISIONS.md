@@ -1,8 +1,14 @@
 # 当前有效决策
 
+## 2026-10-27 媒体封面与图标一致性
+
+- Windows 系统媒体封面更新必须绑定当前歌曲 ID、封面 URL 和更新代次，异步图片回调不得覆盖后续歌曲；系统媒体信息继续由现有 Media Session 接线提供。
+- Windows 默认托盘图标与 Music 深色 V/J 主图形保持品牌一致，但继续使用独立小尺寸资源和现有 ICO/PNG 回退；用户选择的其他托盘主题不被迁移。
+- Android 自适应启动器前景保持深色 Music V/J 图形居中，移除会导致不同启动器偏移的额外平移；包名、签名和资源目录保持不变。
+
 ## 2026-09-29 2.13.9 与统一域名
 
-- Windows/Android 正式版本统一为 `2.13.9`，Android 基础 `versionCode=91`；生产源码提交分别为 `8c9f13b` 和 `accf122`。
+- Windows/Android 正式版本统一为 `2.13.10`，Android 基础 `versionCode=92`；生产源码提交和发布记录以各端 `PROGRESS.md` 的 2.13.10 条目为准。
 - 认证与更新 API 使用 `https://linux.visoncube.cn`，公开安装包及 Windows 更新元数据使用 `https://download.visoncube.cn`。旧域名只保留给历史客户端兼容，新源码和新发布元数据不得再生成旧域名链接。
 - 继续使用候选 Actions 构建和验证；生产文件由维护端上传 COS，服务器发布清单原子更新，GitHub Actions 不直接写生产 COS 或服务器。
 

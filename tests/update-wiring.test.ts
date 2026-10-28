@@ -16,12 +16,13 @@ void test('Windows updates use a validated dynamic feed and surface unavailable 
 })
 
 void test('the close shortcut and both Music protocols use the shared window and deeplink paths', async() => {
-  const [windowIndex, eventListener, constants, app, deeplink] = await Promise.all([
+  const [windowIndex, eventListener, constants, app, deeplink, mediaSession] = await Promise.all([
     readSource('../src/main/modules/winMain/index.ts'),
     readSource('../src/renderer/core/useApp/useEventListener.ts'),
     readSource('../src/common/constants.ts'),
     readSource('../src/main/app.ts'),
     readSource('../src/renderer/core/useApp/useDeeplink/index.ts'),
+    readSource('../src/renderer/core/useApp/usePlayer/useMediaSessionInfo.ts'),
   ])
 
   assert.match(windowIndex, /case HOTKEY_COMMON\.close\.action:\s+closeWindow\(\)/)
@@ -31,6 +32,8 @@ void test('the close shortcut and both Music protocols use the shared window and
   assert.match(constants, /visoncubemusic/)
   assert.match(app, /const protocols = \['visoncubemusic', 'lxmusic'\]/)
   assert.match(deeplink, /\^\(\?:lxmusic\|visoncubemusic\)/)
+  assert.match(mediaSession, /let metadataGeneration = 0/)
+  assert.match(mediaSession, /generation != metadataGeneration \|\| musicInfo\.id != musicId \|\| musicInfo\.pic != picUrl/)
 })
 
 void test('stable upstream playlist fixes and IEC size units remain wired', async() => {

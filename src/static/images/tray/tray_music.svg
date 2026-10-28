@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="VisonCube Music tray icon">
-  <path d="M810 290A350 350 0 1 0 810 734" fill="none" stroke="#193B67" stroke-width="120" stroke-linecap="round"/>
-  <path d="M408 370L550 660L716 370" fill="none" stroke="#18A99A" stroke-width="130" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="VisonCube Music tray icon">
+  <path d="M24 28 C21 24 21 20 25 18 C30 14 36 17 39 23 L61 66 L81 26 C85 18 91 17 97 22 C101 25 102 30 99 36 L70 89 C65 98 57 100 51 91Z" fill="#B471F5"/>
+  <path d="M103 49 L103 75 C103 83 100 87 93 91 L71 104 L62 87 L80 77 C84 75 86 72 86 67 L86 49Z" fill="#F4FBFF" stroke="#111A2A" stroke-width="1.5" stroke-linejoin="round"/>
 </svg>

@@ -15,30 +15,32 @@ export default () => {
     emptyAudio.pause()
   }
   void emptyAudio.play()
-  let prevPicUrl = ''
+  let metadataGeneration = 0
 
   const updateMediaSessionInfo = () => {
-    if (musicInfo.id == null) {
+    const generation = ++metadataGeneration
+    const musicId = musicInfo.id
+    if (musicId == null) {
       navigator.mediaSession.metadata = null
       return
     }
+    const picUrl = musicInfo.pic
     const mediaMetadata: MediaMetadata = {
       title: musicInfo.name,
       artist: musicInfo.singer,
       album: musicInfo.album,
       artwork: [],
     }
-    if (musicInfo.pic) {
+    if (picUrl) {
       const pic = new Image()
-      pic.src = prevPicUrl = musicInfo.pic
+      pic.src = picUrl
       pic.onload = () => {
-        if (prevPicUrl == pic.src) {
-          mediaMetadata.artwork = [{ src: pic.src }]
-          // @ts-expect-error
-          navigator.mediaSession.metadata = new window.MediaMetadata(mediaMetadata)
-        }
+        if (generation != metadataGeneration || musicInfo.id != musicId || musicInfo.pic != picUrl) return
+        mediaMetadata.artwork = [{ src: picUrl }]
+        // @ts-expect-error
+        navigator.mediaSession.metadata = new window.MediaMetadata(mediaMetadata)
       }
-    } else prevPicUrl = ''
+    }
 
     // @ts-expect-error
     navigator.mediaSession.metadata = new window.MediaMetadata(mediaMetadata)
