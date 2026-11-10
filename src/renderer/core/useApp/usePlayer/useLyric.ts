@@ -20,7 +20,7 @@ export default () => {
 
   const setPlayInfo = () => {
     stop()
-    sendInfo()
+    sendInfo({ isPlaying: false, playedTime: 0 })
   }
 
   watch(() => appSetting['player.isShowLyricTranslation'], setLyric)

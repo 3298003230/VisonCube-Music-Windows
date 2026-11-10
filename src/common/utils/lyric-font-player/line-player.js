@@ -140,14 +140,13 @@ export default class LinePlayer {
   _refresh() {
     this.curLineNum++
     // console.log('curLineNum time', this.lines[this.curLineNum].time)
-    if (this.curLineNum >= this.maxLine) return this._handleMaxLine()
-
-    let curLine = this.lines[this.curLineNum]
+    const curLine = this.lines[this.curLineNum]
 
     const currentTime = this._currentTime()
     const driftTime = currentTime - curLine.time
 
     if (driftTime >= 0) {
+      if (this.curLineNum === this.maxLine) return this._handleMaxLine()
       let nextLine = this.lines[this.curLineNum + 1]
       const delay = (nextLine.time - curLine.time - driftTime) / this._rate
 
@@ -172,6 +171,7 @@ export default class LinePlayer {
       if (this.isPlay) {
         timeoutTools.start(() => {
           if (!this.isPlay) return
+          this.curLineNum = -1
           this._refresh()
         }, delay)
       }

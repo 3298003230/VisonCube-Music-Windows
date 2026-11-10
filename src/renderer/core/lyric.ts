@@ -13,6 +13,7 @@ const getCurrentTime = () => {
 
 let lrc: Lyric
 let desktopLyricPort: Electron.IpcRendererEvent['ports'][0] | null = null
+let pendingLyricPlay: ReturnType<typeof setTimeout> | undefined
 const analyserTools: {
   dataArray: Uint8Array
   bufferLength: number
@@ -46,23 +47,7 @@ export const sendDesktopLyricInfo = (info: LX.DesktopLyric.LyricActions, transfe
 const handleDesktopLyricMessage = (action: LX.DesktopLyric.WinMainActions) => {
   switch (action) {
     case 'get_info':
-      sendDesktopLyricInfo({
-        action: 'set_info',
-        data: {
-          id: musicInfo.id,
-          singer: musicInfo.singer,
-          name: musicInfo.name,
-          album: musicInfo.album,
-          lrc: musicInfo.lrc,
-          tlrc: musicInfo.tlrc,
-          rlrc: musicInfo.rlrc,
-          lxlrc: musicInfo.lxlrc,
-          // pic: musicInfo.pic,
-          isPlay: isPlay.value,
-          line: lyric.line,
-          played_time: getCurrentTime(),
-        },
-      })
+      sendInfo()
       break
     case 'get_status':
       sendDesktopLyricInfo({
@@ -124,6 +109,14 @@ export const init = () => {
   })
 }
 
+const resumeLyricAfterUpdate = () => {
+  clearTimeout(pendingLyricPlay)
+  if (!isPlay.value) return
+  pendingLyricPlay = setTimeout(() => {
+    if (isPlay.value) play()
+  })
+}
+
 export const setLyricOffset = (offset: number) => {
   const tempOffset = offset - lyric.offset
   setTempOffset(tempOffset)
@@ -133,27 +126,13 @@ export const setLyricOffset = (offset: number) => {
     data: tempOffset,
   })
 
-  if (isPlay.value) {
-    setTimeout(() => {
-      const time = getCurrentTime()
-      sendDesktopLyricInfo({
-        action: 'set_play',
-        data: time,
-      })
-      lrc.play(time)
-    })
-  }
+  resumeLyricAfterUpdate()
 }
 
 export const setPlaybackRate = (rate: number) => {
   lrc.setPlaybackRate(rate)
 
-  if (isPlay.value) {
-    setTimeout(() => {
-      const time = getCurrentTime()
-      lrc.play(time)
-    })
-  }
+  resumeLyricAfterUpdate()
 }
 
 export const setLyric = () => {
@@ -179,13 +158,7 @@ export const setLyric = () => {
     })
   }
 
-  if (isPlay.value) {
-    setTimeout(() => {
-      const time = getCurrentTime()
-      sendDesktopLyricInfo({ action: 'set_play', data: time })
-      lrc.play(time)
-    })
-  }
+  resumeLyricAfterUpdate()
 }
 
 export const setDisabledAutoPause = (disabledAutoPause: boolean) => {
@@ -204,6 +177,7 @@ export const setDisableAutoPauseBySource = (disabled: boolean, source: string) =
 
 
 export const play = () => {
+  clearTimeout(pendingLyricPlay)
   // if (!musicInfo.lrc) return
   const currentTime = getCurrentTime()
   lrc.play(currentTime)
@@ -211,18 +185,23 @@ export const play = () => {
 }
 
 export const pause = () => {
+  clearTimeout(pendingLyricPlay)
   lrc.pause()
   sendDesktopLyricInfo({ action: 'set_pause' })
 }
 
 export const stop = () => {
+  clearTimeout(pendingLyricPlay)
   lrc.setLyric('')
   sendDesktopLyricInfo({ action: 'set_stop' })
   // setLines([])
   setText('', 0)
 }
 
-export const sendInfo = () => {
+export const sendInfo = ({ isPlaying = isPlay.value, playedTime = getCurrentTime() }: {
+  isPlaying?: boolean
+  playedTime?: number
+} = {}) => {
   sendDesktopLyricInfo({
     action: 'set_info',
     data: {
@@ -235,9 +214,9 @@ export const sendInfo = () => {
       rlrc: musicInfo.rlrc,
       lxlrc: musicInfo.lxlrc,
       // pic: musicInfo.pic,
-      isPlay: isPlay.value,
+      isPlay: isPlaying,
       line: lyric.line,
-      played_time: getCurrentTime(),
+      played_time: playedTime,
     },
   })
 }

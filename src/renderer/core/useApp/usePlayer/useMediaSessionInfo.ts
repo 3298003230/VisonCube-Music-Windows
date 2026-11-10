@@ -1,4 +1,4 @@
-import { onBeforeUnmount } from '@common/utils/vueTools'
+import { onBeforeUnmount, watch } from '@common/utils/vueTools'
 import { getDuration, getPlaybackRate, getCurrentTime } from '@renderer/plugins/player'
 import { isPlay, musicInfo, playMusicInfo } from '@renderer/store/player/state'
 import { playProgress } from '@renderer/store/player/playProgress'
@@ -14,36 +14,40 @@ export default () => {
   emptyAudio.onplaying = () => {
     emptyAudio.pause()
   }
-  void emptyAudio.play()
+  const keepMediaSession = () => {
+    // 静音音频只负责注册系统控件，实际播放状态由播放器事件更新。
+    void emptyAudio.play().catch(() => {})
+  }
+  keepMediaSession()
+
   let metadataGeneration = 0
+  let metadata: MediaMetadata | null = null
 
   const updateMediaSessionInfo = () => {
     const generation = ++metadataGeneration
     const musicId = musicInfo.id
     if (musicId == null) {
+      metadata = null
       navigator.mediaSession.metadata = null
       return
     }
+
     const picUrl = musicInfo.pic
-    const mediaMetadata: MediaMetadata = {
+    const currentMetadata = new MediaMetadata({
       title: musicInfo.name,
       artist: musicInfo.singer,
       album: musicInfo.album,
-      artwork: [],
-    }
-    if (picUrl) {
-      const pic = new Image()
-      pic.src = picUrl
-      pic.onload = () => {
-        if (generation != metadataGeneration || musicInfo.id != musicId || musicInfo.pic != picUrl) return
-        mediaMetadata.artwork = [{ src: picUrl }]
-        // @ts-expect-error
-        navigator.mediaSession.metadata = new window.MediaMetadata(mediaMetadata)
-      }
-    }
+    })
+    metadata = currentMetadata
+    navigator.mediaSession.metadata = currentMetadata
 
-    // @ts-expect-error
-    navigator.mediaSession.metadata = new window.MediaMetadata(mediaMetadata)
+    if (!picUrl) return
+    const pic = new Image()
+    pic.onload = () => {
+      if (generation != metadataGeneration || musicInfo.id != musicId || musicInfo.pic != picUrl) return
+      currentMetadata.artwork = [{ src: picUrl }]
+    }
+    pic.src = picUrl
   }
 
   const updatePositionState = (state: {
@@ -51,10 +55,17 @@ export default () => {
     position?: number
     playbackRate?: number
   } = {}) => {
+    const duration = state.duration ?? getDuration()
+    const position = state.position ?? getCurrentTime()
+    const playbackRate = state.playbackRate ?? getPlaybackRate()
+    if (!Number.isFinite(duration) || duration <= 0 || !Number.isFinite(position) || !Number.isFinite(playbackRate) || playbackRate === 0) {
+      navigator.mediaSession.setPositionState()
+      return
+    }
     navigator.mediaSession.setPositionState({
-      duration: state.duration ?? getDuration(),
-      playbackRate: state.playbackRate ?? getPlaybackRate(),
-      position: state.position ?? getCurrentTime(),
+      duration,
+      playbackRate,
+      position: Math.min(duration, Math.max(0, position)),
     })
   }
 
@@ -66,23 +77,26 @@ export default () => {
     stop()
   }
   const handlePlay = () => {
+    navigator.mediaSession.metadata = metadata
     navigator.mediaSession.playbackState = 'playing'
   }
   const handlePause = () => {
     navigator.mediaSession.playbackState = 'paused'
+    updatePositionState({
+      position: playProgress.nowPlayTime,
+      duration: playProgress.maxPlayTime,
+    })
   }
   const handleStop = () => {
     navigator.mediaSession.playbackState = 'none'
   }
   const handleSetPlayInfo = () => {
-    void emptyAudio.play().finally(() => {
-      updateMediaSessionInfo()
-      updatePositionState({
-        position: playProgress.nowPlayTime,
-        duration: playProgress.maxPlayTime,
-      })
-      handlePause()
+    updateMediaSessionInfo()
+    updatePositionState({
+      position: playProgress.nowPlayTime,
+      duration: playProgress.maxPlayTime,
     })
+    keepMediaSession()
   }
 
   // const registerMediaSessionHandler = () => {
@@ -136,19 +150,24 @@ export default () => {
   window.app_event.on('pause', handlePause)
   window.app_event.on('stop', handleStop)
   window.app_event.on('error', handlePause)
-  window.app_event.on('playerEmptied', handleSetPlayInfo)
+  window.app_event.on('playerEmptied', keepMediaSession)
   // window.app_event.on('playerLoadstart', handleSetPlayInfo)
   window.app_event.on('musicToggled', handleSetPlayInfo)
   window.app_event.on('picUpdated', updateMediaSessionInfo)
 
+  watch(() => musicInfo.id, id => {
+    if (id == null) updateMediaSessionInfo()
+  })
+
   onBeforeUnmount(() => {
+    metadataGeneration++
     window.app_event.off('playerLoadeddata', updatePositionState)
     window.app_event.off('playerPlaying', updatePositionState)
     window.app_event.off('play', handlePlay)
     window.app_event.off('pause', handlePause)
     window.app_event.off('stop', handleStop)
     window.app_event.off('error', handlePause)
-    window.app_event.off('playerEmptied', handleSetPlayInfo)
+    window.app_event.off('playerEmptied', keepMediaSession)
     // window.app_event.off('playerLoadstart', handleSetPlayInfo)
     window.app_event.off('musicToggled', handleSetPlayInfo)
     window.app_event.off('picUpdated', updateMediaSessionInfo)

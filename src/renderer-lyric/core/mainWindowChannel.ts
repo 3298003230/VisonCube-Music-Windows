@@ -26,11 +26,9 @@ const handleDesktopLyricMessage = (event: LX.DesktopLyric.LyricActions) => {
       lyrics.rlyric = event.data.rlrc
       lyrics.lxlyric = event.data.lxlrc
       setLyric()
-      if (event.data.isPlay) {
-        setImmediate(() => {
-          getStatus()
-        })
-      }
+      setIsPlay(event.data.isPlay)
+      if (event.data.isPlay) play(event.data.played_time)
+      else pause()
       break
     case 'set_lyric':
       lyrics.lyric = event.data.lrc ?? ''
