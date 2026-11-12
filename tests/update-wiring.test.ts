@@ -78,19 +78,33 @@ void test('the system media card follows the latest track while artwork and regi
   let playbackRate = 1
   let changeTrackId!: (id: string | null) => void
   const musicInfo = { id: 'a' as string | null, name: 'Track A', singer: 'Artist A', album: 'Album A', pic: 'https://example.test/cover' }
+  const MediaMetadataMock = class {
+    title: string
+    artist: string
+    album: string
+    constructor(metadata: MediaMetadataInit) {
+      this.title = metadata.title ?? ''
+      this.artist = metadata.artist ?? ''
+      this.album = metadata.album ?? ''
+      Object.defineProperty(this, 'artwork', {
+        configurable: false,
+        enumerable: true,
+        value: Object.freeze([...(metadata.artwork ?? [])]),
+        writable: false,
+      })
+    }
+  }
   const setup = await loadPlaybackSource('../src/renderer/core/useApp/usePlayer/useMediaSessionInfo.ts', {
     Audio: class { play = () => registration },
     Image: class {
       onload?: () => void
       constructor() { images.push(this) }
     },
-    MediaMetadata: class {
-      artwork: MediaImage[] = []
-      constructor(metadata: MediaMetadataInit) { Object.assign(this, metadata) }
-    },
+    MediaMetadata: MediaMetadataMock,
     navigator: { mediaSession: session },
-    window: { app_event: appEvent },
+    window: { app_event: appEvent, MediaMetadata: MediaMetadataMock },
     musicInfo,
+    isPlay: { value: true },
     onBeforeUnmount: () => {},
     watch: (_get: () => string | null, listener: typeof changeTrackId) => { changeTrackId = listener },
     require: () => 'silence.mp3',
@@ -109,10 +123,12 @@ void test('the system media card follows the latest track while artwork and regi
   assert.equal(session.metadata?.artist, 'Artist B')
   assert.equal(session.metadata?.album, 'Album B')
   assert.equal(positions.at(-1), undefined)
+  const metadataBeforeArtwork = session.metadata
 
   images[0].onload!()
   assert.equal(session.metadata?.artwork.length, 0)
   images[1].onload!()
+  assert.notEqual(session.metadata, metadataBeforeArtwork)
   assert.equal(session.metadata?.artwork[0].src, musicInfo.pic)
 
   appEvent.emit('playerLoadeddata')
@@ -132,7 +148,7 @@ void test('the system media card follows the latest track while artwork and regi
   appEvent.emit('playerEmptied')
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(session.playbackState, 'playing')
-  assert.equal(images.length, 2)
+  assert.equal(images.length, 3)
 
   appEvent.emit('pause')
   assert.equal(session.playbackState, 'paused')
@@ -221,7 +237,7 @@ void test('desktop lyrics use the supplied timestamp and discard pending playbac
   assert.deepEqual(desktopPlayback, [28500, false, 250])
 })
 
-void test('one-line and two-line lyrics wait for the actual line time and retain legacy milliseconds', async() => {
+void test('one-line and two-line lyrics wait for the actual line time and retain source millisecond semantics', async() => {
   let now = 0
   let timer: { callback: () => void, at: number } | undefined
   const LinePlayer = await loadPlaybackSource('../src/common/utils/lyric-font-player/line-player.js', {
@@ -242,20 +258,32 @@ void test('one-line and two-line lyrics wait for the actual line time and retain
     pending.callback()
   }
 
-  player.setLyric('[00:01.5]first\n[00:03.050]last', ['[00:01.005]translation'])
+  player.setLyric('[00:01.5]first\n[00:03.05]last', ['[00:01.5]translation'])
+  assert.equal(player.lines[0].time, 1050)
   assert.equal(player.lines[0].extendedLyrics[0], 'translation')
   player.play(0)
   assert.deepEqual(output, [''])
-  advance(1005)
+  advance(1050)
   assert.deepEqual(output, ['', 'first'])
   advance(3050)
   assert.deepEqual(output, ['', 'first', 'last'])
   assert.equal(timer, undefined)
 
+  now = 0
+  player.setLyric('[00:01.005]precise\n[00:03.050]last')
+  assert.equal(player.lines[0].time, 1005)
+  player.play(0)
+  assert.equal(output.at(-1), '')
+  advance(1005)
+  assert.equal(output.at(-1), 'precise')
+  advance(3050)
+  assert.equal(output.at(-1), 'last')
+
+  now = 0
   player.setLyric('[00:02.7]single')
   player.play(0)
   assert.equal(output.at(-1), '')
-  advance(5057)
+  advance(2070)
   assert.equal(output.at(-1), 'single')
   assert.equal(timer, undefined)
 })
