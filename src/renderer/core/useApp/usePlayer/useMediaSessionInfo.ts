@@ -85,8 +85,8 @@ export default () => {
   const handlePause = () => {
     navigator.mediaSession.playbackState = 'paused'
     updatePositionState({
-      position: playProgress.nowPlayTime,
-      duration: playProgress.maxPlayTime,
+      position: getCurrentTime(),
+      duration: getDuration(),
     })
   }
   const handleStop = () => {
@@ -103,6 +103,14 @@ export default () => {
       })
       if (!isPlay.value) handlePause()
     })
+  }
+  const refreshMediaSessionMetadata = () => {
+    updateMediaSessionInfo()
+    if (metadata) navigator.mediaSession.metadata = metadata
+  }
+  const handleDeviceChanged = () => {
+    refreshMediaSessionMetadata()
+    keepMediaSession()
   }
 
   // const registerMediaSessionHandler = () => {
@@ -160,6 +168,8 @@ export default () => {
   // window.app_event.on('playerLoadstart', handleSetPlayInfo)
   window.app_event.on('musicToggled', handleSetPlayInfo)
   window.app_event.on('picUpdated', updateMediaSessionInfo)
+  window.app_event.on('playerPlaying', refreshMediaSessionMetadata)
+  window.app_event.on('playerDeviceChanged', handleDeviceChanged)
 
   watch(() => musicInfo.id, id => {
     if (id == null) updateMediaSessionInfo()
@@ -177,5 +187,7 @@ export default () => {
     // window.app_event.off('playerLoadstart', handleSetPlayInfo)
     window.app_event.off('musicToggled', handleSetPlayInfo)
     window.app_event.off('picUpdated', updateMediaSessionInfo)
+    window.app_event.off('playerPlaying', refreshMediaSessionMetadata)
+    window.app_event.off('playerDeviceChanged', handleDeviceChanged)
   })
 }

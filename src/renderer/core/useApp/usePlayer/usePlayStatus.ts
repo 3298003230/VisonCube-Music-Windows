@@ -16,8 +16,15 @@ export default () => {
   // const setLockDesktopLyric = useCommit('setLockDesktopLyric')
   let collect = false
 
+  const getCollectStatus = async(musicId: string | null) => {
+    if (musicId == null) return false
+    return checkListExistMusic(loveList.id, musicId)
+  }
+
   const updateCollectStatus = async() => {
-    let status = !!playMusicInfo.musicInfo && await checkListExistMusic(loveList.id, playMusicInfo.musicInfo.id)
+    const musicId = playMusicInfo.musicInfo?.id ?? null
+    const status = await getCollectStatus(musicId)
+    if ((playMusicInfo.musicInfo?.id ?? null) != musicId) return false
     if (collect == status) return false
     collect = status
     return true
@@ -37,7 +44,10 @@ export default () => {
     sendPlayerStatus({ status: 'error' })
   }
   const handleSetPlayInfo = async() => {
-    await updateCollectStatus()
+    const musicId = playMusicInfo.musicInfo?.id ?? null
+    const status = await getCollectStatus(musicId)
+    if ((playMusicInfo.musicInfo?.id ?? null) != musicId) return
+    collect = status
     sendPlayerStatus({
       collect,
       name: musicInfo.name,

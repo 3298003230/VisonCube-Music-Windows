@@ -109,7 +109,7 @@ void test('the system media card follows the latest track while artwork and regi
     watch: (_get: () => string | null, listener: typeof changeTrackId) => { changeTrackId = listener },
     require: () => 'silence.mp3',
     playProgress: { maxPlayTime: 0, nowPlayTime: 0 },
-    getDuration: () => 90,
+    getDuration: () => 120,
     getCurrentTime: () => 91,
     getPlaybackRate: () => playbackRate,
   }, 'setup')
@@ -117,6 +117,7 @@ void test('the system media card follows the latest track while artwork and regi
 
   appEvent.emit('musicToggled')
   assert.equal(session.metadata?.title, 'Track A')
+  const metadataA = session.metadata
   Object.assign(musicInfo, { id: 'b', name: 'Track B', singer: 'Artist B', album: 'Album B' })
   appEvent.emit('musicToggled')
   assert.equal(session.metadata?.title, 'Track B')
@@ -131,8 +132,16 @@ void test('the system media card follows the latest track while artwork and regi
   assert.notEqual(session.metadata, metadataBeforeArtwork)
   assert.equal(session.metadata?.artwork[0].src, musicInfo.pic)
 
+  session.metadata = metadataA
+  appEvent.emit('playerDeviceChanged')
+  assert.equal(session.metadata?.title, 'Track B')
+  session.metadata = metadataA
+  appEvent.emit('playerPlaying')
+  assert.equal(session.metadata?.title, 'Track B')
+  assert.equal(positions.at(-1)?.position, 91)
+
   appEvent.emit('playerLoadeddata')
-  assert.equal(positions.at(-1)?.position, 90)
+  assert.equal(positions.at(-1)?.position, 91)
   playbackRate = 0
   appEvent.emit('playerPlaying')
   assert.equal(positions.at(-1), undefined)
@@ -148,13 +157,61 @@ void test('the system media card follows the latest track while artwork and regi
   appEvent.emit('playerEmptied')
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(session.playbackState, 'playing')
-  assert.equal(images.length, 3)
+  assert.equal(images.length, 6)
 
   appEvent.emit('pause')
   assert.equal(session.playbackState, 'paused')
+  assert.equal(positions.at(-1)?.position, 91)
   musicInfo.id = null
   changeTrackId(null)
   assert.equal(session.metadata, null)
+})
+
+void test('delayed collection checks cannot publish an older player status', async() => {
+  const appEvent = new EventEmitter()
+  const sent: Array<Record<string, unknown>> = []
+  const pending = new Map<string, (value: boolean) => void>()
+  const musicInfo = { id: 'a', name: 'Track A', singer: 'Artist A', album: 'Album A', pic: null as string | null, lrc: null as string | null, tlrc: null, rlrc: null, lxlrc: null }
+  const playMusicInfo = { musicInfo: { id: 'a' } }
+  const setup = await loadPlaybackSource('../src/renderer/core/useApp/usePlayer/usePlayStatus.ts', {
+    window: { app_event: appEvent },
+    sendPlayerStatus: (status: Record<string, unknown>) => sent.push(status),
+    onPlayerAction: () => () => {},
+    loveList: { id: 'love' },
+    checkListExistMusic: (_listId: string, musicId: string) => new Promise<boolean>(resolve => pending.set(musicId, resolve)),
+    addListMusics: () => {},
+    removeListMusics: () => {},
+    playMusicInfo,
+    musicInfo,
+    throttle: (handler: (...args: unknown[]) => unknown) => handler,
+    pause: () => {},
+    play: () => {},
+    playNext: () => {},
+    playPrev: () => {},
+    playProgress: { maxPlayTime: 0, nowPlayTime: 0 },
+    appSetting: { 'player.playbackRate': 1 },
+    lyric: { lines: [] },
+    onBeforeUnmount: () => {},
+    watch: () => {},
+  }, 'setup')
+  setup()
+
+  appEvent.emit('musicToggled')
+  playMusicInfo.musicInfo = { id: 'b' }
+  Object.assign(musicInfo, { id: 'b', name: 'Track B', singer: 'Artist B', album: 'Album B' })
+  appEvent.emit('musicToggled')
+
+  pending.get('b')!(true)
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(sent.length, 1)
+  assert.equal(sent[0].name, 'Track B')
+  assert.equal(sent[0].collect, true)
+
+  pending.get('a')!(false)
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(sent.length, 1)
+  assert.equal(sent[0].name, 'Track B')
+  assert.equal(sent[0].collect, true)
 })
 
 void test('desktop lyrics use the supplied timestamp and discard pending playback on pause or track change', async() => {

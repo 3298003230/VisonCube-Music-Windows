@@ -174,6 +174,13 @@
 - arm64-v8a 候选 APK 已下载到本机并与 CI 校验清单一致，包名 `com.visoncube.music`、版本 `2.13.5`、versionCode `86003`、ABI `arm64-v8a`，证书指纹匹配既有正式证书。
 - 本轮未创建 Release、未更新 COS 或服务器清单；修复后的实际播放仍需实体 Android 设备验收。
 
+## 2026-11-12 播放状态竞态候选
+
+- 补充 Windows Media Session 在耳机拔插和音频设备变化后的元数据重提交，并在真实播放事件到达时刷新当前歌曲。
+- 补充 `usePlayStatus` 异步收藏查询的歌曲 ID 代次校验，延迟回调不能覆盖新歌曲状态。
+- `update-wiring.test.ts` 已覆盖设备变化、播放恢复、暂停位置和延迟收藏查询，Windows 38/38、Android 15/15 通过。
+- 本次只准备候选构建，不创建正式 Release，不更新 COS 或服务器。
+
 ## 2026-09-11 Music 2.13.6 正式发布与生产切换
 
 - 双端 `v2.13.6` GitHub Release 已创建；Windows x64 安装包、`.blockmap`、`latest.yml` 与 SHA-256 清单，及 Android universal APK 与 SHA-256 清单已上传至既有 Music COS 目录，未上传源码、依赖或签名材料。
